@@ -1,0 +1,9 @@
+{
+  "id": "null-arithmetik",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Was ergibt Semester + 1, wenn Semester NULL ist?",
+  "options": ["1", "0", "NULL", "Einen Fehler"],
+  "correct": [2],
+  "explanation": "Jede Rechnung mit NULL ergibt NULL. Mit NVL(Semester, 0) + 1 lässt sich das abfangen."
+}

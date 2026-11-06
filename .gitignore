@@ -1,0 +1,7 @@
+node_modules/
+dist/
+release/
+.DS_Store
+# Logos der Institution liegen nur lokal (nicht Teil der offenen Lizenz)
+public/brand/*
+!public/brand/README.md

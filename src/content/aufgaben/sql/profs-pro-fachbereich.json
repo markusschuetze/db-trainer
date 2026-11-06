@@ -1,0 +1,15 @@
+{
+  "id": "profs-pro-fachbereich",
+  "topicId": "sql-gruppen",
+  "kind": "dql",
+  "level": 3,
+  "title": "Lehrende pro Fachbereich",
+  "topic": "JOIN, GROUP BY, COUNT",
+  "task": "Gib für jeden Fachbereich den Namen und die Anzahl der Professorinnen und Professoren aus. Fachbereiche ohne Professur sollen mit 0 erscheinen.",
+  "hints": [
+    "Damit Fachbereiche ohne Professur nicht verschwinden, brauchst du einen LEFT OUTER JOIN.",
+    "COUNT(p.P_Nr) zählt nur vorhandene Partner, COUNT(*) würde die leere Zeile mitzählen."
+  ],
+  "solution": "SELECT f.FB_Name, COUNT(p.P_Nr) AS Anzahl\nFROM Fachbereich f\nLEFT OUTER JOIN Prof p ON f.FB_Nr = p.FB_Nr\nGROUP BY f.FB_Name;",
+  "source": "Beispiel für eine Aufgabe als Datei"
+}
