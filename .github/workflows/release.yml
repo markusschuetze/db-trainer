@@ -1,0 +1,32 @@
+# Erstellt fertige Pakete zum Selbsthosten, sobald ein Versions-Tag (z. B. v0.3.0) gepusht wird.
+# Die ZIPs erscheinen unter "Releases" im Repository und lassen sich ohne Programmierumgebung nutzen.
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run package
+      - name: Release mit Paketen anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/db-trainer-html.zip release/db-trainer-scorm12.zip \
+            --title "DB-Trainer $GITHUB_REF_NAME" \
+            --notes "Fertige Pakete zum Selbsthosten. Anleitung: BRANDING.md im Repository.
+
+          - db-trainer-html.zip: für jeden Webserver und als ILIAS-HTML-Lernmodul
+          - db-trainer-scorm12.zip: SCORM 1.2 für ILIAS/Moodle (Fortschritt am Login, Ergebnis der Probeklausur)
+
+          Branding: config.json im entpackten Ordner anpassen, Logo nach brand/ legen."

@@ -35,6 +35,8 @@ Die gebaute Seite ist rein statisch und funktioniert in jedem Unterverzeichnis.
 
 - **Eigene Website / GitHub Pages:** `dist/` hochladen. Für GitHub Pages ist ein Workflow
   enthalten (`.github/workflows/pages.yml`): Repository-Einstellungen → Pages → Source „GitHub Actions“.
+- **Fertige Pakete:** Bei jedem Versions-Tag (`v…`) erzeugt GitHub automatisch ein Release mit
+  `db-trainer-html.zip` und `db-trainer-scorm12.zip` (`.github/workflows/release.yml`).
 - **ILIAS (z. B. ILU), HTML-Lernmodul:** `release/db-trainer-html.zip` als HTML-Lernmodul hochladen,
   Startdatei `index.html`.
 - **ILIAS/Moodle als SCORM 1.2:** `release/db-trainer-scorm12.zip`. Das Ergebnis der Probeklausur
@@ -45,13 +47,14 @@ Die gebaute Seite ist rein statisch und funktioniert in jedem Unterverzeichnis.
 SQLite liegt eingebettet in einer JavaScript-Datei vor (keine `.wasm`-Datei), weil Lernplattformen
 unbekannte Dateitypen beim Upload oft herausfiltern. Sie wird erst geladen, wenn eine SQL-Seite sie braucht.
 
-## Branding
+## Selbst hosten und branden
 
-- `src/config.ts`: Name, Logo, Institution, Fußzeilen-Links, Standard-Theme.
-- `src/index.css`: Farben als Design-Tokens. Ein Theme ist ein Block `[data-theme="…"]`.
-  `institution-example` ist ein **Platzhalter**: Werte aus dem offiziellen Corporate Design einsetzen.
-- Logos gehören nach `public/brand/` und werden nicht eingecheckt (nicht Teil der offenen Lizenz).
-- Per URL wählbar: `?theme=dark`.
+**Ohne Programmierung:** Fertiges Paket unter **Releases** herunterladen, `config.json` und Logo
+anpassen, hochladen. Name, Logo, Farben, Schrift, Kopfzeile, Fußzeilen-Links und die Schwellen für
+die Prüfungsreife lassen sich dort ändern, ohne neuen Build. Ausführliche Anleitung: **[BRANDING.md](BRANDING.md)**.
+
+Mitgeliefert sind die Designs `auto` (hell/dunkel nach Gerät), `neutral`, `dark` und `th-koeln`
+(Farben der TH Köln). Logos gehören nicht ins Repository, sondern nur ins eigene Paket.
 
 ## Neue Aufgaben hinzufügen (für Lehrende)
 

@@ -1,25 +1,40 @@
 // Erzeugt aus dist/ zwei Pakete in release/:
 //   db-trainer-html.zip    -> ILIAS "HTML-Lernmodul", Moodle "Datei/Ordner", jeder Webserver
-//   db-trainer-scorm12.zip -> SCORM 1.2 (ILIAS/Moodle), meldet das Ergebnis der Probeklausur
+//   db-trainer-scorm12.zip -> SCORM 1.2 (ILIAS/Moodle), speichert Fortschritt am Login und
+//                             meldet das Ergebnis der Probeklausur
+//
+// Optional mit Branding-Ordner (enthaelt config.json und brand/ mit Logo usw.):
+//   npm run package -- ../branding-meine-hochschule
 // Benoetigt das Kommandozeilenprogramm "zip".
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 const root = new URL('..', import.meta.url).pathname;
 const dist = join(root, 'dist');
 const out = join(root, 'release');
+const stage = join(out, '.stage');
+const branding = process.argv[2] ? resolve(process.argv[2]) : null;
+
 rmSync(out, { recursive: true, force: true });
-mkdirSync(out);
+mkdirSync(stage, { recursive: true });
+cpSync(dist, stage, { recursive: true });
+
+if (branding) {
+  if (!existsSync(branding)) throw new Error(`Branding-Ordner nicht gefunden: ${branding}`);
+  if (existsSync(join(branding, 'config.json'))) cpSync(join(branding, 'config.json'), join(stage, 'config.json'));
+  if (existsSync(join(branding, 'brand'))) cpSync(join(branding, 'brand'), join(stage, 'brand'), { recursive: true });
+  console.log(`Branding übernommen aus ${branding}`);
+}
 
 const files = [];
 (function walk(dir) {
   for (const f of readdirSync(dir)) {
     const p = join(dir, f);
     if (statSync(p).isDirectory()) walk(p);
-    else files.push(relative(dist, p));
+    else files.push(relative(stage, p));
   }
-})(dist);
+})(stage);
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const manifest = `<?xml version="1.0" encoding="UTF-8"?>
@@ -43,8 +58,8 @@ ${files.map((f) => `      <file href="${esc(f)}"/>`).join('\n')}
 </manifest>
 `;
 
-execFileSync('zip', ['-qr', join(out, 'db-trainer-html.zip'), '.'], { cwd: dist });
-writeFileSync(join(dist, 'imsmanifest.xml'), manifest);
-execFileSync('zip', ['-qr', join(out, 'db-trainer-scorm12.zip'), '.'], { cwd: dist });
-rmSync(join(dist, 'imsmanifest.xml'));
+execFileSync('zip', ['-qr', join(out, 'db-trainer-html.zip'), '.'], { cwd: stage });
+writeFileSync(join(stage, 'imsmanifest.xml'), manifest);
+execFileSync('zip', ['-qr', join(out, 'db-trainer-scorm12.zip'), '.'], { cwd: stage });
+rmSync(stage, { recursive: true, force: true });
 console.log(`release/db-trainer-html.zip und release/db-trainer-scorm12.zip erstellt (${files.length} Dateien).`);

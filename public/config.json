@@ -1,0 +1,12 @@
+{
+  "_hinweis": "Branding ohne Programmierung: Werte ändern, Datei speichern, Seite neu laden. Alle Felder sind optional. Felder mit _ am Anfang sind Kommentare. Anleitung: BRANDING.md im Repository.",
+  "appName": "DB-Trainer",
+  "tagline": "Datenbanksysteme interaktiv üben",
+  "theme": "auto",
+  "themeSwitcher": false,
+  "logo": "",
+  "institution": "",
+  "colors": {},
+  "readyStreak": 3,
+  "readySureShare": 0.8
+}

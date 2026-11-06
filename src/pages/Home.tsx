@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { READY_STREAK, useProgress } from '../progress';
+import { useProgress } from '../progress';
 import { readiness } from './ProgressPage';
 
 interface Module {
@@ -67,7 +67,7 @@ export function Home() {
           <span className="block text-sm font-semibold uppercase tracking-wide text-muted">Dein Stand</span>
           <span className="mt-1 block text-2xl font-bold">{r.title}</span>
           <span className="mt-1 block text-sm text-muted">
-            {d.exams.length} Probeklausuren · {Math.min(r.streak, READY_STREAK)} von {READY_STREAK} in Folge bestanden · {r.sure} von{' '}
+            {d.exams.length} Probeklausuren · {Math.min(r.streak, config.readyStreak)} von {config.readyStreak} in Folge bestanden · {r.sure} von{' '}
             {r.total} Wissensfragen sicher
           </span>
         </span>

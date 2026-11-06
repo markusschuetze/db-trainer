@@ -43,14 +43,16 @@
   --radius: 0.75rem;
 }
 
-/* PLATZHALTER fuer ein Institutions-Theme. Echte Werte aus dem offiziellen
-   Corporate-Design der Hochschule einsetzen (nicht geraten, nicht im Repo
-   ohne Freigabe). Logos liegen nie im Repo, siehe public/brand/README.md. */
-[data-theme="institution-example"] {
-  --brand: #a4123f;
+/* TH Koeln: Farben aus dem Logo bzw. dem Stylesheet von th-koeln.de
+   (Rot #c60c0f, Orange #ea5b0c, Magenta #b62584). Schrift wie auf th-koeln.de:
+   Myriad Pro Semi Condensed, falls installiert, sonst Arial. Das Logo selbst ist
+   eine geschuetzte Marke und liegt nicht im Repository (siehe BRANDING.md). */
+[data-theme="th-koeln"] {
+  --brand: #c60c0f;
   --brand-contrast: #ffffff;
-  --accent: #1d1d1b;
-  --bg: #f3f2f1;
+  --accent: #b62584;
+  --bg: #f4f4f4;
+  --font: "myriad-pro-semi-condensed", "Myriad Pro", Arial, Helvetica, sans-serif;
 }
 
 [data-theme="dark"] {

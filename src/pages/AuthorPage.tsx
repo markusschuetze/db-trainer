@@ -322,6 +322,7 @@ export function AuthorPage() {
             <h2 className="mb-1 font-bold">Speichern</h2>
             <p className="mb-3 font-mono text-xs text-muted">{path}</p>
             <div className="flex flex-wrap gap-3">
+              {config.repo && (
               <a
                 className={`${btn} ${ok ? '' : 'pointer-events-none opacity-50'}`}
                 aria-disabled={!ok}
@@ -331,6 +332,7 @@ export function AuthorPage() {
               >
                 Auf GitHub speichern
               </a>
+              )}
               <button
                 className={btnGhost}
                 onClick={async () => {

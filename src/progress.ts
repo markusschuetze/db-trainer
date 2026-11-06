@@ -9,7 +9,6 @@
 //   - Export/Import als Datei fuer den Wechsel zwischen Geraeten ausserhalb von ILU
 
 import { useSyncExternalStore } from 'react';
-import { config } from './config';
 import type { Chapter } from './content/mcQuestions';
 import { readSuspendData, scormActive, suspendLimit, writeSuspendData } from './scorm';
 
@@ -218,8 +217,6 @@ export function mastery(s?: ItemStat): Mastery {
 }
 
 export const PASS_PERCENT = 50;
-export const READY_STREAK = config.readyStreak;
-export const READY_SURE_SHARE = config.readySureShare;
 export const FULL_CHAPTERS = 7;
 
 export const percentOf = (e: ExamAttempt) => (e.x ? (100 * e.p) / e.x : 0);

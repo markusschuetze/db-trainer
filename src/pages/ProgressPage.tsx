@@ -1,3 +1,4 @@
+import { config } from '../config';
 import { useRef, useState } from 'react';
 import { CHAPTER_NAME, type Chapter } from '../content/mcQuestions';
 import {
@@ -9,8 +10,6 @@ import {
   passStreak,
   percentOf,
   PASS_PERCENT,
-  READY_STREAK,
-  READY_SURE_SHARE,
   resetProgress,
   storageLabel,
   useProgress,
@@ -36,15 +35,15 @@ export function readiness(d: ProgressData) {
   const anyPassed = d.exams.some(passed);
   let title: string;
   let text: string;
-  if (streak >= READY_STREAK && sureShare >= READY_SURE_SHARE) {
+  if (streak >= config.readyStreak && sureShare >= config.readySureShare) {
     title = 'Prüfungsreif';
     text = `Du hast die letzten ${streak} vollständigen Probeklausuren bestanden und beherrschst die Wissensfragen. Du schaffst das!`;
-  } else if (streak >= READY_STREAK) {
+  } else if (streak >= config.readyStreak) {
     title = 'Fast prüfungsreif';
-    text = `Die Probeklausuren sitzen. Festige noch die Wissensfragen, bis mindestens ${Math.round(READY_SURE_SHARE * 100)} % sicher sind.`;
+    text = `Die Probeklausuren sitzen. Festige noch die Wissensfragen, bis mindestens ${Math.round(config.readySureShare * 100)} % sicher sind.`;
   } else if (anyPassed) {
     title = 'Auf gutem Weg';
-    text = `Du hast schon bestanden. Schaffe ${READY_STREAK} vollständige Probeklausuren in Folge, dann bist du prüfungsreif.`;
+    text = `Du hast schon bestanden. Schaffe ${config.readyStreak} vollständige Probeklausuren in Folge, dann bist du prüfungsreif.`;
   } else if (d.exams.length) {
     title = 'Dranbleiben';
     text = 'Schau dir an, in welchen Kapiteln Punkte fehlen, übe gezielt und versuche es erneut. Jede Klausur bringt dich weiter.';
@@ -52,13 +51,13 @@ export function readiness(d: ProgressData) {
     title = 'Los geht’s';
     text = 'Mach deine erste Probeklausur. Danach siehst du hier, wo du stehst und was noch fehlt.';
   }
-  return { streak, sure, total: allQ.length, sureShare, title, text, ready: streak >= READY_STREAK && sureShare >= READY_SURE_SHARE };
+  return { streak, sure, total: allQ.length, sureShare, title, text, ready: streak >= config.readyStreak && sureShare >= config.readySureShare };
 }
 
 function StreakDots({ streak }: { streak: number }) {
   return (
-    <div className="flex gap-2" aria-label={`${Math.min(streak, READY_STREAK)} von ${READY_STREAK} Probeklausuren in Folge bestanden`}>
-      {Array.from({ length: READY_STREAK }, (_, i) => (
+    <div className="flex gap-2" aria-label={`${Math.min(streak, config.readyStreak)} von ${config.readyStreak} Probeklausuren in Folge bestanden`}>
+      {Array.from({ length: config.readyStreak }, (_, i) => (
         <span
           key={i}
           aria-hidden
@@ -263,7 +262,7 @@ export function ProgressPage() {
           <div className="text-center">
             <StreakDots streak={r.streak} />
             <p className="mt-2 text-xs text-muted">
-              {Math.min(r.streak, READY_STREAK)} von {READY_STREAK} in Folge bestanden
+              {Math.min(r.streak, config.readyStreak)} von {config.readyStreak} in Folge bestanden
             </p>
           </div>
         </div>
@@ -277,7 +276,7 @@ export function ProgressPage() {
         </div>
         <p className="mt-3 text-xs text-muted">
           Für die Prüfungsreife zählen vollständige Probeklausuren (alle Kapitel, mindestens 60 Minuten), bestanden ab{' '}
-          {PASS_PERCENT} %, und mindestens {Math.round(READY_SURE_SHARE * 100)} % der Wissensfragen „sicher“. Das ist eine Lernhilfe, keine Garantie für die
+          {PASS_PERCENT} %, und mindestens {Math.round(config.readySureShare * 100)} % der Wissensfragen „sicher“. Das ist eine Lernhilfe, keine Garantie für die
           echte Klausur.
         </p>
       </section>
