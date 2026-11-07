@@ -4,6 +4,7 @@ import { ResultTable } from '../components/SqlOutput';
 import { LEVEL_NAME, scenarioById } from '../content/scenarios';
 import { sqlExercises } from '../content/sqlExercises';
 import { runSqlExercise, type SqlRun } from '../sql/sqlGrading';
+import { topicById } from '../content/topics';
 import { useSql } from '../useSql';
 
 function Comparison({ run }: { run: SqlRun }) {
@@ -72,6 +73,7 @@ export function SqlExercisePage({ id }: { id: string }) {
       ready={!!SQL}
       loadError={error}
       nextHref={next && `#/sql/${next.id}`}
+      tracking={{ id: `sql:${ex.id}`, topicId: ex.topicId, chapter: topicById(ex.topicId)?.chapter ?? 'SQL', level: ex.level }}
       freshNote="Jeder Lauf startet mit dem ursprünglichen Datenbestand, Änderungen bleiben nicht erhalten."
       aside={<ScenarioBrowser SQL={SQL} scenario={ex.scenario} />}
       run={(code, grade) => {

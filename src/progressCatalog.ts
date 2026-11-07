@@ -5,8 +5,10 @@ import { nfExercises } from './content/exercises';
 import { mcQuestions, type Chapter } from './content/mcQuestions';
 import { specializations } from './content/specializations';
 import { sqlExercises } from './content/sqlExercises';
+import { textTasks } from './content/textTasks';
 import { topicById, topics } from './content/topics';
 
+/** Alle Kapitel in Reihenfolge (Standard + im Aufgabenpaket ergaenzte); wird in place erweitert */
 export const CHAPTERS: Chapter[] = ['01', '02', '03', '04', '05', '06', 'SQL'];
 
 /** Thema einer Beziehungs-Phrase: im ER-Trainer Krähenfuß, im Relationen-Trainer je nach Typ */
@@ -17,7 +19,8 @@ export function relTopic(p: Phrase) {
 }
 
 /** Alle Fortschritts-IDs mit Thema (Uebungen und Wissensfragen) */
-export const catalog: { id: string; topicId: string; kind: 'uebung' | 'frage' }[] = [
+export const catalog: { id: string; topicId: string; kind: 'uebung' | 'frage' }[] = [];
+const buildCatalog = () => [
   ...mcQuestions.map((q) => ({ id: `mc:${q.id}`, topicId: q.topicId, kind: 'frage' as const })),
   ...phrases.map((p) => ({ id: `er:${p.id}`, topicId: erTopic(), kind: 'uebung' as const })),
   ...specializations.map((s) => ({ id: `spez:${s.id}`, topicId: '03-spezialisierung', kind: 'uebung' as const })),
@@ -25,23 +28,20 @@ export const catalog: { id: string; topicId: string; kind: 'uebung' | 'frage' }[
   ...nfExercises.map((e) => ({ id: `nf:${e.id}`, topicId: e.topicId, kind: 'uebung' as const })),
   ...ddlExercises.map((e) => ({ id: `ddl:${e.id}`, topicId: e.topicId, kind: 'uebung' as const })),
   ...sqlExercises.map((e) => ({ id: `sql:${e.id}`, topicId: e.topicId, kind: 'uebung' as const })),
+  ...textTasks.map((t) => ({ id: `tt:${t.id}`, topicId: t.topicId, kind: 'uebung' as const })),
 ];
 
 export const topicOfItem = (id: string) => catalog.find((c) => c.id === id)?.topicId;
 
 const chapterOf = (topicId: string) => topicById(topicId)?.chapter;
 
-export const practiceIds = Object.fromEntries(
-  CHAPTERS.map((c) => [c, catalog.filter((i) => i.kind === 'uebung' && chapterOf(i.topicId) === c).map((i) => i.id)]),
-) as Record<Chapter, string[]>;
+export const practiceIds: Record<string, string[]> = {};
 
-export const questionIds = Object.fromEntries(
-  CHAPTERS.map((c) => [c, catalog.filter((i) => i.kind === 'frage' && chapterOf(i.topicId) === c).map((i) => i.id)]),
-) as Record<Chapter, string[]>;
+export const questionIds: Record<string, string[]> = {};
 
 export const itemsOfTopic = (topicId: string) => catalog.filter((i) => i.topicId === topicId);
 
-export const practiceHref: Record<Chapter, string> = {
+export const practiceHref: Record<string, string> = {
   '01': '#/lernen',
   '02': '#/modellierung',
   '03': '#/modellierung',
@@ -60,3 +60,15 @@ export function topicHref(topicId: string): string {
 }
 
 export { topics };
+
+/** Baut Katalog, Kapitel-Zuordnung und Links neu auf (nach dem Laden des Aufgabenpakets). */
+export function rebuildCatalog() {
+  catalog.length = 0;
+  catalog.push(...buildCatalog());
+  for (const c of CHAPTERS) {
+    practiceIds[c] = catalog.filter((i) => i.kind === 'uebung' && chapterOf(i.topicId) === c).map((i) => i.id);
+    questionIds[c] = catalog.filter((i) => i.kind === 'frage' && chapterOf(i.topicId) === c).map((i) => i.id);
+    practiceHref[c] ??= '#/lernen';
+  }
+}
+rebuildCatalog();

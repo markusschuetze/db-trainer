@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { track } from '../analytics';
 import { ErDiagram } from '../components/ErDiagram';
 import { RelationView } from '../components/RelationView';
 import { fkNotNull, relPhrases, relType, toRelations, validMappings, type Mapping } from '../content/erPhrases';
 import { markDone } from '../progress';
+import { relTopic } from '../progressCatalog';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
@@ -16,6 +18,7 @@ export function RelPage() {
   const [pk, setPk] = useState<PkChoice | null>(null);
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
+  const started = useRef(Date.now());
   const p = relPhrases[i];
   const valid = validMappings(p);
   const mappingOk = mapping !== null && valid.includes(mapping);
@@ -30,6 +33,7 @@ export function RelPage() {
     setNullable(null);
     setPk(null);
     setChecked(false);
+    started.current = Date.now();
   };
 
   return (
@@ -142,6 +146,7 @@ export function RelPage() {
                 setChecked(true);
                 setScore((s) => ({ right: s.right + (allOk ? 1 : 0), total: s.total + 1 }));
                 if (allOk) markDone(`rel:${p.id}`);
+                track({ k: 'i', i: `rel:${p.id}`, tp: relTopic(p), ch: '04', ok: allOk ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: 0, src: 'u' });
               }}
             >
               Prüfen

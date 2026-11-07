@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { track } from '../analytics';
 import { CHAPTER_NAME, mcQuestions, type Chapter, type McQuestion } from '../content/mcQuestions';
 import { mastery, recordItem, useProgress, type Mastery, type ProgressData } from '../progress';
 import { CHAPTERS } from '../progressCatalog';
@@ -29,6 +30,7 @@ export function LearnPage({ topicId }: { topicId?: string }) {
   const [current, setCurrent] = useState<McQuestion | null>(() => nextQuestion(pool, d));
   const [answer, setAnswer] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
+  const started = useRef(Date.now());
   const q = current && pool.includes(current) ? current : nextQuestion(pool, d);
   const right = !!q && answer.length === q.correct.length && answer.every((a) => q.correct.includes(a));
   const sure = pool.filter((x) => mastery(d.items[`mc:${x.id}`]) === 'sicher').length;
@@ -37,6 +39,7 @@ export function LearnPage({ topicId }: { topicId?: string }) {
     setCurrent(nextQuestion(pool, d, q?.id));
     setAnswer([]);
     setChecked(false);
+    started.current = Date.now();
   };
 
   return (
@@ -143,6 +146,18 @@ export function LearnPage({ topicId }: { topicId?: string }) {
                 onClick={() => {
                   setChecked(true);
                   recordItem(`mc:${q.id}`, right);
+                  track({
+                    k: 'i',
+                    i: `mc:${q.id}`,
+                    tp: q.topicId,
+                    ch: q.chapter,
+                    ok: right ? 1 : 0,
+                    s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)),
+                    a: (d.items[`mc:${q.id}`]?.[0] ?? 0) + 1,
+                    h: 0,
+                    o: answer,
+                    src: 'l',
+                  });
                 }}
               >
                 Antworten

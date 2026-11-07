@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { config } from '../config';
+import { assetUrl, config } from '../config';
+import { ConsentBanner } from './ConsentBanner';
 import { applyTheme, currentTheme, THEME_LABEL, themes } from '../theme';
 
 /** ?embed=1 blendet Kopf- und Fußzeile aus (für iFrames in ILIAS, Moodle, Webseiten). */
@@ -16,9 +17,12 @@ export function Layout({ children }: { children: ReactNode }) {
   const fg = light ? 'text-ink' : 'text-brand-contrast';
   if (embedded)
     return (
-      <main id="main" className="mx-auto w-full max-w-5xl px-4 py-4">
-        {children}
-      </main>
+      <>
+        <ConsentBanner />
+        <main id="main" className="mx-auto w-full max-w-5xl px-4 py-4">
+          {children}
+        </main>
+      </>
     );
   return (
     <div className="flex min-h-screen flex-col">
@@ -28,10 +32,11 @@ export function Layout({ children }: { children: ReactNode }) {
       >
         Zum Inhalt springen
       </a>
+      <ConsentBanner />
       <header className={light ? 'border-b border-line bg-surface text-ink' : 'bg-brand text-brand-contrast'}>
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <a href="#/" className="flex items-center gap-3 no-underline">
-            {config.logo && <img src={`brand/${config.logo}`} alt={config.institution} className="h-10" />}
+            {config.logo && <img src={assetUrl(config.logo)} alt={config.institution} className="h-10" />}
             <span className={`text-xl font-bold ${fg}`}>{config.appName}</span>
           </a>
           <nav aria-label="Hauptnavigation" className="ml-auto flex gap-4 text-sm font-semibold">

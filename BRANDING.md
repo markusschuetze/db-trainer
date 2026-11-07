@@ -1,5 +1,11 @@
 # Selbst hosten und branden – ohne Programmierung
 
+## 0. Am einfachsten: der Dozentenmodus
+
+Unter `#/dozent` (Link „Dozentenmodus“ in der Fußzeile) lassen sich `config.json` und `aufgaben.json`
+per Klick erzeugen, mit Live-Vorschau, Kontrastprüfung und Test der Inhalte. Die folgenden Abschnitte
+beschreiben, was dahinter steckt.
+
 ## 1. Paket herunterladen
 
 Unter **Releases** im Repository liegen fertige Pakete:
@@ -67,7 +73,40 @@ Felder, die mit `_` beginnen (z. B. `"_hinweis"`), sind Kommentare.
 }
 ```
 
-## 3. Hinweise
+## 3. Eigene Aufgaben und Übungsblätter (aufgaben.json)
+
+Neben `config.json` kann eine Datei `aufgaben.json` liegen. Sie ergänzt, ohne neuen Build:
+
+| Abschnitt | Inhalt |
+|---|---|
+| `chapters`, `topics` | neue Kapitel und Themen (erscheinen in Fortschritt, Lernmodus, Probeklausur) |
+| `questions` | Wissensfragen |
+| `scenarios` | Fall-Datenbanken (Schema, sichtbare und verdeckte Daten) |
+| `sql` | SQL-Aufgaben (Musterlösung wird beim Laden ausgeführt und geprüft) |
+| `worksheets` | Übungsblätter für das Praktikum (Datenbank plus Aufgaben) |
+| `textTasks` | Textaufgaben „Schema aus Text erkennen“ |
+
+Ein vollständiges Beispiel liegt als `aufgaben.beispiel.json` im Paket (zum Verwenden in `aufgaben.json`
+umbenennen). Fehlerhafte Einträge werden übersprungen und im Dozentenmodus gemeldet, der Rest läuft weiter.
+Studierende können Übungsblätter zusätzlich als Datei unter „Praktikum“ laden.
+
+## 4. Anonyme Lernstatistik (optional)
+
+Mit dem Sammelserver `collector.mjs` (Node.js 18+, eine Datei, keine Abhängigkeiten) sehen Lehrende im
+Dozentenmodus, wo Studierende Probleme haben, wo sie gut sind und wie schnell sie Aufgaben lösen:
+
+```bash
+TOKEN=dein-passwort DATA_FILE=events.jsonl PORT=8787 node collector.mjs
+```
+
+Hinter HTTPS betreiben, die Adresse als `analyticsUrl` in `config.json` eintragen. Studierende werden einmalig
+gefragt und können ablehnen. Gesendet werden nur Aufgaben-ID, Thema, richtig/falsch, Sekunden, Versuche,
+Tipp-Nutzung, bei Wissensfragen die gewählte Antwortnummer, bei Probeklausuren die Punkte je Kapitel und eine
+zufällige Gerätekennung. Nicht gesendet werden Namen, Login, Eingaben (SQL, Texte) und IP-Adressen. Auswertungen
+erscheinen erst ab `analyticsMinGroup` Lernenden (Standard 5). Die Gerätekennung ist keiner Person zugeordnet, gilt
+aber rechtlich als pseudonym: Vor dem Einsatz mit dem Datenschutz der Hochschule abstimmen.
+
+## 5. Hinweise
 
 - **Logos sind Marken.** Sie gehören nicht in das öffentliche Repository, sondern nur in das
   eigene Paket (Ordner `brand/`). Das Repository ignoriert den Inhalt von `public/brand/`.

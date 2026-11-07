@@ -1,0 +1,79 @@
+{
+  "_hinweis": "Beispiel für ein Aufgabenpaket. Zum Verwenden in aufgaben.json umbenennen und neben index.html legen. Alle Abschnitte sind optional. Fehlerhafte Einträge werden beim Laden übersprungen und im Dozentenmodus gemeldet. Anleitung: BRANDING.md, Abschnitt Aufgabenpaket.",
+  "chapters": [{ "id": "tx", "name": "Transaktionen" }],
+  "topics": [
+    { "id": "tx-acid", "chapter": "tx", "title": "ACID-Eigenschaften", "slides": "Atomicity, Consistency, Isolation, Durability" },
+    { "id": "tx-commit", "chapter": "tx", "title": "COMMIT und ROLLBACK", "slides": "Transaktionsende" }
+  ],
+  "questions": [
+    {
+      "id": "tx-isolation",
+      "topicId": "tx-acid",
+      "question": "Wofür steht das „I“ in ACID?",
+      "options": ["Integrity", "Isolation", "Indexing", "Inheritance"],
+      "correct": [1],
+      "explanation": "Isolation: Gleichzeitige Transaktionen beeinflussen sich nicht gegenseitig."
+    },
+    {
+      "id": "tx-rollback",
+      "topicId": "tx-commit",
+      "question": "Was bewirkt ROLLBACK?",
+      "options": ["Alle Änderungen seit dem letzten COMMIT werden verworfen", "Die Tabelle wird gelöscht", "Die Änderungen werden dauerhaft gespeichert"],
+      "correct": [0],
+      "explanation": "ROLLBACK macht alle noch nicht bestätigten Änderungen rückgängig."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "kino",
+      "name": "Kino",
+      "description": "Filme, Säle und Vorstellungen.",
+      "schema": "CREATE TABLE Film (Film_ID NUMBER PRIMARY KEY, Titel VARCHAR2(60) NOT NULL, Dauer NUMBER(3));\nCREATE TABLE Saal (Saal_ID NUMBER PRIMARY KEY, Name VARCHAR2(20) NOT NULL, Plaetze NUMBER(4));\nCREATE TABLE Vorstellung (Film_ID NUMBER REFERENCES Film (Film_ID), Saal_ID NUMBER REFERENCES Saal (Saal_ID), Beginn DATE NOT NULL, Preis NUMBER(4,2), CONSTRAINT pk_vorstellung PRIMARY KEY (Film_ID, Saal_ID, Beginn));",
+      "dataA": "INSERT INTO Film VALUES (1, 'Datenfluss', 112);\nINSERT INTO Film VALUES (2, 'Tabellen am Meer', 95);\nINSERT INTO Film VALUES (3, 'Der lange Join', 140);\nINSERT INTO Saal VALUES (1, 'Saal 1', 200);\nINSERT INTO Saal VALUES (2, 'Saal 2', 80);\nINSERT INTO Vorstellung VALUES (1, 1, DATE '2026-11-10', 9.5);\nINSERT INTO Vorstellung VALUES (2, 2, DATE '2026-11-10', 8);\nINSERT INTO Vorstellung VALUES (3, 1, DATE '2026-11-11', 11);",
+      "dataB": "INSERT INTO Film VALUES (1, 'Datenfluss', 100);\nINSERT INTO Film VALUES (4, 'Schlüsselerlebnis', 88);\nINSERT INTO Film VALUES (5, 'Normalform', 150);\nINSERT INTO Saal VALUES (1, 'Saal 1', 120);\nINSERT INTO Saal VALUES (3, 'Saal 3', 300);\nINSERT INTO Vorstellung VALUES (4, 3, DATE '2026-12-01', 12);\nINSERT INTO Vorstellung VALUES (5, 3, DATE '2026-12-02', 10);\nINSERT INTO Vorstellung VALUES (1, 1, DATE '2026-12-02', 7);"
+    }
+  ],
+  "sql": [
+    {
+      "id": "kino-lange-filme",
+      "topicId": "sql-select",
+      "kind": "dql",
+      "scenario": "kino",
+      "level": 1,
+      "title": "Lange Filme",
+      "task": "Gib Titel und Dauer aller Filme aus, die länger als 100 Minuten dauern.",
+      "hints": ["WHERE Dauer > 100"],
+      "solution": "SELECT Titel, Dauer FROM Film WHERE Dauer > 100;"
+    }
+  ],
+  "worksheets": [
+    {
+      "id": "blatt-kino",
+      "title": "Übungsblatt 7: Kino",
+      "description": "Abfragen über mehrere Tabellen. Die Datenbank bleibt zwischen den Eingaben erhalten.",
+      "schema": "CREATE TABLE Film (Film_ID NUMBER PRIMARY KEY, Titel VARCHAR2(60) NOT NULL, Dauer NUMBER(3));\nCREATE TABLE Saal (Saal_ID NUMBER PRIMARY KEY, Name VARCHAR2(20) NOT NULL, Plaetze NUMBER(4));\nCREATE TABLE Vorstellung (Film_ID NUMBER REFERENCES Film (Film_ID), Saal_ID NUMBER REFERENCES Saal (Saal_ID), Beginn DATE NOT NULL, Preis NUMBER(4,2), CONSTRAINT pk_vorstellung PRIMARY KEY (Film_ID, Saal_ID, Beginn));\nINSERT INTO Film VALUES (1, 'Datenfluss', 112);\nINSERT INTO Film VALUES (2, 'Tabellen am Meer', 95);\nINSERT INTO Saal VALUES (1, 'Saal 1', 200);\nINSERT INTO Vorstellung VALUES (1, 1, DATE '2026-11-10', 9.5);",
+      "tasks": [
+        { "id": "a1", "text": "Welche Filme laufen am 10.11.2026? Gib Titel und Saalname aus.", "hint": "Drei Tabellen verbinden.", "solution": "SELECT f.Titel, s.Name FROM Film f JOIN Vorstellung v ON f.Film_ID = v.Film_ID JOIN Saal s ON s.Saal_ID = v.Saal_ID WHERE v.Beginn = DATE '2026-11-10';" },
+        { "id": "a2", "text": "Füge den Film „Schlüsselerlebnis“ (Film_ID 4, 88 Minuten) hinzu und lies, was passiert, wenn du die Film_ID 1 noch einmal verwendest." }
+      ]
+    }
+  ],
+  "textTasks": [
+    {
+      "id": "kino-text",
+      "topicId": "tx-acid",
+      "title": "Kinoverwaltung",
+      "level": 1,
+      "text": "Ein Kino zeigt Filme in Sälen. Ein Film hat eine Film-ID und einen Titel. Ein Saal hat eine Saalnummer und eine Platzzahl. Ein Film kann in keiner, einer oder mehreren Vorstellungen laufen; eine Vorstellung findet zu einem Beginn in genau einem Saal statt und zeigt genau einen Film.",
+      "entities": [
+        { "name": "Film", "key": "Film-ID", "attrs": ["Titel"] },
+        { "name": "Saal", "key": "Saalnummer", "attrs": ["Platzzahl"] }
+      ],
+      "distractors": ["Kunde", "Ticket"],
+      "relationships": [
+        { "e1": "Film", "e2": "Saal", "verb": "läuft in", "c12": "0N", "c21": "0N", "attrs": ["Beginn"], "why": "Ein Film läuft in beliebig vielen Sälen, ein Saal zeigt beliebig viele Filme: M:N. Der Beginn gehört zur Beziehung." }
+      ],
+      "wrongRelationships": [{ "e1": "Film", "e2": "Saal", "verb": "gehört", "why": "Ein Film gehört keinem Saal." }]
+    }
+  ]
+}

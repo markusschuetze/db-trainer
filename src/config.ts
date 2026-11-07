@@ -48,6 +48,10 @@ export interface AppConfig {
   /** Repository fuer den Aufgaben-Editor ("Auf GitHub speichern"); leer = Knopf ausblenden */
   repo: string;
   branch: string;
+  /** Adresse des Sammelservers fuer die anonyme Lernstatistik (leer = keine Statistik) */
+  analyticsUrl: string;
+  /** Auswertungen erst ab so vielen verschiedenen Lernenden zeigen (Datenschutz) */
+  analyticsMinGroup: number;
   /** Pruefungsreife: so viele vollstaendige Probeklausuren in Folge bestanden ... */
   readyStreak: number;
   /** ... und dieser Anteil der Wissensfragen "sicher" (0 bis 1) */
@@ -56,24 +60,26 @@ export interface AppConfig {
 
 export const defaults: AppConfig = {
   appName: 'DB-Trainer',
-  tagline: 'Datenbanksysteme interaktiv üben',
+  tagline: 'Datenbanksysteme interaktiv üben · TH Köln, Campus Gummersbach',
   title: '',
   favicon: '',
   logo: '',
   institution: '',
-  theme: 'auto',
+  theme: 'th-koeln',
   themeSwitcher: false,
   header: 'farbig',
   colors: {},
   font: '',
   fontUrl: '',
   footerLinks: [
-    { label: 'Aufgabe hinzufügen (für Lehrende)', href: '#/autor' },
+    { label: 'Dozentenmodus', href: '#/dozent' },
     { label: 'Quellcode (MIT)', href: 'https://github.com/markusschuetze/db-trainer' },
   ],
   license: 'Software: MIT · Inhalte: CC BY-SA 4.0',
   repo: 'markusschuetze/db-trainer',
   branch: 'main',
+  analyticsUrl: '',
+  analyticsMinGroup: 5,
   readyStreak: 3,
   readySureShare: 0.8,
 };
@@ -117,6 +123,12 @@ export function mergeConfig(base: AppConfig, input: unknown): { config: AppConfi
     } else if (k === 'readyStreak') {
       if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10) out.readyStreak = value;
       else warnings.push('readyStreak muss eine ganze Zahl zwischen 1 und 10 sein.');
+    } else if (k === 'analyticsUrl') {
+      if (typeof value === 'string' && (value === '' || /^https?:\/\//.test(value))) out.analyticsUrl = value.replace(/\/+$/, '');
+      else warnings.push('analyticsUrl muss leer sein oder mit http:// bzw. https:// beginnen.');
+    } else if (k === 'analyticsMinGroup') {
+      if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 100) out.analyticsMinGroup = value;
+      else warnings.push('analyticsMinGroup muss eine ganze Zahl zwischen 1 und 100 sein.');
     } else if (typeof value === typeof expected) {
       (out as unknown as Record<string, unknown>)[k] = value;
     } else warnings.push(`Feld „${key}“ hat den falschen Typ (erwartet: ${typeof expected}).`);
@@ -129,10 +141,26 @@ export async function loadRuntimeConfig(): Promise<void> {
   try {
     const res = await fetch('./config.json', { cache: 'no-cache' });
     if (!res.ok) return;
-    const { config: merged, warnings } = mergeConfig(defaults, await res.json());
+    const text = await res.text();
+    if (text.trimStart().startsWith('<')) return; // HTML statt JSON: keine config.json vorhanden
+    const { config: merged, warnings } = mergeConfig(defaults, JSON.parse(text));
     Object.assign(config, merged);
     for (const w of warnings) console.warn(`[DB-Trainer] ${w}`);
   } catch (e) {
     console.warn('[DB-Trainer] config.json konnte nicht gelesen werden, es gelten die Standardwerte.', e);
   }
 }
+
+/** Nur die vom Standard abweichenden Felder, als config.json-Text (fuer den Design-Editor) */
+export function configToJson(cfg: AppConfig): string {
+  const out: Record<string, unknown> = {
+    _hinweis: 'Branding ohne Programmierung. Datei neben index.html legen, Seite neu laden. Nicht genannte Felder behalten ihren Standardwert. Anleitung: BRANDING.md.',
+  };
+  for (const k of Object.keys(defaults) as (keyof AppConfig)[]) {
+    if (JSON.stringify(cfg[k]) !== JSON.stringify(defaults[k])) out[k] = cfg[k];
+  }
+  return JSON.stringify(out, null, 2) + '\n';
+}
+
+/** Logo/Favicon: Dateiname im Ordner brand/ oder eingebettete Datei (data:) oder Adresse (http) */
+export const assetUrl = (v: string, folder = 'brand/') => (/^(data:|https?:\/\/|\/)/.test(v) ? v : `${folder}${v}`);

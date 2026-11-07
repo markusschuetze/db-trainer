@@ -22,11 +22,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" release/db-trainer-html.zip release/db-trainer-scorm12.zip \
+          gh release create "$GITHUB_REF_NAME" release/db-trainer-html.zip release/db-trainer-scorm12.zip server/collector.mjs \
             --title "DB-Trainer $GITHUB_REF_NAME" \
             --notes "Fertige Pakete zum Selbsthosten. Anleitung: BRANDING.md im Repository.
 
           - db-trainer-html.zip: für jeden Webserver und als ILIAS-HTML-Lernmodul
           - db-trainer-scorm12.zip: SCORM 1.2 für ILIAS/Moodle (Fortschritt am Login, Ergebnis der Probeklausur)
+          - collector.mjs: optionaler Sammelserver für die anonyme Lernstatistik (Node.js, keine Abhängigkeiten)
 
-          Branding: config.json im entpackten Ordner anpassen, Logo nach brand/ legen."
+          Branding und Aufgaben: Dozentenmodus (#/dozent) öffnen, config.json bzw. aufgaben.json erzeugen und neben index.html legen."

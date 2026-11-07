@@ -5,3 +5,4 @@ release/
 # Logos der Institution liegen nur lokal (nicht Teil der offenen Lizenz)
 public/brand/*
 !public/brand/README.md
+events.jsonl

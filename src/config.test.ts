@@ -40,3 +40,20 @@ describe('config.json (Branding ohne Build)', () => {
     expect(mergeConfig(defaults, json).warnings).toEqual([]);
   });
 });
+
+import { assetUrl, configToJson } from './config';
+
+describe('config.json aus dem Design-Editor', () => {
+  it('enthaelt nur Abweichungen und ist wieder einlesbar', () => {
+    const { config } = mergeConfig(defaults, { appName: 'SQL-Labor', colors: { brand: '#003366' }, header: 'hell' });
+    const json = JSON.parse(configToJson(config));
+    expect(Object.keys(json).sort()).toEqual(['_hinweis', 'appName', 'colors', 'header']);
+    expect(mergeConfig(defaults, json).config).toEqual(config);
+    expect(Object.keys(JSON.parse(configToJson(defaults)))).toEqual(['_hinweis']);
+  });
+  it('Logo als Dateiname, Adresse oder eingebettete Datei', () => {
+    expect(assetUrl('logo.svg')).toBe('brand/logo.svg');
+    expect(assetUrl('data:image/svg+xml;base64,AAA')).toMatch(/^data:/);
+    expect(assetUrl('https://x.de/l.png')).toBe('https://x.de/l.png');
+  });
+});

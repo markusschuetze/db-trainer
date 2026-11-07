@@ -1,9 +1,11 @@
 // Wissensfragen pro Kapitel. Eigenstaendig formuliert nach den Inhalten der Skripte.
 // correct: Indizes der richtigen Optionen. multi: Mehrfachauswahl (wird so angekuendigt).
 
-export type Chapter = '01' | '02' | '03' | '04' | '05' | '06' | 'SQL';
+/** Standard-Kapitel '01'..'06', 'SQL'; Lehrende koennen im Aufgabenpaket eigene ergaenzen */
+export type Chapter = string;
+export const BUILTIN_CHAPTERS = ['01', '02', '03', '04', '05', '06', 'SQL'];
 
-export const CHAPTER_NAME: Record<Chapter, string> = {
+export const CHAPTER_NAME: Record<string, string> = {
   '01': 'Einleitung',
   '02': 'ER-Modell',
   '03': 'Erweitertes ER-Modell',

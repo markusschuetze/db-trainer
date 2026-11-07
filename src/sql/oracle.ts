@@ -428,6 +428,16 @@ export function executeStatement(db: Database, raw: string): StatementResult {
     if (kw === 'CREATE' && /^CREATE\s+TABLE/i.test(stmt)) message = runCreateTable(db, stmt);
     else if (kw === 'DROP' && /^DROP\s+TABLE/i.test(stmt)) message = runDrop(db, stmt);
     else if (kw === 'ALTER') message = runAlter(db, stmt);
+    else if (kw === 'TRUNCATE') {
+      const t = stmt.match(re(`^TRUNCATE\\s+TABLE\\s+"?(${ID})"?$`));
+      if (!t) throw new OracleError('Syntaxfehler in TRUNCATE TABLE.', 'ORA-00933');
+      const name = findTable(db, t[1]);
+      if (!name) throw new OracleError(`Tabelle ${t[1]} existiert nicht.`, 'ORA-00942');
+      if (dependentsOf(db, name).length)
+        throw new OracleError(`Auf ${name} verweisen Fremdschlüssel. TRUNCATE ist dann nicht erlaubt.`, 'ORA-02266');
+      db.exec(`DELETE FROM "${name}"`);
+      message = `Tabelle ${name} geleert.`;
+    }
     else {
       if (kw === 'SELECT' || kw === 'WITH') {
         checkGroupBy(stmt);
@@ -463,6 +473,14 @@ export function executeStatement(db: Database, raw: string): StatementResult {
 /** Fuehrt ein Skript wie SQL Developer aus: Fehler stoppen nicht. */
 export function runScript(db: Database, script: string): StatementResult[] {
   return splitStatements(script).map((s) => executeStatement(db, s));
+}
+
+/** Datenbank aus einem Abbild (db.export()) wiederherstellen, z. B. fuer ROLLBACK */
+export function restoreDatabase(SQL: SqlJsStatic, data: Uint8Array): Database {
+  const db = new SQL.Database(data);
+  db.exec('PRAGMA foreign_keys=ON');
+  registerOracleFunctions(db);
+  return db;
 }
 
 export function createDatabase(SQL: SqlJsStatic): Database {

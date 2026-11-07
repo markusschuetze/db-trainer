@@ -9,13 +9,14 @@ export function SqlEditor({
 }: {
   value: string;
   onChange: (v: string) => void;
-  onRun: () => void;
+  /** Strg/Cmd+Enter; bekommt die markierte Auswahl (leer, wenn nichts markiert ist) */
+  onRun: (selection: string) => void;
   label: string;
 }) {
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      onRun();
+      onRun(e.currentTarget.value.slice(e.currentTarget.selectionStart, e.currentTarget.selectionEnd));
     } else if (e.key === 'Tab' && !e.shiftKey) {
       e.preventDefault();
       const el = e.currentTarget;

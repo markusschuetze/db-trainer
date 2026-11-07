@@ -1,4 +1,4 @@
-import { config } from './config';
+import { assetUrl, config } from './config';
 
 /** Auswaehlbare Designs (Umschalter in der Kopfzeile, falls aktiviert) */
 export const themes = ['auto', 'neutral', 'dark', 'th-koeln'] as const;
@@ -68,7 +68,7 @@ export function applyBranding() {
   if (config.favicon) {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]') ?? document.head.appendChild(document.createElement('link'));
     link.rel = 'icon';
-    link.href = config.favicon;
+    link.href = assetUrl(config.favicon, '');
   }
   if (config.fontUrl) {
     const css = document.createElement('link');

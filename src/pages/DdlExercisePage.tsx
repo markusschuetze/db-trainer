@@ -2,6 +2,7 @@ import { EditorExercise } from '../components/EditorExercise';
 import { SchemaView } from '../components/SchemaView';
 import { ddlExercises } from '../content/ddlExercises';
 import { runExercise } from '../sql/ddlGrading';
+import { topicById } from '../content/topics';
 import { useSql } from '../useSql';
 
 export function DdlExercisePage({ id }: { id: string }) {
@@ -29,6 +30,7 @@ export function DdlExercisePage({ id }: { id: string }) {
       ready={!!SQL}
       loadError={error}
       nextHref={next && `#/ddl/${next.id}`}
+      tracking={{ id: `ddl:${ex.id}`, topicId: ex.topicId, chapter: topicById(ex.topicId)?.chapter ?? '06', level: ex.level }}
       freshNote={`Jeder Lauf startet mit einer frischen Datenbank${ex.setup ? ' (inklusive der vorhandenen Tabellen)' : ''}.`}
       aside={
         ex.setup && (

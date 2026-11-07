@@ -17,6 +17,7 @@ import {
   type Mastery,
   type ProgressData,
 } from '../progress';
+import { ConsentSetting } from '../components/ConsentBanner';
 import { topicsOf } from '../content/topics';
 import { CHAPTERS, itemsOfTopic, practiceIds, questionIds, topicHref, topics } from '../progressCatalog';
 
@@ -473,6 +474,8 @@ export function ProgressPage() {
           })}
         </ul>
       </section>
+
+      <ConsentSetting />
 
       {/* Sichern / Laden */}
       <section className="mt-6 rounded-card border border-line bg-surface p-5">

@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { App } from './App';
 import { loadRuntimeConfig } from './config';
+import { loadContentPack } from './content/pack';
 import { initScorm } from './scorm';
 import { applyBranding } from './theme';
 
 // Erst die config.json lesen (Branding ohne neuen Build), dann rendern.
-loadRuntimeConfig().finally(() => {
+loadRuntimeConfig()
+  .then(loadContentPack)
+  .finally(() => {
   applyBranding();
   initScorm();
   createRoot(document.getElementById('root')!).render(

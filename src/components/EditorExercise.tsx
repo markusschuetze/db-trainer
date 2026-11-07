@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
+import { track } from '../analytics';
 import type { CheckResult } from '../sql/ddlGrading';
 import type { StatementResult } from '../sql/oracle';
 import { loadDraft, markDone, saveDraft } from '../progress';
@@ -33,6 +34,7 @@ export function EditorExercise({
   freshNote,
   run,
   nextHref,
+  tracking,
 }: {
   progressId: string;
   backHref: string;
@@ -49,7 +51,10 @@ export function EditorExercise({
   freshNote: string;
   run: (code: string, grade: boolean) => EditorRun;
   nextHref?: string;
+  /** Messung fuer die anonyme Lernstatistik */
+  tracking?: { id: string; topicId: string; chapter: string; level: number };
 }) {
+  const started = useRef(Date.now());
   const [code, setCode] = useState(() => loadDraft(progressId, starter));
   const [out, setOut] = useState<EditorRun | null>(null);
   const [graded, setGraded] = useState(false);
@@ -67,6 +72,19 @@ export function EditorExercise({
     setOut(r);
     setGraded(grade);
     if (grade) {
+      if (tracking)
+        track({
+          k: 'i',
+          i: tracking.id,
+          tp: tracking.topicId,
+          ch: tracking.chapter,
+          ok: r.passed ? 1 : 0,
+          s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)),
+          a: attempts + 1,
+          h: hintsShown,
+          lv: tracking.level,
+          src: 'u',
+        });
       setAttempts((a) => a + 1);
       if (r.passed) markDone(progressId);
     }

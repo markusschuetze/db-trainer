@@ -25,6 +25,8 @@ export interface SqlRun {
   expected?: ResultSet;
   /** DML: abweichende Tabellen auf Datenbestand A */
   diffs?: TableDiff[];
+  /** DML: Tabellen, die die Musterloesung aendert */
+  changed?: string[];
 }
 
 export type Dataset = 'A' | 'B';
@@ -206,7 +208,7 @@ function gradeDml(SQL: SqlJsStatic, ex: SqlExercise, script: string): SqlRun {
       hint: okB ? undefined : 'Auf anderen Daten weicht das Ergebnis ab. Hast du Werte fest eingetragen, die man über eine Bedingung finden sollte?',
     });
   }
-  return { results: user.results, checks, passed: checks.every((c) => c.ok), diffs };
+  return { results: user.results, checks, passed: checks.every((c) => c.ok), diffs, changed: target };
 }
 
 export function runSqlExercise(SQL: SqlJsStatic, ex: SqlExercise, script: string): SqlRun {

@@ -12,7 +12,10 @@ import { ProgressPage } from './pages/ProgressPage';
 import { NfExercisePage } from './pages/NfExercisePage';
 import { NfList } from './pages/NfList';
 import { Playground } from './pages/Playground';
+import { PraktikumPage } from './pages/PraktikumPage';
 import { SqlExercisePage } from './pages/SqlExercisePage';
+import { TeacherPage } from './pages/TeacherPage';
+import { TextTaskList, TextTaskPage } from './pages/TextTaskPage';
 import { SqlList } from './pages/SqlList';
 
 // Hash-Routing: funktioniert statisch ueberall, auch in iFrame und ILIAS-Lernmodul.
@@ -43,6 +46,12 @@ function route(page?: string, id?: string): ReactNode {
       return <RelPage />;
     case 'pruefung':
       return <ExamPage />;
+    case 'textaufgaben':
+      return id ? <TextTaskPage key={id} id={id} /> : <TextTaskList />;
+    case 'praktikum':
+      return <PraktikumPage key={id ?? 'liste'} id={id} />;
+    case 'dozent':
+      return <TeacherPage tab={id} />;
     case 'autor':
       return <AuthorPage />;
     case 'fortschritt':

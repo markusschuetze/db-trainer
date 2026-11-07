@@ -9,7 +9,7 @@
 //   - Export/Import als Datei fuer den Wechsel zwischen Geraeten ausserhalb von ILU
 
 import { useSyncExternalStore } from 'react';
-import type { Chapter } from './content/mcQuestions';
+import { BUILTIN_CHAPTERS, type Chapter } from './content/mcQuestions';
 import { readSuspendData, scormActive, suspendLimit, writeSuspendData } from './scorm';
 
 /** [gesehen, richtig, Serie richtig in Folge, zuletzt (Unix-Sekunden)] */
@@ -169,9 +169,9 @@ export function recordItem(id: string, right: boolean) {
 }
 
 /** Probeklausur eintragen (einmalig pro Klausur) inkl. Ergebnis je Aufgabe */
-export function recordExam(attempt: ExamAttempt, itemResults: { id: string; right: boolean }[]) {
+export function recordExam(attempt: ExamAttempt, itemResults: { id: string; right: boolean }[]): boolean {
   ensureInit();
-  if (state.exams.some((e) => e.id === attempt.id)) return;
+  if (state.exams.some((e) => e.id === attempt.id)) return false;
   update((d) => {
     const items = { ...d.items };
     for (const r of itemResults) {
@@ -180,6 +180,7 @@ export function recordExam(attempt: ExamAttempt, itemResults: { id: string; righ
     }
     return { ...d, items, exams: [...d.exams, attempt] };
   });
+  return true;
 }
 
 export function resetProgress() {
@@ -217,12 +218,11 @@ export function mastery(s?: ItemStat): Mastery {
 }
 
 export const PASS_PERCENT = 50;
-export const FULL_CHAPTERS = 7;
 
 export const percentOf = (e: ExamAttempt) => (e.x ? (100 * e.p) / e.x : 0);
 export const passed = (e: ExamAttempt) => percentOf(e) >= PASS_PERCENT;
 /** Zaehlt fuer die Pruefungsreife: alle Kapitel, mindestens 60 Minuten */
-export const isFull = (e: ExamAttempt) => e.c.length >= FULL_CHAPTERS && e.m >= 60;
+export const isFull = (e: ExamAttempt) => BUILTIN_CHAPTERS.every((c) => e.c.includes(c)) && e.m >= 60;
 
 /** Bestandene vollstaendige Probeklausuren in Folge (die juengsten zuerst) */
 export function passStreak(exams: ExamAttempt[]): number {

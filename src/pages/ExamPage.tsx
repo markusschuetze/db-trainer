@@ -6,7 +6,7 @@ import { RelationView } from '../components/RelationView';
 import { SqlEditor } from '../components/SqlEditor';
 import { StatementOutput } from '../components/SqlOutput';
 import { CARD_LABEL, CARDS, fkNotNull, toRelations, validMappings, type Card, type Mapping } from '../content/erPhrases';
-import { CHAPTER_NAME, type Chapter } from '../content/mcQuestions';
+import { BUILTIN_CHAPTERS, CHAPTER_NAME, type Chapter } from '../content/mcQuestions';
 import type { DepKind } from '../content/types';
 import {
   buildExam,
@@ -20,6 +20,7 @@ import {
   type NfAnswer,
 } from '../exam/exam';
 import { topicById } from '../content/topics';
+import { track } from '../analytics';
 import { recordExam, type ExamAttempt } from '../progress';
 import { topicOfItem } from '../progressCatalog';
 import { reportScore } from '../scorm';
@@ -30,12 +31,12 @@ import { useSql } from '../useSql';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
-const ALL = Object.keys(CHAPTER_NAME) as Chapter[];
+const allChapters = () => Object.keys(CHAPTER_NAME) as Chapter[];
 
 /* ======================= Start ======================= */
 
 function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
-  const [chapters, setChapters] = useState<Chapter[]>(ALL);
+  const [chapters, setChapters] = useState<Chapter[]>(allChapters);
   const [minutes, setMinutes] = useState(60);
   const [allowRun, setAllowRun] = useState(false);
   return (
@@ -44,7 +45,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
       <fieldset className="mt-4">
         <legend className="font-semibold">Kapitel</legend>
         <div className="mt-2 grid gap-1 sm:grid-cols-2">
-          {ALL.map((c) => (
+          {allChapters().map((c) => (
             <label key={c} className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -483,7 +484,7 @@ export function ExamPage() {
       const [p, x] = k[it.chapter] ?? [0, 0];
       k[it.chapter] = [p + results[i].points, x + it.points];
     });
-    recordExam(
+    const fresh = recordExam(
       {
         id: `${state.seed}-${state.startedAt}`,
         t: Math.floor(state.submittedAt / 1000),
@@ -495,6 +496,23 @@ export function ExamPage() {
       },
       items.map((it, i) => ({ id: it.id, right: results[i].points === it.points })),
     );
+    if (fresh) {
+      items.forEach((it, i) =>
+        track({
+          k: 'i',
+          i: it.id,
+          tp: topicOfItem(it.id) ?? it.chapter,
+          ch: it.chapter,
+          ok: results[i].points === it.points ? 1 : 0,
+          s: 0,
+          a: 1,
+          h: 0,
+          ...(it.kind === 'mc' ? { o: (state.answers[it.id] as number[] | undefined) ?? [] } : {}),
+          src: 'k',
+        }),
+      );
+      track({ k: 'e', p: Math.round(got * 2) / 2, x: max, m: state.minutes, ch: state.chapters, kc: Object.fromEntries(Object.entries(k).map(([c, v]) => [c, v as [number, number]])) });
+    }
   }, [state?.submittedAt, SQL, results]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state)
@@ -551,7 +569,7 @@ export function ExamPage() {
           className={`mt-4 block rounded-card border-2 p-4 no-underline ${percent >= 50 ? 'border-ok bg-ok-bg' : 'border-line bg-surface'}`}
         >
           <strong>{percent >= 50 ? '✓ Bestanden.' : '✗ Diesmal nicht bestanden.'}</strong>{' '}
-          {state.chapters.length >= 7 && state.minutes >= 60
+          {BUILTIN_CHAPTERS.every((c) => state.chapters.includes(c)) && state.minutes >= 60
             ? 'Diese vollständige Probeklausur zählt für deine Prüfungsreife.'
             : 'Teilklausuren zählen nicht für die Prüfungsreife, aber für deine Fragenstatistik.'}{' '}
           <span className="underline">Fortschritt ansehen →</span>

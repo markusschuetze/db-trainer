@@ -11,7 +11,10 @@ ohne Anmeldung, ohne Tracking.
 | Normalisierung | 05 | 1NF (mehrwertig/strukturiert), voll/partiell/transitiv, höchste NF, Zielschema |
 | SQL-DDL | 06 | CREATE/ALTER/DROP, Constraints, referenzielle Integrität, Identity Columns |
 | SQL-DML/DQL | Folgekapitel | 3 Fall-Datenbanken (Hochschule, Gastro, Projekte) nach Beispielen aus der Vorlesung, je Leicht/Mittel/Schwer; Schema-Diagramm mit Fremdschlüsseln; Zufallsaufgabe; Spielwiese |
+| Textaufgaben | 01–03 | Klausurvorbereitung: aus Anforderungstexten Entitäten, Beziehungen, Kardinalitäten, Schlüssel und Spezialisierungen erkennen, Relationenschema ableiten |
+| Praktikum | Übungen | Arbeiten wie im SQL Developer im Browser: persistente Datenbank, Ausführen mit Oracle-Fehlermeldungen, COMMIT/ROLLBACK, ER-Fenster (zeigt, ob der Fremdschlüssel auf den Primärschlüssel zeigt), Übungsblätter vom Dozenten per Paket oder Datei |
 | Prüfungsmodus | alle | Probeklausur mit Zeitlimit, ohne Hilfen, Auswertung nach Kapiteln und Themen |
+| Dozentenmodus | – | Dashboard (Probleme, Stärken, Bearbeitungszeiten, falsche Antworten, CSV), Aufgaben- und Blatt-Editor, Design-Editor mit `config.json`-Export |
 | Fortschritt | alle | Prüfungsreife wie in Führerschein-Apps (3 vollständige Probeklausuren in Folge bestanden, 80 % der Fragen sicher; einstellbar in `src/config.ts`), Verlauf, Schwachstellen, Stand je Thema |
 | Fragen lernen | alle | Wissensfragen nach Kapitel oder Thema; falsch beantwortete kommen zuerst wieder |
 
@@ -56,7 +59,21 @@ die Prüfungsreife lassen sich dort ändern, ohne neuen Build. Ausführliche Anl
 Mitgeliefert sind die Designs `auto` (hell/dunkel nach Gerät), `neutral`, `dark` und `th-koeln`
 (Farben der TH Köln). Logos gehören nicht ins Repository, sondern nur ins eigene Paket.
 
-## Neue Aufgaben hinzufügen (für Lehrende)
+## Dozentenmodus
+
+`#/dozent` (Link „Dozentenmodus“ in der Fußzeile):
+
+- **Auswertung:** anonymes Dashboard aus der freiwilligen Lernstatistik (siehe BRANDING.md, Abschnitt 4): schwächste und
+  stärkste Themen, typische Denkfehler bei Wissensfragen, Median der Bearbeitungszeit, Versuche, Tipp-Nutzung,
+  Klausurverteilung, Nutzung pro Woche, CSV-Export. Ohne Sammelserver: Demo oder Datei `events.jsonl` laden.
+- **Aufgaben und Übungsblätter:** Entwurf für `aufgaben.json` mit Themen, Kapiteln, Übungsblättern (Schema per `.sql`-Datei),
+  Fall-Datenbanken, Textaufgaben; „Entwurf prüfen“ führt alle Musterlösungen aus, ohne den Trainer zu verändern.
+- **Design und Einstellungen:** Live-Vorschau, Kontrastprüfung, Logo-Upload, `config.json`-Export.
+
+Der Dozentenmodus ist keine Anmeldung. Geschützt sind die Auswertungsdaten (Token am Sammelserver); eigene Dateien kann jeder
+erzeugen, auf den Server legen kann sie nur, wer Zugriff hat.
+
+## Neue Aufgaben hinzufügen (für Lehrende, über GitHub)
 
 **Ohne Programmierkenntnisse über den Aufgaben-Editor** (Link „Aufgabe hinzufügen“ in der Fußzeile, `#/autor`):
 

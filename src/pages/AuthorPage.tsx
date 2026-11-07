@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { addItem, loadDraft, saveDraft } from '../content/draftPack';
 import { ScenarioBrowser } from '../components/ScenarioBrowser';
 import { ResultTable, StatementOutput } from '../components/SqlOutput';
 import { LEVEL_NAME, scenarioById, scenarios } from '../content/scenarios';
@@ -61,6 +62,7 @@ export function AuthorPage() {
   const [scenario, setScenario] = useState('hochschule');
   const [ordered, setOrdered] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [added, setAdded] = useState('');
 
   const effChapter: Chapter = kind === 'frage' ? chapter : 'SQL';
   const topicChoices = topicsOf(effChapter);
@@ -126,6 +128,7 @@ export function AuthorPage() {
       const failed = preview.results.filter((r) => !r.ok);
       if (failed.length) problems.push(`Die Musterlösung läuft nicht fehlerfrei: ${failed[0].message}${failed[0].ora ? ` (${failed[0].ora})` : ''}`);
       else if (!preview.passed) problems.push(`Die Musterlösung besteht die eigene Prüfung nicht: ${preview.checks.find((c) => !c.ok)?.hint ?? ''}`);
+      if (kind === 'dml' && !failed.length && !preview.changed?.length) problems.push('Die Musterlösung ändert keine Daten.');
       if (runSqlExercise(SQL, ex, '').passed) problems.push('Eine leere Abgabe würde bestehen. Die Aufgabe muss etwas verlangen.');
       if (kind === 'dql' && !failed.length && preview.expected && preview.expected.rows.length === 0)
         notes.push('Das Ergebnis ist auf den sichtbaren Daten leer. Das ist als Übung wenig aussagekräftig.');
@@ -334,6 +337,16 @@ export function AuthorPage() {
               </a>
               )}
               <button
+                className={btn}
+                disabled={!ok}
+                onClick={() => {
+                  saveDraft(addItem(loadDraft(), kind === 'frage' ? 'questions' : 'sql', data as { id: string }));
+                  setAdded(`„${id}“ liegt jetzt im Entwurf. Im Dozentenmodus lädst du daraus die aufgaben.json herunter.`);
+                }}
+              >
+                Zum Entwurf hinzufügen
+              </button>
+              <button
                 className={btnGhost}
                 onClick={async () => {
                   try {
@@ -348,6 +361,11 @@ export function AuthorPage() {
                 {copied ? 'Kopiert' : 'JSON kopieren'}
               </button>
             </div>
+            {added && (
+              <p role="status" className="mt-3 text-sm">
+                {added} <a href="#/dozent/aufgaben" className="underline">Zum Dozentenmodus</a>
+              </p>
+            )}
             <details className="mt-3">
               <summary className="cursor-pointer text-sm font-semibold">Datei-Inhalt ansehen</summary>
               <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-bg p-3 font-mono text-xs">{json}</pre>

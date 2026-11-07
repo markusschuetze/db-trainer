@@ -41,6 +41,18 @@ const modules: Module[] = [
     href: '#/sql',
   },
   {
+    title: 'Textaufgaben',
+    script: 'Klausurvorbereitung',
+    text: 'Aus Anforderungstexten Entitäten, Beziehungen, Kardinalitäten und Schlüssel erkennen und das Relationenschema ableiten.',
+    href: '#/textaufgaben',
+  },
+  {
+    title: 'Praktikum',
+    script: 'Übungen',
+    text: 'Arbeiten wie im SQL Developer, aber im Browser: Datenbank bleibt erhalten, Fehlermeldungen, COMMIT/ROLLBACK, ER-Modell auf Knopfdruck.',
+    href: '#/praktikum',
+  },
+  {
     title: 'Prüfungsmodus',
     script: 'alle Kapitel',
     text: 'Probeklausur mit Zeitlimit, ohne Hilfen, mit Auswertung nach Kapiteln.',

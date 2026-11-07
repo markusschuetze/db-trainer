@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { track } from '../analytics';
 import { CrowLegend, ErDiagram } from '../components/ErDiagram';
 import { CARD_LABEL, CARDS, phrases, relType, type Card } from '../content/erPhrases';
 import { specializations } from '../content/specializations';
@@ -13,6 +14,7 @@ function CardinalityTrainer() {
   const [a21, setA21] = useState<Card | ''>('');
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
+  const started = useRef(Date.now());
   const p = phrases[i];
   const ok12 = a12 === p.c12;
   const ok21 = a21 === p.c21;
@@ -21,12 +23,14 @@ function CardinalityTrainer() {
     setChecked(true);
     setScore((s) => ({ right: s.right + (ok12 && ok21 ? 1 : 0), total: s.total + 1 }));
     if (ok12 && ok21) markDone(`er:${p.id}`);
+    track({ k: 'i', i: `er:${p.id}`, tp: '02-kraehenfuss', ch: '02', ok: ok12 && ok21 ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: 0, src: 'u' });
   };
   const next = () => {
     setI((i + 1) % phrases.length);
     setA12('');
     setA21('');
     setChecked(false);
+    started.current = Date.now();
   };
 
   const select = (value: Card | '', set: (c: Card | '') => void, label: string, ok: boolean) => (
