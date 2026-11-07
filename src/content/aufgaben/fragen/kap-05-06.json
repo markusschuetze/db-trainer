@@ -1,0 +1,1018 @@
+[
+ {
+  "id": "an-einfuege",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Ein neues Produkt kann nicht gespeichert werden, solange kein Verkäufer bekannt ist, weil beide zusammen den Schlüssel bilden. Welche Anomalie?",
+  "options": [
+   "Leseanomalie",
+   "Löschanomalie",
+   "Änderungsanomalie",
+   "Einfügeanomalie"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Information lässt sich nicht einfügen, weil ein anderer Teil des Schlüssels fehlt."
+ },
+ {
+  "id": "an-loesch",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Beim Löschen des letzten Produkts eines Verkäufers verschwinden zugleich dessen Verkäuferdaten. Welche Anomalie?",
+  "options": [
+   "Löschanomalie",
+   "Einfügeanomalie",
+   "Keine Anomalie",
+   "Änderungsanomalie"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Beim Löschen gehen unbeabsichtigt weitere, unabhängige Informationen verloren."
+ },
+ {
+  "id": "an-ursache",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Was ist die gemeinsame Ursache der drei Anomalien?",
+  "options": [
+   "Fehlende Indizes",
+   "Redundante Speicherung von Informationen in einer Relation",
+   "Ein falscher Datentyp",
+   "Zu wenige Spalten"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Mehrere Sachverhalte in einer Tabelle führen zu Redundanz und damit zu Anomalien."
+ },
+ {
+  "id": "an-folgen",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Welche Folgen hat eine Relation ohne Normalformen?",
+  "options": [
+   "Höherer Speicherbedarf",
+   "Gefahr widersprüchlicher Daten",
+   "Automatisch schnellere Abfragen",
+   "Aufwendige Änderungen"
+  ],
+  "correct": [
+   0,
+   1,
+   3
+  ],
+  "explanation": "Redundanz kostet Speicher, macht Änderungen aufwendig und gefährdet die Konsistenz.",
+  "multi": true
+ },
+ {
+  "id": "an-nf-anzahl",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Welche Normalformen haben in der Praxis die größte Bedeutung?",
+  "options": [
+   "Nur die zweite",
+   "Nur die fünfte",
+   "Keine",
+   "Die ersten drei"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "1NF, 2NF und 3NF genügen in der Praxis meist; es gibt weitere bis 5NF sowie die Boyce-Codd-Normalform."
+ },
+ {
+  "id": "an-aufbauend",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "Was gilt für Normalformen ab der 2. Normalform?",
+  "options": [
+   "Die vorhergehende Normalform muss bereits erfüllt sein",
+   "Sie ersetzen die vorherige",
+   "Sie gelten nur für Relationen mit einem Fremdschlüssel",
+   "Sie sind unabhängig voneinander"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Jede Normalform x NF, x > 1, setzt die vorhergehende voraus."
+ },
+ {
+  "id": "an-aenderung",
+  "topicId": "05-anomalien",
+  "chapter": "05",
+  "question": "In einer Relation steht der Standort der Abteilung in jeder Mitarbeiterzeile. Der Standort ändert sich. Was ist das Risiko?",
+  "options": [
+   "Die Abteilung wird gelöscht",
+   "Wird eine Zeile vergessen, sind die Daten widersprüchlich",
+   "Es entsteht eine neue Abteilung",
+   "Der Standort kann nicht geändert werden"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Änderungsanomalie: redundante Werte müssen überall konsistent geändert werden."
+ },
+ {
+  "id": "n1-mehrwertig",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Welches Attribut verletzt die 1. Normalform?",
+  "options": [
+   "Name: „Meier“",
+   "Telefonnummern: „0221 123, 0221 456“",
+   "Telefonnummer: „0221 123“",
+   "Geburtsdatum: „2004-05-12“"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Mehrere Werte in einem Feld sind ein mehrwertiges Attribut."
+ },
+ {
+  "id": "n1-strukturiert",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Was ist ein strukturiertes Attribut?",
+  "options": [
+   "Ein Primärschlüssel",
+   "Ein Fremdschlüssel",
+   "Ein Attribut mit vielen Buchstaben",
+   "Ein Attribut mit Werten aus mehr als einer Domäne, z. B. „3500 €“"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Zahl und Einheit in einem Feld mischen zwei Domänen und werden getrennt."
+ },
+ {
+  "id": "n1-aufloesen-mehrwert",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Wie löst man ein mehrwertiges Attribut auf?",
+  "options": [
+   "Durch Löschen",
+   "Für jeden Wert ein eigenes Tupel, das Attribut wird Teil des Schlüssels",
+   "In eine zweite Spalte gleicher Art",
+   "Als eine Spalte mit Komma-Liste belassen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Duplizierte Tupel enthalten nur noch atomare Werte, das aufgelöste Attribut wird Teil des Primärschlüssels."
+ },
+ {
+  "id": "n1-aufloesen-struktur",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Wie löst man ein strukturiertes Attribut auf?",
+  "options": [
+   "In eine neue Tabelle auslagern",
+   "Auf mehrere Zeilen verteilen",
+   "Jede Domäne in ein eigenes Attribut aufspalten",
+   "Als Text belassen"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "„3500 €“ wird zu Preis = 3500 und Währung = €."
+ },
+ {
+  "id": "n1-immer",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Was gilt für die 1. Normalform im Unterschied zu den anderen?",
+  "options": [
+   "Sie muss immer erfüllt sein",
+   "Sie ist optional",
+   "Sie gilt nur bei Fremdschlüsseln",
+   "Sie gilt nur für große Tabellen"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Das Relationenmodell verlangt atomare Werte, 1NF ist daher Pflicht."
+ },
+ {
+  "id": "n1-adresse",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Das Attribut „Gebäude/Raum“ enthält „A 304“. Warum ist das nicht atomar?",
+  "options": [
+   "Es enthält ein Leerzeichen",
+   "Gebäude und Raum sind zwei Informationen in einem Feld",
+   "Es enthält Buchstaben",
+   "Es ist zu kurz"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Zwei Domänen: Gebäude (A) und Raum (304). Besser getrennte Attribute."
+ },
+ {
+  "id": "n1-abhaengig",
+  "topicId": "05-1nf",
+  "chapter": "05",
+  "question": "Zu jedem Auftrag gibt es mehrere Arbeitsfolgen mit je einer Vorgabezeit (1, 2 → 15, 25). Wie löst man das auf?",
+  "options": [
+   "Je Arbeitsfolge ein Tupel mit der zugehörigen Vorgabezeit; nur AFO wird Teil des Schlüssels",
+   "Zwei Spalten, die unabhängig aufgeteilt werden",
+   "Beide Listen belassen",
+   "Eine Spalte mit „1:15, 2:25“"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Abhängige mehrwertige Attribute werden gemeinsam aufgeteilt, nur das führende (AFO) wird Schlüsselteil."
+ },
+ {
+  "id": "n2-relevanz",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Wann muss die 2. Normalform überhaupt geprüft werden?",
+  "options": [
+   "Immer bei mehr als 5 Spalten",
+   "Nur bei einem Fremdschlüssel",
+   "Nie",
+   "Bei zusammengesetztem Primärschlüssel"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Partielle Abhängigkeiten setzen einen zusammengesetzten Schlüssel voraus."
+ },
+ {
+  "id": "n2-voll",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Wann ist X → Y eine volle funktionale Abhängigkeit?",
+  "options": [
+   "Wenn X leer ist",
+   "Wenn jedes Attribut aus Y von der gesamten Menge X abhängt",
+   "Wenn Y ein Primärschlüssel ist",
+   "Wenn Y von einem Teil von X abhängt"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Voll: Man braucht alle Attribute von X, um Y zu bestimmen."
+ },
+ {
+  "id": "n2-partiell",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Schlüssel (Mitarbeiter_ID, Projekt_ID). Welche Abhängigkeit verletzt die 2NF?",
+  "options": [
+   "Projekt_ID → Projektname",
+   "Mitarbeiter_ID, Projekt_ID → Stunden",
+   "Mitarbeiter_ID, Projekt_ID → Rolle",
+   "Rolle → Stunden"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Der Projektname hängt nur an einem Teil des Schlüssels: partielle Abhängigkeit."
+ },
+ {
+  "id": "n2-transform",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Wie überführt man 1NF in 2NF?",
+  "options": [
+   "Alle Attribute löschen",
+   "Partiell abhängige Attribute mit dem Teilschlüssel in eigene Relationen auslagern",
+   "Einen weiteren Schlüssel ergänzen",
+   "Alle Zeilen zusammenfassen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Der Teilschlüssel wird Primärschlüssel der neuen Relation und bleibt als Fremdschlüssel in der Ursprungsrelation."
+ },
+ {
+  "id": "n2-einfach",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Eine 1NF-Relation hat einen einfachen Primärschlüssel. Ist sie in 2NF?",
+  "options": [
+   "Nein, nie",
+   "Ja, partielle Abhängigkeiten sind unmöglich",
+   "Nur wenn sie weniger als 3 Spalten hat",
+   "Nur ohne Fremdschlüssel"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Ein Teil eines einfachen Schlüssels existiert nicht, daher gibt es keine partielle Abhängigkeit."
+ },
+ {
+  "id": "n2-keine-restattribute",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Nach dem Auslagern bleibt in der Ursprungsrelation nur noch der ursprüngliche Schlüssel übrig. Was entsteht?",
+  "options": [
+   "Eine Zuordnungsrelation (M:N ohne Attribute)",
+   "Ein Fehler",
+   "Eine Relation ohne Schlüssel",
+   "Eine leere Relation"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Beispiel: Arbeitet_in(Mitarbeiter_ID, Projekt_ID) ohne weitere Attribute."
+ },
+ {
+  "id": "n2-abt-name",
+  "topicId": "05-2nf",
+  "chapter": "05",
+  "question": "Ang_Nr → Name, Ort, Abt_Nr, Abt_Name. Schlüssel (Ang_Nr, ANr). Wovon hängt Abt_Name nicht nur ab?",
+  "options": [
+   "Vom Namen des Angestellten",
+   "Von ANr",
+   "Von Abt_Nr, es ist zusätzlich transitiv abhängig",
+   "Von nichts"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Abt_Name hängt über Abt_Nr von Ang_Nr ab: eine transitive Abhängigkeit, die erst die 3NF betrifft."
+ },
+ {
+  "id": "n3-def",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "Wann ist eine Relation in der 3. Normalform?",
+  "options": [
+   "Wenn sie in 1NF ist und keinen Fremdschlüssel hat",
+   "Wenn sie genau drei Attribute hat",
+   "Wenn sie keinen Primärschlüssel hat",
+   "Wenn sie in 2NF ist und kein Nichtschlüsselattribut transitiv von einem Schlüssel abhängt"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "3NF = 2NF + keine transitiven Abhängigkeiten von Nichtschlüsselattributen."
+ },
+ {
+  "id": "n3-transitiv",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "BNR → LNR und LNR → LNAME. Welche Aussage stimmt?",
+  "options": [
+   "Es gibt keine Abhängigkeit",
+   "LNAME ist Teil des Schlüssels",
+   "LNR hängt von LNAME ab",
+   "LNAME hängt transitiv von BNR ab"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "BNR → LNR → LNAME: indirekte (transitive) Abhängigkeit."
+ },
+ {
+  "id": "n3-transform",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "Wie löst man s → a → b auf?",
+  "options": [
+   "a und b in eine neue Relation mit Schlüssel a; a bleibt als Fremdschlüssel zurück",
+   "Die Relation bleibt unverändert",
+   "a wird in den Schlüssel von s aufgenommen",
+   "b wird gelöscht"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Das Attribut a, über das die Abhängigkeit läuft, wird Primärschlüssel der ausgelagerten Relation."
+ },
+ {
+  "id": "n3-buero",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "MitArb_ID → Büro-Nr, Büro-Nr → B_Größe, Etage. Wie sieht die 3NF aus?",
+  "options": [
+   "Mitarbeiter(MitArb_ID, Name, Büro-Nr) und Büro(Büro-Nr, B_Größe, Etage)",
+   "Eine Relation mit allen Attributen",
+   "Büro(Büro-Nr, MitArb_ID)",
+   "Mitarbeiter und Büro ohne Fremdschlüssel"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Die Büro-Eigenschaften hängen am Büro, nicht am Mitarbeiter, und gehören in eine eigene Relation."
+ },
+ {
+  "id": "n3-warum",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "Was bedeutet eine transitive Abhängigkeit praktisch?",
+  "options": [
+   "Es fehlen Daten",
+   "Eine Information wird mehrfach gespeichert",
+   "Die Tabelle hat zu viele Zeilen",
+   "Der Primärschlüssel ist zu lang"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Der Lieferant steht z. B. in jeder Bestellzeile erneut: Redundanz mit Anomaliegefahr."
+ },
+ {
+  "id": "n3-reihenfolge",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "In welcher Reihenfolge werden Normalformen hergestellt?",
+  "options": [
+   "1NF, dann 2NF, dann 3NF",
+   "3NF, dann 2NF, dann 1NF",
+   "Beliebig",
+   "Nur 3NF"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Jede Normalform setzt die vorherige voraus, also von 1NF aufwärts."
+ },
+ {
+  "id": "n3-schluessel",
+  "topicId": "05-3nf",
+  "chapter": "05",
+  "question": "Welche Attribute werden bei der 3NF-Prüfung betrachtet?",
+  "options": [
+   "Nichtschlüsselattribute",
+   "Nur Datumsspalten",
+   "Nur Fremdschlüssel",
+   "Nur Primärschlüsselattribute"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Geprüft wird, ob Nichtschlüsselattribute indirekt über andere Nichtschlüsselattribute vom Schlüssel abhängen."
+ },
+ {
+  "id": "cr-varchar2",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Wofür steht VARCHAR2(50) in Oracle?",
+  "options": [
+   "Text fester Länge mit genau 50 Zeichen",
+   "Ein Datum mit 50 Feldern",
+   "Eine Zahl mit 50 Stellen",
+   "Text variabler Länge mit höchstens 50 Zeichen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "VARCHAR2(n) speichert Text variabler Länge bis n. CHAR(n) hat feste Länge."
+ },
+ {
+  "id": "cr-number",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Was bedeutet NUMBER(5,2)?",
+  "options": [
+   "5 Zeichen Text",
+   "5 Nachkommastellen und 2 Vorkommastellen",
+   "Zwei Zahlen",
+   "Insgesamt 5 Stellen, davon 2 Nachkommastellen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "NUMBER(n,k): n Gesamtstellen, k Nachkommastellen, also hier höchstens 999,99."
+ },
+ {
+  "id": "cr-date",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Was speichert der Oracle-Datentyp DATE?",
+  "options": [
+   "Datum und Uhrzeit",
+   "Eine Zahl",
+   "Nur eine Uhrzeit",
+   "Nur das Datum ohne Zeit"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "In Oracle enthält DATE auch die Uhrzeit."
+ },
+ {
+  "id": "cr-aufbau",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Welche Angaben gehören zu einer Spaltendefinition in CREATE TABLE?",
+  "options": [
+   "Spaltenname",
+   "Der Inhalt der Tabelle",
+   "Datentyp",
+   "Optional Constraints"
+  ],
+  "correct": [
+   0,
+   2,
+   3
+  ],
+  "explanation": "CREATE TABLE legt nur die Struktur an, die Daten kommen per INSERT.",
+  "multi": true
+ },
+ {
+  "id": "cr-kommentar",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Wie schreibt man in SQL einen einzeiligen Kommentar?",
+  "options": [
+   "// Kommentar",
+   "<!-- Kommentar -->",
+   "-- Kommentar",
+   "# Kommentar"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Einzeilige Kommentare beginnen mit zwei Bindestrichen, mehrzeilige stehen in /* … */."
+ },
+ {
+  "id": "cr-case",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Wie behandelt SQL Groß- und Kleinschreibung bei Schlüsselwörtern und Bezeichnern?",
+  "options": [
+   "Es unterscheidet sie nicht (ohne Anführungszeichen)",
+   "Nur bei Tabellennamen",
+   "Nur bei Datentypen",
+   "Es unterscheidet immer"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "SQL ist case-insensitive. Für die Lesbarkeit schreibt man Schlüsselwörter groß."
+ },
+ {
+  "id": "cr-blob",
+  "topicId": "06-create",
+  "chapter": "06",
+  "question": "Wofür dient der Datentyp BLOB?",
+  "options": [
+   "Datumswerte",
+   "Ganze Zahlen",
+   "Große binäre Daten, z. B. Bilder",
+   "Kurze Texte"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "BLOB = Binary Large Object."
+ },
+ {
+  "id": "co-notnull-null",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Was bedeutet NOT NULL?",
+  "options": [
+   "Die Spalte darf keine leeren Werte enthalten",
+   "Die Spalte enthält nur Nullen",
+   "Die Spalte ist ein Primärschlüssel",
+   "Die Spalte ist eindeutig"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "NOT NULL verlangt für jede Zeile einen Wert."
+ },
+ {
+  "id": "co-unique-null",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Welche Aussage über UNIQUE ist richtig?",
+  "options": [
+   "Die Spalte darf nie NULL sein",
+   "Es gibt genau eine UNIQUE-Spalte je Tabelle",
+   "Ein Wert darf in der Spalte nur einmal vorkommen",
+   "UNIQUE ersetzt den Primärschlüssel"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Mehrere Spalten können unabhängig UNIQUE sein, der Primärschlüssel ist ein Spezialfall."
+ },
+ {
+  "id": "co-default",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Wann wird ein DEFAULT-Wert verwendet?",
+  "options": [
+   "Nur bei NULL im Primärschlüssel",
+   "Immer, auch wenn ein Wert angegeben ist",
+   "Wenn beim Einfügen für die Spalte kein Wert angegeben wird",
+   "Nur bei UPDATE"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Ohne explizite Angabe füllt DEFAULT die Spalte."
+ },
+ {
+  "id": "co-check",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Wofür dient ein CHECK-Constraint?",
+  "options": [
+   "Zum Sortieren",
+   "Zum Prüfen der Syntax",
+   "Für benutzerdefinierte Bedingungen, die jeder Datensatz erfüllen muss",
+   "Zum Kopieren"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Beispiel: CHECK (AGE >= 18). Bei Verstoß wird das Einfügen oder Ändern abgelehnt."
+ },
+ {
+  "id": "co-tabellenconstraint",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Wann braucht man ein Tabellenconstraint statt eines Spaltenconstraints?",
+  "options": [
+   "Bei Bedingungen über mehrere Spalten, z. B. zusammengesetzter Primärschlüssel",
+   "Nur für NOT NULL",
+   "Nie",
+   "Immer"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Spaltenconstraints gelten für eine Spalte, Tabellenconstraints können mehrere Spalten betreffen."
+ },
+ {
+  "id": "co-benannt",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Welchen Vorteil hat ein benannter Constraint?",
+  "options": [
+   "Er gilt für mehrere Tabellen",
+   "Er ist schneller",
+   "Fehlermeldungen nennen den Namen, und man kann ihn gezielt ändern oder löschen",
+   "Er benötigt weniger Speicher"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Ohne Namen vergibt das System kryptische Bezeichnungen."
+ },
+ {
+  "id": "co-pk-eins",
+  "topicId": "06-constraints",
+  "chapter": "06",
+  "question": "Wie viele PRIMARY KEY-Constraints darf eine Tabelle haben?",
+  "options": [
+   "Beliebig viele",
+   "Mindestens zwei",
+   "Höchstens einen (der aber mehrere Spalten umfassen kann)",
+   "Keinen"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Pro Tabelle gibt es höchstens einen Primärschlüssel, bei mehreren Spalten als Tabellenconstraint."
+ },
+ {
+  "id": "fkd-restricted",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Was passiert standardmäßig, wenn man einen Elterndatensatz löscht, auf den noch Kinddatensätze verweisen?",
+  "options": [
+   "Die Kinddatensätze werden mitgelöscht",
+   "Das Löschen wird abgelehnt",
+   "Der Elterndatensatz wird verändert",
+   "Der Fremdschlüssel wird auf NULL gesetzt"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Ohne weitere Angabe gilt das restriktive Verhalten (Oracle: ORA-02292)."
+ },
+ {
+  "id": "fkd-setnull",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Was bewirkt ON DELETE SET NULL?",
+  "options": [
+   "Der Fremdschlüssel wird gelöscht",
+   "Beim Löschen des Elterndatensatzes wird der Fremdschlüssel der Kinder auf NULL gesetzt",
+   "Das Löschen wird abgelehnt",
+   "Die Kinder werden gelöscht"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Die Kinddatensätze bleiben erhalten, verlieren aber ihre Verknüpfung."
+ },
+ {
+  "id": "fkd-ora",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Welchen Oracle-Fehler erhält man beim Einfügen einer Anmeldung zu einem nicht vorhandenen Kurs?",
+  "options": [
+   "ORA-01400",
+   "ORA-00001",
+   "ORA-00942",
+   "ORA-02291 (übergeordneter Schlüssel nicht gefunden)"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "ORA-02291: Der referenzierte Elterndatensatz fehlt."
+ },
+ {
+  "id": "fkd-tabellenform",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Wie lautet ein Fremdschlüssel als Tabellenconstraint?",
+  "options": [
+   "CONSTRAINT fk FOREIGN KEY (spalte) REFERENCES tabelle (spalte)",
+   "FOREIGN spalte TO tabelle",
+   "REFERENCES spalte tabelle",
+   "KEY spalte -> tabelle"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Spaltenform: spalte NUMBER REFERENCES tabelle (spalte)."
+ },
+ {
+  "id": "fkd-ziel",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Worauf muss ein Fremdschlüssel in Oracle verweisen?",
+  "options": [
+   "Auf eine beliebige Spalte",
+   "Auf eine Spalte ohne Constraint",
+   "Auf einen PRIMARY KEY oder UNIQUE-Schlüssel",
+   "Auf eine View"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Fehlt dort ein Schlüssel, meldet Oracle ORA-02270."
+ },
+ {
+  "id": "fkd-reihenfolge",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Welche Tabelle muss zuerst angelegt werden?",
+  "options": [
+   "Die mit mehr Spalten",
+   "Immer die kleinere",
+   "Die referenzierte (Eltern-)Tabelle",
+   "Die referenzierende (Kind-)Tabelle"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Der Fremdschlüssel kann nur auf eine existierende Tabelle zeigen, oder man ergänzt ihn später per ALTER TABLE."
+ },
+ {
+  "id": "fkd-oracle-kein",
+  "topicId": "06-fk",
+  "chapter": "06",
+  "question": "Welche Optionen für das Löschverhalten kennt Oracle?",
+  "options": [
+   "ON DELETE RESTRICT",
+   "ON DELETE CASCADE",
+   "ON UPDATE CASCADE",
+   "ON DELETE SET NULL"
+  ],
+  "correct": [
+   1,
+   3
+  ],
+  "explanation": "Oracle kennt nur CASCADE und SET NULL; ohne Angabe gilt das restriktive Verhalten. ON UPDATE gibt es nicht.",
+  "multi": true
+ },
+ {
+  "id": "ad-add-spalte",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Wie ergänzt man einer bestehenden Tabelle eine Spalte?",
+  "options": [
+   "CREATE COLUMN spalte",
+   "UPDATE TABLE t ADD spalte",
+   "ALTER TABLE t ADD (spalte VARCHAR2(20))",
+   "INSERT COLUMN spalte"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "ALTER TABLE ändert die Struktur einer vorhandenen Tabelle."
+ },
+ {
+  "id": "ad-drop-constraint",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Wie entfernt man einen benannten Constraint?",
+  "options": [
+   "REMOVE name FROM t",
+   "DELETE CONSTRAINT name",
+   "DROP name",
+   "ALTER TABLE t DROP CONSTRAINT name"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Das setzt voraus, dass der Constraint einen Namen hat."
+ },
+ {
+  "id": "ad-cascade",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Was bewirkt DROP TABLE t CASCADE CONSTRAINTS?",
+  "options": [
+   "Verhindert das Löschen",
+   "Löscht alle Tabellen",
+   "Löscht nur die Daten",
+   "Löscht die Tabelle und die Fremdschlüssel anderer Tabellen, die auf sie verweisen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Ohne CASCADE CONSTRAINTS lehnt Oracle das Löschen mit ORA-02449 ab."
+ },
+ {
+  "id": "ad-drop-vs-delete",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Was ist der Unterschied zwischen DROP TABLE und DELETE FROM?",
+  "options": [
+   "Es ist dasselbe",
+   "DROP entfernt nur Zeilen",
+   "DELETE entfernt die Struktur",
+   "DROP entfernt die Tabelle samt Struktur, DELETE nur Zeilen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "DROP gehört zur DDL (Struktur), DELETE zur DML (Daten)."
+ },
+ {
+  "id": "ad-skript",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Warum stehen am Anfang von Übungsskripten oft DROP TABLE-Anweisungen?",
+  "options": [
+   "Um Daten zu kopieren",
+   "Weil Tabellen sonst nicht angelegt werden können",
+   "Damit das Skript mehrfach ausgeführt werden kann",
+   "Weil Oracle sonst abstürzt"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "So beginnt jeder Lauf mit einem sauberen Zustand."
+ },
+ {
+  "id": "ad-modify",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Wie ändert man in Oracle den Datentyp einer vorhandenen Spalte?",
+  "options": [
+   "ALTER TABLE t MODIFY (spalte NUMBER(10))",
+   "RENAME spalte",
+   "ALTER TABLE t CHANGE spalte",
+   "UPDATE t SET TYPE"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "MODIFY ändert Spaltendefinitionen, ADD ergänzt, DROP entfernt."
+ },
+ {
+  "id": "ad-rename",
+  "topicId": "06-alter-drop",
+  "chapter": "06",
+  "question": "Wie benennt man eine Spalte in Oracle um?",
+  "options": [
+   "ALTER COLUMN alt AS neu",
+   "ALTER TABLE t RENAME COLUMN alt TO neu",
+   "RENAME alt TO neu IN t",
+   "UPDATE COLUMN"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "RENAME COLUMN ... TO ... steht im Syntaxdiagramm unter ALTER TABLE."
+ },
+ {
+  "id": "id-always",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Was bewirkt GENERATED ALWAYS AS IDENTITY?",
+  "options": [
+   "Der Wert wird immer vom System erzeugt, eigene Werte sind nicht erlaubt",
+   "Die Spalte darf NULL sein",
+   "Der Wert muss immer angegeben werden",
+   "Die Spalte ist ein Fremdschlüssel"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Bei ALWAYS erzeugt Oracle jeden Wert selbst. BY DEFAULT erlaubt auch eigene Werte."
+ },
+ {
+  "id": "id-kuenstlich",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Wofür eignen sich Identity Columns typischerweise?",
+  "options": [
+   "Für Fremdschlüssel",
+   "Für Texte",
+   "Für Kommentare",
+   "Für künstliche Primärschlüssel"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Laufende Nummern als Surrogatschlüssel."
+ },
+ {
+  "id": "id-sequence",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Wie erhält man in Oracle den nächsten Wert einer Sequenz?",
+  "options": [
+   "sequenzname.NEXTVAL",
+   "sequenzname++",
+   "NEXT(sequenzname)",
+   "sequenzname.NEXT()"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "NEXTVAL liefert den nächsten Wert, CURRVAL den aktuellen."
+ },
+ {
+  "id": "id-sequence-create",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Welche Anweisung legt eine Sequenz an?",
+  "options": [
+   "CREATE COUNTER s",
+   "NEW SEQUENCE s",
+   "ALTER TABLE ADD SEQUENCE",
+   "CREATE SEQUENCE s START WITH 1 INCREMENT BY 1"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Das Syntaxdiagramm nennt START WITH, INCREMENT BY, NOCYCLE und CACHE."
+ },
+ {
+  "id": "id-insert",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Wie fügt man in eine Tabelle mit Identity-Spalte einen Datensatz ein?",
+  "options": [
+   "Die Identity-Spalte weglassen",
+   "Den Wert NULL angeben",
+   "Immer eine Zahl vorgeben",
+   "Erst die Spalte löschen"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Man gibt nur die übrigen Spalten an, den Identity-Wert vergibt das System."
+ },
+ {
+  "id": "id-neu",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Seit welcher Version bietet Oracle Identity Columns?",
+  "options": [
+   "Nur in MySQL",
+   "Seit Oracle 12c",
+   "Es gibt sie nicht",
+   "Seit Oracle 8"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Die Vorlesung nennt es „neu bei Oracle“. Vorher nutzte man Sequenzen und Trigger."
+ },
+ {
+  "id": "id-autoincrement",
+  "topicId": "06-identity",
+  "chapter": "06",
+  "question": "Warum funktioniert AUTO_INCREMENT nicht in Oracle?",
+  "options": [
+   "Es ist in Oracle verboten",
+   "Es ist ein Datentyp",
+   "Es ist MySQL-Syntax, Oracle nutzt Identity Columns oder Sequenzen",
+   "Es fehlt nur die Lizenz"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Die DBMS haben unterschiedliche Dialekte. In Oracle: GENERATED … AS IDENTITY."
+ }
+]

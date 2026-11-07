@@ -52,6 +52,7 @@ export function ScenarioBrowser({ SQL, scenario, open = false }: { SQL: SqlJsSta
               </button>
               <dialog
                 ref={dialog}
+                aria-label={`Schema der Datenbank ${sc.name}`}
                 className="m-auto max-h-[90vh] max-w-[95vw] rounded-card border border-line bg-surface p-5 text-ink backdrop:bg-black/50"
                 onClick={(e) => e.target === dialog.current && dialog.current?.close()}
               >
@@ -67,7 +68,7 @@ export function ScenarioBrowser({ SQL, scenario, open = false }: { SQL: SqlJsSta
           ) : (
             <p className="text-sm text-muted">Wird geladen …</p>
           )}
-          <pre className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{sc.relations.join('\n')}</pre>
+          <pre tabIndex={0} className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{sc.relations.join('\n')}</pre>
           <p className="mt-2 text-xs text-muted">Pfeile zeigen vom Fremdschlüssel zur referenzierten Tabelle. Unterstrichen: Primärschlüssel.</p>
         </div>
       ) : (

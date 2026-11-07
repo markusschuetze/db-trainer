@@ -3,10 +3,12 @@ import { config } from '../config';
 import { Dashboard } from '../dashboard/Dashboard';
 import { DesignEditor } from '../dashboard/DesignEditor';
 import { PackEditor } from '../dashboard/PackEditor';
+import { ReviewTab } from '../dashboard/ReviewTab';
 
 const TABS = [
   ['auswertung', 'Auswertung'],
   ['aufgaben', 'Aufgaben und Übungsblätter'],
+  ['inhalte', 'Inhalte prüfen'],
   ['design', 'Design und Einstellungen'],
   ['hilfe', 'Anleitung'],
 ] as const;
@@ -20,6 +22,7 @@ function Help() {
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
           <li><strong>Auswertung:</strong> Wo haben Studierende die meisten Probleme, wo sind sie gut, wie schnell lösen sie Aufgaben, welche falschen Antworten werden häufig gewählt. Anonym und nur in Gruppen ab {config.analyticsMinGroup} Personen.</li>
           <li><strong>Aufgaben und Übungsblätter:</strong> Neue Wissensfragen, SQL-Aufgaben, Fall-Datenbanken, Themen, Kapitel, Textaufgaben und Übungsblätter für das Praktikum. Ergebnis ist eine Datei <code className={code}>aufgaben.json</code>.</li>
+          <li><strong>Inhalte prüfen:</strong> Alle Fragen, Aufgaben und Lösungen zur fachlichen Durchsicht, als Druckansicht oder CSV mit Prüfvermerk.</li>
           <li><strong>Design und Einstellungen:</strong> Name, Logo, Farben, Schrift, Fußzeilen-Links, Schwellen für die Prüfungsreife. Ergebnis ist eine Datei <code className={code}>config.json</code>.</li>
         </ul>
         <p className="mt-3 text-sm text-muted">Der Dozentenmodus ist keine Anmeldung: Jeder kann diese Seite öffnen und eigene Dateien erzeugen, aber nur du kannst sie auf den Server legen. Geschützt sind die Auswertungsdaten durch das Token des Sammelservers.</p>
@@ -55,12 +58,12 @@ export function TeacherPage({ tab }: { tab?: string }) {
   const cur = TABS.some(([id]) => id === tab) ? tab! : 'auswertung';
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="text-sm underline print:hidden">
         ← Zum Trainer
       </a>
       <h1 className="mt-2 text-3xl font-bold">Dozentenmodus</h1>
       <p className="mt-1 max-w-2xl text-muted">Auswertung der Lehre, neue Inhalte und Branding an einem Ort.</p>
-      <nav className="mt-5 flex flex-wrap gap-2 border-b border-line pb-3" aria-label="Dozentenmodus">
+      <nav className="mt-5 flex flex-wrap gap-2 border-b border-line pb-3 print:hidden" aria-label="Dozentenmodus">
         {TABS.map(([id, label]) => (
           <a
             key={id}
@@ -75,6 +78,7 @@ export function TeacherPage({ tab }: { tab?: string }) {
       <div className="mt-6">
         {cur === 'auswertung' && <Dashboard />}
         {cur === 'aufgaben' && <PackEditor />}
+        {cur === 'inhalte' && <ReviewTab />}
         {cur === 'design' && <DesignEditor />}
         {cur === 'hilfe' && <Help />}
       </div>

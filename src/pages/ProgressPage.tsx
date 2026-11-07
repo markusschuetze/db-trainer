@@ -57,7 +57,7 @@ export function readiness(d: ProgressData) {
 
 function StreakDots({ streak }: { streak: number }) {
   return (
-    <div className="flex gap-2" aria-label={`${Math.min(streak, config.readyStreak)} von ${config.readyStreak} Probeklausuren in Folge bestanden`}>
+    <div className="flex gap-2" role="img" aria-label={`${Math.min(streak, config.readyStreak)} von ${config.readyStreak} Probeklausuren in Folge bestanden`}>
       {Array.from({ length: config.readyStreak }, (_, i) => (
         <span
           key={i}
@@ -305,7 +305,7 @@ export function ProgressPage() {
           <HistoryChart exams={d.exams} />
           <details className="mt-3">
             <summary className="cursor-pointer text-sm font-semibold">Als Tabelle</summary>
-            <div className="mt-2 overflow-x-auto">
+            <div className="mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label="Probeklausuren als Tabelle">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-muted">

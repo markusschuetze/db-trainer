@@ -33,6 +33,10 @@ export interface AppConfig {
   institution: string;
   /** 'auto' (hell/dunkel nach Systemeinstellung), 'neutral', 'dark' oder 'th-koeln' */
   theme: string;
+  /** Standardsprache: 'de', 'en' oder 'auto' (Browsersprache) */
+  language: string;
+  /** Sprachumschalter (DE/EN) in der Kopfzeile anzeigen */
+  languageSwitcher: boolean;
   /** Design-Auswahl in der Kopfzeile anzeigen */
   themeSwitcher: boolean;
   /** Kopfzeile 'farbig' (Markenfarbe) oder 'hell' (weiss, passend fuer farbige Logos) */
@@ -66,6 +70,8 @@ export const defaults: AppConfig = {
   logo: '',
   institution: '',
   theme: 'th-koeln',
+  language: 'de',
+  languageSwitcher: true,
   themeSwitcher: false,
   header: 'farbig',
   colors: {},
@@ -123,6 +129,9 @@ export function mergeConfig(base: AppConfig, input: unknown): { config: AppConfi
     } else if (k === 'readyStreak') {
       if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10) out.readyStreak = value;
       else warnings.push('readyStreak muss eine ganze Zahl zwischen 1 und 10 sein.');
+    } else if (k === 'language') {
+      if (value === 'de' || value === 'en' || value === 'auto') out.language = value;
+      else warnings.push('language muss "de", "en" oder "auto" sein.');
     } else if (k === 'analyticsUrl') {
       if (typeof value === 'string' && (value === '' || /^https?:\/\//.test(value))) out.analyticsUrl = value.replace(/\/+$/, '');
       else warnings.push('analyticsUrl muss leer sein oder mit http:// bzw. https:// beginnen.');

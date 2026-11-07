@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import initSqlJs, { type SqlJsStatic } from 'sql.js';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { applyPack, packReport, type Pack } from './pack';
+import { applyPack, packReport, validatePack, type Pack } from './pack';
 import { CHAPTER_NAME, mcQuestions } from './mcQuestions';
 import { scenarioById } from './scenarios';
 import { sqlExercises } from './sqlExercises';
@@ -24,7 +24,7 @@ describe('Aufgabenpaket', () => {
   it('Beispielpaket wird vollstaendig und ohne Probleme uebernommen', () => {
     const r = applyPack(example(), SQL);
     expect(r.problems).toEqual([]);
-    expect(r.counts).toEqual({ chapters: 1, topics: 2, questions: 2, sql: 1, scenarios: 1, worksheets: 1, textTasks: 1 });
+    expect(r.counts).toMatchObject({ chapters: 1, topics: 2, questions: 2, sql: 1, scenarios: 1, worksheets: 1, textTasks: 1 });
     // neues Kapitel, Thema, Fragen und Katalog
     expect(CHAPTER_NAME.tx).toBe('Transaktionen');
     expect(CHAPTERS).toContain('tx');
@@ -78,5 +78,42 @@ describe('Aufgabenpaket', () => {
     const r = applyPack({ chapters: [{ id: '05', name: 'Doppelt' }, { id: 'neu', name: 'Neu' }] }, SQL);
     expect(r.counts.chapters).toBe(1);
     expect(CHAPTER_NAME['05']).toBe('Normalisierung');
+  });
+});
+
+describe('Aufgabenpaket: DDL, Normalisierung, ER-Phrasen', () => {
+  const ddl = (checks: unknown[], solution = 'CREATE TABLE Kino (id NUMBER PRIMARY KEY, name VARCHAR2(30) NOT NULL);'): Record<string, unknown> =>
+    ({ id: 'ddl-kino', topicId: '06-create', level: 1, title: 'Kino', task: 'Lege Kino an.', hints: [], solution, checks });
+
+  it('uebernimmt gueltige Aufgaben und weist fehlerhafte mit Klartext ab', () => {
+    const phrase = { id: 'ph-test', text: 'Ein Kunde kauft Artikel.', e1: { name: 'Kunde', key: 'Kunden_Nr', attr: 'Name', plural: 'Kunden' }, verb: 'kauft', e2: { name: 'Artikel', key: 'Art_Nr', attr: 'Bezeichnung', plural: 'Artikel' }, c12: '0N', c21: '0N' };
+    const nf = {
+      id: 'nf-test', topicId: '05-2nf', title: 'Test', scenario: 'x', relation: { columns: ['A', 'B', 'C'], pk: ['A', 'B'], rows: [['1', '1', 'x'], ['1', '2', 'x'], ['2', '1', 'y']] },
+      oneNF: { ok: true, issues: [] }, fds: [{ lhs: ['A'], rhs: ['C'], kind: 'partiell', why: 'C hängt nur von A ab.' }], highestNF: 1, target: ['R1 (A, C)', 'R2 (A <fk>, B)'], tags: ['2NF'], source: 'x',
+    };
+    const nfBad = { ...nf, id: 'nf-kaputt', fds: [{ lhs: ['B'], rhs: ['C'], kind: 'partiell', why: 'falsch' }] }; // B bestimmt C nicht eindeutig
+    const r = applyPack(
+      {
+        ddl: [ddl([{ kind: 'table', table: 'Kino' }, { kind: 'pk', table: 'Kino', columns: ['id'] }]) as never, { ...ddl([{ kind: 'table', table: 'Kino' }]), id: 'ddl-falsch', solution: 'CREATE TABLE Anders (x NUMBER);' } as never],
+        nf: [nf as never, nfBad as never],
+        phrases: [phrase as never, { ...phrase, id: 'ph-kaputt', c12: '9' } as never],
+      },
+      SQL,
+    );
+    expect(r.counts).toMatchObject({ ddl: 1, nf: 1, phrases: 1 });
+    const msg = (id: string) => r.problems.find((p) => p.id === id)?.message ?? '';
+    expect(msg('ddl-falsch')).toMatch(/besteht die eigenen Prüfungen nicht/);
+    expect(msg('nf-kaputt')).toMatch(/FD verletzt/);
+    expect(msg('ph-kaputt')).toMatch(/c12 und c21/);
+  });
+
+  it('Probelauf entfernt auch DDL, Normalisierung und Phrasen wieder', async () => {
+    const { ddlExercises } = await import('./ddlExercises');
+    const { nfExercises } = await import('./exercises');
+    const { phrases } = await import('./erPhrases');
+    const before = [ddlExercises.length, nfExercises.length, phrases.length];
+    const r = validatePack({ ddl: [{ ...ddl([{ kind: 'table', table: 'Kino' }]), id: 'ddl-probe' } as never] }, SQL);
+    expect(r.counts.ddl).toBe(1);
+    expect([ddlExercises.length, nfExercises.length, phrases.length]).toEqual(before);
   });
 });

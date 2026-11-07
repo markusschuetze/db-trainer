@@ -36,7 +36,7 @@ export function DdlExercisePage({ id }: { id: string }) {
         ex.setup && (
           <details className="rounded-card border border-line bg-surface p-5">
             <summary className="cursor-pointer font-bold">Bereits vorhandene Tabellen</summary>
-            <pre className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{ex.setup.trim()}</pre>
+            <pre tabIndex={0} className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{ex.setup.trim()}</pre>
           </details>
         )
       }

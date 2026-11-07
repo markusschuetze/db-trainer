@@ -1,7 +1,7 @@
 {
   "name": "db-trainer",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
     "@types/react-dom": "^19.3.0",
     "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^6.2.1",
+    "axe-core": "^4.14.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",

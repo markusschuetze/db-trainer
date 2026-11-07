@@ -189,7 +189,7 @@ export function DesignEditor() {
           <button className={btnGhost} onClick={() => importRef.current?.click()}>vorhandene config.json laden</button>
           <details>
             <summary className="cursor-pointer text-sm font-semibold">Inhalt ansehen</summary>
-            <pre className="mt-2 max-h-72 overflow-auto rounded-lg bg-bg p-3 font-mono text-xs">{configToJson(cfg)}</pre>
+            <pre tabIndex={0} className="mt-2 max-h-72 overflow-auto rounded-lg bg-bg p-3 font-mono text-xs">{configToJson(cfg)}</pre>
           </details>
           {msg && <p role="status" className="text-sm">{msg}</p>}
         </section>

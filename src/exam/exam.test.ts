@@ -4,6 +4,7 @@ import initSqlJs, { type SqlJsStatic } from 'sql.js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { validMappings, fkNotNull } from '../content/erPhrases';
 import { CHAPTER_NAME, mcQuestions, type Chapter } from '../content/mcQuestions';
+import { correctKey, relKey } from '../logic/textTaskLogic';
 import { buildExam, gradeEstimate, gradeItem, type Answer, type ExamItem } from './exam';
 
 let SQL: SqlJsStatic;
@@ -34,6 +35,16 @@ function perfect(item: ExamItem): Answer {
         fds: item.ex.fds.map((f) => f.kind),
         highest: item.ex.highestNF,
       };
+    case 'tt': {
+      const t = item.t;
+      return {
+        ents: t.entities.map((e) => e.name),
+        rels: t.relationships.map(relKey),
+        cards: Object.fromEntries(t.relationships.map((r) => [relKey(r), { c12: r.c12, c21: r.c21 }])),
+        keys: Object.fromEntries(t.entities.map((e) => [e.name, correctKey(t, e.name)])),
+        spec: Object.fromEntries((t.specializations ?? []).map((sp, i) => [i, { disjoint: sp.disjoint, total: sp.total }])),
+      };
+    }
     case 'ddl':
     case 'sql':
       return item.ex.solution;
@@ -90,5 +101,14 @@ describe('Probeklausur', () => {
     expect(gradeEstimate(100)).toBe('1,0');
     expect(gradeEstimate(50)).toBe('4,0');
     expect(gradeEstimate(49.9)).toBe('5,0');
+  });
+});
+
+describe('Probeklausur ohne Zeitlimit', () => {
+  it('hat denselben Umfang wie eine 60-Minuten-Klausur und deckt alle Kapitel ab', () => {
+    const a = buildExam({ chapters: ALL, minutes: 0, allowRun: false, seed: 5 });
+    const b = buildExam({ chapters: ALL, minutes: 60, allowRun: false, seed: 5 });
+    expect(a.map((i) => i.id)).toEqual(b.map((i) => i.id));
+    for (const c of ALL) expect(a.some((i) => i.chapter === c), c).toBe(true);
   });
 });

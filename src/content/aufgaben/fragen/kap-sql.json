@@ -1,0 +1,773 @@
+[
+ {
+  "id": "se-reihenfolge",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "In welcher Reihenfolge stehen die Klauseln einer SELECT-Anweisung?",
+  "options": [
+   "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY",
+   "WHERE, SELECT, FROM, GROUP BY",
+   "SELECT, WHERE, FROM, ORDER BY",
+   "FROM, SELECT, ORDER BY, WHERE"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Das ist die Schreibreihenfolge aus dem Syntaxdiagramm."
+ },
+ {
+  "id": "se-distinct",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Wozu dient DISTINCT?",
+  "options": [
+   "Es werden alle Spalten ausgegeben",
+   "Das Ergebnis wird sortiert",
+   "Doppelte Ergebniszeilen werden entfernt",
+   "Es zählt die Zeilen"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "SELECT DISTINCT liefert jede Kombination nur einmal."
+ },
+ {
+  "id": "se-between",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Welche Zeilen liefert WHERE Gehalt BETWEEN 3000 AND 4000?",
+  "options": [
+   "Nur Werte zwischen den Grenzen, ohne diese",
+   "Alle Werte außerhalb",
+   "Nur 3000 und 4000",
+   "Gehalt von 3000 bis 4000, beide Grenzen eingeschlossen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "BETWEEN schließt Unter- und Obergrenze ein."
+ },
+ {
+  "id": "se-in",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Was bewirkt WHERE Ort IN ('Köln', 'Bonn')?",
+  "options": [
+   "Alle Zeilen",
+   "Zeilen ohne Ort",
+   "Zeilen, deren Ort beides gleichzeitig ist",
+   "Zeilen, deren Ort Köln oder Bonn ist"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "IN prüft die Zugehörigkeit zu einer Wertemenge, wie mehrere ODER-Bedingungen."
+ },
+ {
+  "id": "se-like-prozent",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Welche Namen findet WHERE Name LIKE '%er'?",
+  "options": [
+   "Alle, die „er“ in der Mitte haben",
+   "Alle, die mit „er“ beginnen",
+   "Nur den Namen „er“",
+   "Alle, die auf „er“ enden"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "% steht für beliebig viele Zeichen vor „er“."
+ },
+ {
+  "id": "se-order-standard",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Wie sortiert ORDER BY ohne Angabe?",
+  "options": [
+   "Absteigend (DESC)",
+   "Aufsteigend (ASC)",
+   "Zufällig",
+   "Gar nicht"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "ASC ist der Standard, DESC muss man angeben."
+ },
+ {
+  "id": "se-alias",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Was bewirkt AS in SELECT Gehalt * 12 AS Jahresgehalt?",
+  "options": [
+   "Es ändert die Tabelle",
+   "Es speichert das Ergebnis",
+   "Es multipliziert nochmals",
+   "Es gibt der Ergebnisspalte einen Namen (Spaltenalias)"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "AS vergibt einen Alias für Spalten. Bei Tabellenaliasen steht in Oracle kein AS."
+ },
+ {
+  "id": "se-and-or",
+  "topicId": "sql-select",
+  "chapter": "SQL",
+  "question": "Welche Bedingung ist bei A AND B OR C zuerst gebunden?",
+  "options": [
+   "Beide gleich, von rechts",
+   "OR bindet stärker als AND",
+   "AND bindet stärker als OR",
+   "Die Reihenfolge ist zufällig"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Wie bei Punkt-vor-Strich: AND vor OR. Mit Klammern wird die Absicht eindeutig."
+ },
+ {
+  "id": "fu-upper",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Was liefert UPPER('Köln')?",
+  "options": [
+   "K",
+   "KÖLN",
+   "Köln",
+   "köln"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "UPPER wandelt in Großbuchstaben, LOWER in Kleinbuchstaben."
+ },
+ {
+  "id": "fu-length",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Was liefert LENGTH('Datenbank')?",
+  "options": [
+   "1",
+   "9",
+   "8",
+   "10"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Datenbank hat 9 Zeichen."
+ },
+ {
+  "id": "fu-substr",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Was liefert SUBSTR('Datenbank', 1, 4)?",
+  "options": [
+   "Daten",
+   "aten",
+   "Date",
+   "Dat"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "SUBSTR(text, Start, Länge): ab Position 1 vier Zeichen, „Date“."
+ },
+ {
+  "id": "fu-concat",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Wie verbindet man in Oracle zwei Texte?",
+  "options": [
+   "Mit +",
+   "Mit JOIN",
+   "Mit dem Operator || oder CONCAT",
+   "Mit &"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Der Zeichenkettenoperator ist ||. Das Pluszeichen ist nur für Zahlen."
+ },
+ {
+  "id": "fu-nvl-zahl",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Was liefert NVL(Note, 5.0), wenn Note NULL ist?",
+  "options": [
+   "Fehler",
+   "5.0",
+   "0",
+   "NULL"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "NVL ersetzt NULL durch den zweiten Wert."
+ },
+ {
+  "id": "fu-to-char",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Wozu dient TO_CHAR(datum, 'DD.MM.YYYY')?",
+  "options": [
+   "Text in ein Datum umwandeln",
+   "Ein Datum als Text in einem gewünschten Format ausgeben",
+   "Das heutige Datum liefern",
+   "Tage addieren"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "TO_CHAR formatiert Datum oder Zahl als Text, TO_DATE macht das Gegenteil."
+ },
+ {
+  "id": "fu-sysdate",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Was liefert SYSDATE?",
+  "options": [
+   "Das Datum der letzten Änderung",
+   "Den Systemnamen",
+   "Ein festes Datum",
+   "Das aktuelle Datum mit Uhrzeit des Datenbankservers"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "SYSDATE ist eine Oracle-Systemvariable, z. B. nutzbar in INSERT oder SELECT … FROM DUAL."
+ },
+ {
+  "id": "fu-dual",
+  "topicId": "sql-funktionen",
+  "chapter": "SQL",
+  "question": "Wofür dient die Tabelle DUAL in Oracle?",
+  "options": [
+   "Als Dummy-Tabelle, um Ausdrücke ohne echte Tabelle auszuwerten",
+   "Zum Speichern zweier Werte",
+   "Für doppelte Zeilen",
+   "Als Sicherungskopie"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "SELECT SYSDATE FROM DUAL: Oracle verlangt ein FROM, DUAL hat genau eine Zeile."
+ },
+ {
+  "id": "gr-count-stern",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Was zählt COUNT(*)?",
+  "options": [
+   "Die Anzahl der Spalten",
+   "Alle Zeilen der Gruppe, auch mit NULL-Werten",
+   "Nur Zeilen ohne NULL",
+   "Die Anzahl verschiedener Werte"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "COUNT(spalte) lässt NULL aus, COUNT(*) zählt Zeilen."
+ },
+ {
+  "id": "gr-avg-null",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Wie behandelt AVG(Note) NULL-Werte?",
+  "options": [
+   "Sie werden ignoriert",
+   "Sie führen zu einem Fehler",
+   "Sie zählen als 1",
+   "Sie zählen als 0"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Aggregatfunktionen (außer COUNT(*)) überspringen NULL. So bleibt die Durchschnittsnote unverfälscht."
+ },
+ {
+  "id": "gr-aggregate",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Welche sind Aggregatfunktionen?",
+  "options": [
+   "AVG",
+   "SUM",
+   "COUNT",
+   "UPPER"
+  ],
+  "correct": [
+   0,
+   1,
+   2
+  ],
+  "explanation": "UPPER ist eine Zeilenfunktion.",
+  "multi": true
+ },
+ {
+  "id": "gr-where-having",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Welche Abfrage zählt nur Kurse mit mindestens 3 Anmeldungen?",
+  "options": [
+   "… HAVING Kurs_ID >= 3",
+   "… WHERE COUNT(*) >= 3 GROUP BY Kurs_ID",
+   "… GROUP BY Kurs_ID WHERE COUNT(*) >= 3",
+   "… GROUP BY Kurs_ID HAVING COUNT(*) >= 3"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Bedingungen auf Aggregate gehören in HAVING, nicht in WHERE."
+ },
+ {
+  "id": "gr-select-liste",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Welche Spalten dürfen bei GROUP BY im SELECT stehen?",
+  "options": [
+   "Nur Primärschlüssel",
+   "Gruppierte Spalten und Aggregatfunktionen",
+   "Beliebige Spalten",
+   "Nur Aggregatfunktionen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Alles andere ergibt in Oracle ORA-00979."
+ },
+ {
+  "id": "gr-ohne-group",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Was passiert bei SELECT Name, COUNT(*) FROM Student; ohne GROUP BY?",
+  "options": [
+   "Fehler: Name ist weder gruppiert noch aggregiert (ORA-00937)",
+   "Es liefert den ersten Namen",
+   "Es zählt pro Name",
+   "Es funktioniert wie WHERE"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Aggregat und Einzelwert lassen sich ohne Gruppierung nicht mischen."
+ },
+ {
+  "id": "gr-min-max",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Was liefert MAX(Gehalt) für eine Tabelle?",
+  "options": [
+   "Die Zeile mit dem höchsten Gehalt",
+   "Den höchsten Gehaltswert",
+   "Die Anzahl der Gehälter",
+   "Die Summe der Gehälter"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "MAX liefert nur den Wert. Die zugehörige Zeile bekommt man über eine Unterabfrage."
+ },
+ {
+  "id": "gr-reihenfolge",
+  "topicId": "sql-gruppen",
+  "chapter": "SQL",
+  "question": "Welche Verarbeitungsreihenfolge gilt logisch?",
+  "options": [
+   "GROUP BY, FROM, WHERE",
+   "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY",
+   "ORDER BY, WHERE, FROM",
+   "SELECT, FROM, WHERE, GROUP BY"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "WHERE filtert Zeilen vor dem Gruppieren, HAVING Gruppen danach, ORDER BY sortiert zuletzt."
+ },
+ {
+  "id": "jo-cross",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Was liefert ein CROSS JOIN zweier Tabellen mit 3 und 4 Zeilen?",
+  "options": [
+   "4 Zeilen",
+   "12 Zeilen (alle Kombinationen)",
+   "7 Zeilen",
+   "3 Zeilen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Das kartesische Produkt kombiniert jede Zeile mit jeder anderen."
+ },
+ {
+  "id": "jo-on",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Wofür steht die ON-Bedingung beim JOIN?",
+  "options": [
+   "Sie legt fest, welche Zeilen der beiden Tabellen zusammengehören",
+   "Sie zählt Zeilen",
+   "Sie sortiert das Ergebnis",
+   "Sie wählt Spalten"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Typisch: ON a.fk = b.pk, also Fremdschlüssel gleich Primärschlüssel."
+ },
+ {
+  "id": "jo-alias-oracle",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Welche Schreibweise für einen Tabellenalias ist in Oracle richtig?",
+  "options": [
+   "FROM k = Kurs",
+   "FROM Kurs AS k",
+   "FROM Kurs: k",
+   "FROM Kurs k"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Bei Tabellenaliasen steht in Oracle kein AS (bei Spaltenaliasen ist AS erlaubt)."
+ },
+ {
+  "id": "jo-left",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Kurs LEFT OUTER JOIN Prof: Welche Zeilen enthält das Ergebnis?",
+  "options": [
+   "Alle Profs, auch ohne Kurs",
+   "Nur Kurse mit Prof",
+   "Alle Kurse, auch ohne Prof",
+   "Nur Kurse ohne Prof"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Der LEFT OUTER JOIN behält alle Zeilen der linken Tabelle, fehlende Partner werden NULL."
+ },
+ {
+  "id": "jo-ohne-partner",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Wie findet man Kurse ohne Prof mit einem Outer Join?",
+  "options": [
+   "CROSS JOIN",
+   "INNER JOIN und WHERE p.P_Nr IS NULL",
+   "WHERE p.P_Nr = NULL",
+   "LEFT OUTER JOIN und WHERE p.P_Nr IS NULL"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Nach dem Outer Join sind die Spalten des fehlenden Partners NULL."
+ },
+ {
+  "id": "jo-self",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Wozu braucht man einen Self-Join?",
+  "options": [
+   "Um eine Tabelle zu kopieren",
+   "Um Duplikate zu entfernen",
+   "Um zwei Datenbanken zu verbinden",
+   "Um eine Tabelle mit sich selbst zu verbinden, z. B. Mitarbeiter und Vorgesetzte"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Man verwendet die Tabelle zweimal mit unterschiedlichen Aliassen."
+ },
+ {
+  "id": "jo-using",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Was bewirkt JOIN … USING (Kurs_ID)?",
+  "options": [
+   "Erzeugt Kurs_ID",
+   "Verbindet über die gleichnamige Spalte Kurs_ID in beiden Tabellen",
+   "Löscht Kurs_ID",
+   "Sortiert nach Kurs_ID"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "USING ist eine Kurzform für ON a.Kurs_ID = b.Kurs_ID, sofern die Spalte in beiden gleich heißt."
+ },
+ {
+  "id": "jo-mehrere",
+  "topicId": "sql-join",
+  "chapter": "SQL",
+  "question": "Wie viele JOINs braucht man, um drei Tabellen zu verbinden?",
+  "options": [
+   "Vier",
+   "Zwei",
+   "Einen",
+   "Drei"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Jeder JOIN verbindet zwei Mengen. n Tabellen brauchen n−1 Verbindungen."
+ },
+ {
+  "id": "ua-skalar",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Was liefert eine skalare Unterabfrage?",
+  "options": [
+   "Beliebig viele Zeilen",
+   "Eine Tabelle",
+   "Nichts",
+   "Genau einen Wert"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Mit Vergleichsoperatoren wie = oder > braucht man einen Einzelwert."
+ },
+ {
+  "id": "ua-in",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Wann nutzt man IN mit einer Unterabfrage?",
+  "options": [
+   "Wenn die Unterabfrage mehrere Werte liefert",
+   "Nur bei Zahlen",
+   "Nie",
+   "Nur bei genau einem Wert"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "x IN (SELECT …) prüft, ob x in der Ergebnismenge vorkommt."
+ },
+ {
+  "id": "ua-exists",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Was prüft EXISTS (Unterabfrage)?",
+  "options": [
+   "Ob ein Wert NULL ist",
+   "Ob die Tabelle existiert",
+   "Ob die Syntax stimmt",
+   "Ob die Unterabfrage mindestens eine Zeile liefert"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "EXISTS ist wahr, wenn die Unterabfrage nicht leer ist."
+ },
+ {
+  "id": "ua-not-in-null",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Welche Falle gibt es bei NOT IN, wenn die Unterabfrage NULL enthält?",
+  "options": [
+   "NULL wird als 0 gewertet",
+   "Das Ergebnis ist leer, weil Vergleiche mit NULL nie wahr sind",
+   "Es gibt einen Syntaxfehler",
+   "Es werden alle Zeilen geliefert"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "NOT IN mit NULL in der Menge liefert nie „wahr“. NOT EXISTS ist hier sicherer."
+ },
+ {
+  "id": "ua-korreliert",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Was kennzeichnet eine korrelierte Unterabfrage?",
+  "options": [
+   "Sie hat keinen WHERE-Teil",
+   "Sie liefert immer NULL",
+   "Sie wird nur einmal ausgeführt",
+   "Sie bezieht sich auf Spalten der äußeren Abfrage"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Sie wird für jede Zeile der äußeren Abfrage neu ausgewertet."
+ },
+ {
+  "id": "ua-union",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Was liefert UNION im Unterschied zu UNION ALL?",
+  "options": [
+   "UNION ALL sortiert",
+   "UNION entfernt Duplikate, UNION ALL behält sie",
+   "UNION behält Duplikate",
+   "Es gibt keinen Unterschied"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Beide vereinigen die Ergebnisse, nur UNION entfernt doppelte Zeilen."
+ },
+ {
+  "id": "ua-minus-intersect",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Welche Mengenoperation liefert Zeilen, die in beiden Abfragen vorkommen?",
+  "options": [
+   "CROSS JOIN",
+   "MINUS",
+   "UNION",
+   "INTERSECT"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "INTERSECT = Schnittmenge, MINUS = Differenz, UNION = Vereinigung."
+ },
+ {
+  "id": "ua-any-all",
+  "topicId": "sql-unterabfrage",
+  "chapter": "SQL",
+  "question": "Was bedeutet WHERE Gehalt > ALL (Unterabfrage)?",
+  "options": [
+   "Größer als mindestens ein Wert",
+   "Es gibt keine Bedeutung",
+   "Das Gehalt ist größer als jeder Wert der Unterabfrage",
+   "Gleich allen Werten"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "ALL verlangt, dass die Bedingung für alle Werte gilt, ANY für mindestens einen."
+ },
+ {
+  "id": "dm-insert-spalten",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Warum sollte man bei INSERT die Spaltennamen angeben?",
+  "options": [
+   "Die Reihenfolge der Werte hängt dann nicht von der Tabellendefinition ab",
+   "Es geht sonst nicht in Oracle",
+   "Es macht das Einfügen schneller",
+   "Es ist Pflicht"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "INSERT INTO t (a, b) VALUES (…) bleibt auch nach einer Strukturänderung korrekt."
+ },
+ {
+  "id": "dm-insert-select",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Wofür dient INSERT INTO … SELECT?",
+  "options": [
+   "Eine Spalte hinzufügen",
+   "Eine Tabelle löschen",
+   "Mehrere Zeilen aus einer Abfrage einfügen",
+   "Zeilen ändern"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Statt VALUES liefert eine Unterabfrage die Zeilen."
+ },
+ {
+  "id": "dm-update-where",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Welche Anweisung ändert nur den Studenten 1001?",
+  "options": [
+   "UPDATE Student SET Semester = 2 WHERE Matrikelnummer = 1001",
+   "SET Semester = 2 IN Student",
+   "UPDATE Student SET Semester = 2",
+   "UPDATE Student WHERE Matrikelnummer = 1001"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Ohne WHERE werden alle Zeilen geändert."
+ },
+ {
+  "id": "dm-delete-ohne",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Was bewirkt DELETE FROM Student; ohne WHERE?",
+  "options": [
+   "Alle Zeilen der Tabelle werden gelöscht",
+   "Nichts",
+   "Die Tabelle wird gelöscht",
+   "Die erste Zeile wird gelöscht"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Die Struktur bleibt, die Daten sind weg (bis zu ROLLBACK)."
+ },
+ {
+  "id": "dm-commit",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Was bewirkt COMMIT?",
+  "options": [
+   "Startet den Server neu",
+   "Löscht die Tabelle",
+   "Macht Änderungen rückgängig",
+   "Bestätigt alle Änderungen der Transaktion dauerhaft"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "COMMIT beendet die Transaktion und macht die Änderungen für alle sichtbar und dauerhaft."
+ },
+ {
+  "id": "dm-rollback",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Was bewirkt ROLLBACK?",
+  "options": [
+   "Verwirft alle Änderungen seit dem letzten COMMIT",
+   "Bestätigt Änderungen",
+   "Löscht das Skript",
+   "Setzt die Datenbank zurück auf den Auslieferungszustand"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "ROLLBACK stellt den Zustand des letzten COMMIT wieder her."
+ },
+ {
+  "id": "dm-ddl-commit",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Was passiert mit offenen Änderungen, wenn man ein DDL-Statement wie CREATE TABLE ausführt?",
+  "options": [
+   "Sie werden verworfen",
+   "Sie werden implizit bestätigt (COMMIT)",
+   "Es entsteht ein Fehler",
+   "Sie bleiben ungeschützt offen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "In Oracle schließt jede DDL-Anweisung die laufende Transaktion mit COMMIT ab."
+ },
+ {
+  "id": "dm-fk-loeschen",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Beim Löschen eines Kurses mit Anmeldungen kommt ORA-02292. Was ist zu tun?",
+  "options": [
+   "Die Primärschlüssel ändern",
+   "Zuerst die abhängigen Anmeldungen löschen, dann den Kurs",
+   "Die Tabelle löschen",
+   "Den Fehler ignorieren"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Kinddatensätze müssen vor dem Elterndatensatz entfernt werden, es sei denn der Fremdschlüssel hat ON DELETE CASCADE."
+ }
+]

@@ -70,3 +70,28 @@ Lösung: SELECT 1 FROM DUAL`);
     expect(slugify('Übungsblatt 7: Größe & Maß')).toBe('uebungsblatt-7-groesse-mass');
   });
 });
+
+import { highestNfOf, parseFds, parseIssues, parseTable } from './draftPack';
+
+describe('Normalisierungsaufgabe aus Text', () => {
+  it('Tabelle aus Excel- oder Semikolon-Text, mit Fehlermeldungen', () => {
+    expect(parseTable('A\tB\n1\tx\n2\ty', ['A']).table).toEqual({ columns: ['A', 'B'], rows: [['1', 'x'], ['2', 'y']], pk: ['A'] });
+    expect(parseTable('A;B\n1;x', ['A']).error).toBeUndefined();
+    expect(parseTable('A;B\n1;x;z', ['A']).error).toMatch(/Zeile 2/);
+    expect(parseTable('A;B\n1;x', ['Z']).error).toMatch(/nicht gefunden/);
+    expect(parseTable('A;B', ['A']).error).toMatch(/Kopfzeile/);
+  });
+  it('Abhaengigkeiten und 1NF-Verletzungen', () => {
+    const f = parseFds('A, B -> C | voll | braucht beide\nA → D | partiell | nur A');
+    expect(f.fds).toEqual([{ lhs: ['A', 'B'], rhs: ['C'], kind: 'voll', why: 'braucht beide' }, { lhs: ['A'], rhs: ['D'], kind: 'partiell', why: 'nur A' }]);
+    expect(parseFds('A -> B | falsch | x').error).toMatch(/Zeile 1/);
+    expect(parseIssues('Preis | strukturiert | Zahl und Währung').issues[0]).toMatchObject({ column: 'Preis', type: 'strukturiert' });
+    expect(parseIssues('x').error).toMatch(/Zeile 1/);
+  });
+  it('hoechste Normalform aus den Abhaengigkeiten', () => {
+    const fd = (kind: 'voll' | 'partiell' | 'transitiv') => ({ lhs: ['A'], rhs: ['B'], kind, why: 'x' });
+    expect(highestNfOf([fd('voll'), fd('partiell')])).toBe(1);
+    expect(highestNfOf([fd('voll'), fd('transitiv')])).toBe(2);
+    expect(highestNfOf([fd('voll')])).toBe(3);
+  });
+});

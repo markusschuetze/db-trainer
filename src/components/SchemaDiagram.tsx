@@ -58,7 +58,7 @@ export function SchemaDiagram({ tables, title, fit = false, maxCols = 3 }: { tab
   );
 
   return (
-    <div className={fit ? '' : 'overflow-x-auto'}>
+    <div className={fit ? '' : 'overflow-x-auto'} {...(fit ? {} : { tabIndex: 0, role: 'region', 'aria-label': title })}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width={fit ? '100%' : W}

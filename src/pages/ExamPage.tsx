@@ -3,6 +3,7 @@ import { DataTable } from '../components/DataTable';
 import { ErDiagram } from '../components/ErDiagram';
 import { ScenarioBrowser } from '../components/ScenarioBrowser';
 import { RelationView } from '../components/RelationView';
+import { ARTIFICIAL, deriveSchema, entityCandidates, keyOptions, relationshipCandidates, relKey } from '../logic/textTaskLogic';
 import { SqlEditor } from '../components/SqlEditor';
 import { StatementOutput } from '../components/SqlOutput';
 import { CARD_LABEL, CARDS, fkNotNull, toRelations, validMappings, type Card, type Mapping } from '../content/erPhrases';
@@ -18,6 +19,7 @@ import {
   type ExamItem,
   type ExamState,
   type NfAnswer,
+  type TtAnswer,
 } from '../exam/exam';
 import { topicById } from '../content/topics';
 import { track } from '../analytics';
@@ -68,6 +70,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           <option value={30}>30 Minuten (kurz)</option>
           <option value={60}>60 Minuten</option>
           <option value={90}>90 Minuten (lang)</option>
+          <option value={0}>Ohne Zeitlimit (zählt nicht für die Prüfungsreife)</option>
         </select>
       </label>
       <label className="mt-4 flex items-start gap-2">
@@ -172,7 +175,7 @@ function SqlInput({
       {item.kind === 'ddl' && item.ex.setup && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold">Bereits vorhandene Tabellen</summary>
-          <pre className="mt-2 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs">{item.ex.setup.trim()}</pre>
+          <pre tabIndex={0} className="mt-2 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs">{item.ex.setup.trim()}</pre>
         </details>
       )}
       {item.kind === 'sql' && <ScenarioBrowser SQL={SQL} scenario={item.ex.scenario} />}
@@ -333,6 +336,7 @@ function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: A
                     {fd.lhs.join(', ')} → {fd.rhs.join(', ')}
                   </span>
                   <select
+                    aria-label={`Art der Abhängigkeit ${fd.lhs.join(', ')} → ${fd.rhs.join(', ')}`}
                     className="rounded border border-line bg-surface px-2 py-1"
                     value={fds[i]}
                     onChange={(e) => set({ ...a, fds: fds.map((x, j) => (j === i ? (e.target.value as DepKind) : x)) })}
@@ -360,6 +364,90 @@ function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: A
         </div>
       );
     }
+    case 'tt': {
+      const a = (answer as TtAnswer) ?? {};
+      const t = item.t;
+      const upd = (patch: Partial<TtAnswer>) => set({ ...a, ...patch });
+      const toggle = (list: string[] | undefined, v: string, on: boolean) => (on ? [...(list ?? []), v] : (list ?? []).filter((x) => x !== v));
+      return (
+        <div className="space-y-4">
+          <p className="text-base leading-7">{t.text}</p>
+          <fieldset>
+            <legend className="text-sm font-semibold">a) Welche Begriffe sind Entitäten?</legend>
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              {entityCandidates(t).map((c) => (
+                <label key={c} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={(a.ents ?? []).includes(c)} onChange={(e) => upd({ ents: toggle(a.ents, c, e.target.checked) })} />
+                  {c}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold">b) Welche Beziehungen nennt der Text?</legend>
+            <div className="mt-1 space-y-1">
+              {relationshipCandidates(t, t.entities.map((e) => e.name)).map((c) => (
+                <label key={c.key} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={(a.rels ?? []).includes(c.key)} onChange={(e) => upd({ rels: toggle(a.rels, c.key, e.target.checked) })} />
+                  {c.e1} — {c.verb} — {c.e2}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold">c) Kardinalitäten der Beziehungen</legend>
+            <div className="mt-1 space-y-3">
+              {t.relationships.map((r) => {
+                const k = relKey(r);
+                return (
+                  <div key={k} className="grid gap-2 sm:grid-cols-2">
+                    <CardSelect label={`Ein(e) ${r.e2} → wie viele ${r.e1}? (${r.verb})`} value={a.cards?.[k]?.c21} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c21: c } } })} />
+                    <CardSelect label={`Ein(e) ${r.e1} → wie viele ${r.e2}?`} value={a.cards?.[k]?.c12} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c12: c } } })} />
+                  </div>
+                );
+              })}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold">d) Primärschlüssel</legend>
+            <div className="mt-1 grid gap-2 sm:grid-cols-2">
+              {t.entities.map((e) => (
+                <label key={e.name} className="block text-sm">
+                  {e.name}
+                  <select className="mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2" value={a.keys?.[e.name] ?? ''} onChange={(ev) => upd({ keys: { ...a.keys, [e.name]: ev.target.value } })}>
+                    <option value="">bitte wählen</option>
+                    {keyOptions(t, e.name).map((o) => (
+                      <option key={o} value={o}>
+                        {o === ARTIFICIAL ? 'neuer künstlicher Schlüssel' : o}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          {t.specializations?.map((sp, i) => (
+            <fieldset key={sp.supertype}>
+              <legend className="text-sm font-semibold">e) Spezialisierung von {sp.supertype} ({sp.subtypes.join(', ')})</legend>
+              <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                {[true, false].map((v) => (
+                  <label key={`d${v}`} className="flex items-center gap-2">
+                    <input type="radio" name={`${item.id}-d${i}`} checked={a.spec?.[i]?.disjoint === v} onChange={() => upd({ spec: { ...a.spec, [i]: { ...a.spec?.[i], disjoint: v } } })} />
+                    {v ? 'disjunkt' : 'überlappend'}
+                  </label>
+                ))}
+                {[true, false].map((v) => (
+                  <label key={`t${v}`} className="flex items-center gap-2">
+                    <input type="radio" name={`${item.id}-t${i}`} checked={a.spec?.[i]?.total === v} onChange={() => upd({ spec: { ...a.spec, [i]: { ...a.spec?.[i], total: v } } })} />
+                    {v ? 'vollständig' : 'partiell'}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      );
+    }
     case 'ddl':
     case 'sql':
       return <SqlInput item={item} value={answer as string} onChange={set} allowRun={allowRun} />;
@@ -375,6 +463,7 @@ const itemTitle = (item: ExamItem) =>
     nf: 'Normalisierung',
     ddl: `SQL-DDL: ${'ex' in item ? item.ex.title : ''}`,
     sql: `SQL: ${'ex' in item ? item.ex.title : ''}`,
+    tt: 'Schema aus Text erkennen',
   })[item.kind];
 
 /* ======================= Loesung ======================= */
@@ -422,17 +511,29 @@ function Solution({ item }: { item: ExamItem }) {
             1NF: {item.ex.oneNF.ok ? 'ja' : `nein (${item.ex.oneNF.issues.map((i) => `${i.column}: ${i.type}`).join(', ')})`}. Abhängigkeiten:{' '}
             {item.ex.fds.map((f) => `${f.lhs.join(', ')} → ${f.rhs.join(', ')} (${f.kind})`).join('; ')}. Höchste NF: {item.ex.highestNF}NF.
           </p>
-          <pre className="mt-2 overflow-x-auto rounded-lg bg-bg p-2 font-mono text-xs">{item.ex.target.join('\n')}</pre>
+          <pre tabIndex={0} className="mt-2 overflow-x-auto rounded-lg bg-bg p-2 font-mono text-xs">{item.ex.target.join('\n')}</pre>
+        </>
+      );
+    case 'tt':
+      return (
+        <>
+          <p>
+            Entitäten: {item.t.entities.map((e) => `${e.name} (Schlüssel: ${e.key || 'künstlich'})`).join(', ')}. Beziehungen:{' '}
+            {item.t.relationships.map((r) => `${r.e1} ${r.verb} ${r.e2} (${r.e1} → ${r.e2}: ${r.c12}, ${r.e2} → ${r.e1}: ${r.c21})`).join('; ')}.
+          </p>
+          <div className="mt-2 rounded-lg bg-bg p-2">
+            <RelationView relations={deriveSchema(item.t)} />
+          </div>
         </>
       );
     case 'ddl':
     case 'sql':
-      return <pre className="overflow-x-auto rounded-lg bg-bg p-2 font-mono text-xs">{item.ex.solution}</pre>;
+      return <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-bg p-2 font-mono text-xs">{item.ex.solution}</pre>;
   }
 }
 
 const practiceHref = (item: ExamItem) =>
-  ({ mc: '#/', er: '#/modellierung', spez: '#/modellierung', rel: '#/relationen', nf: `#/normalisierung/${'ex' in item ? item.ex.id : ''}`, ddl: `#/ddl/${'ex' in item ? item.ex.id : ''}`, sql: `#/sql/${'ex' in item ? item.ex.id : ''}` })[
+  ({ tt: `#/textaufgaben/${'t' in item ? item.t.id : ''}`, mc: '#/', er: '#/modellierung', spez: '#/modellierung', rel: '#/relationen', nf: `#/normalisierung/${'ex' in item ? item.ex.id : ''}`, ddl: `#/ddl/${'ex' in item ? item.ex.id : ''}`, sql: `#/sql/${'ex' in item ? item.ex.id : ''}` })[
     item.kind
   ];
 
@@ -455,7 +556,8 @@ export function ExamPage() {
   const items = useMemo(() => (state ? buildExam(state) : []), [state?.seed, state?.chapters.join(), state?.minutes]); // eslint-disable-line react-hooks/exhaustive-deps
   const running = !!state && !state.submittedAt;
   const now = useNow(running);
-  const left = state ? state.startedAt + state.minutes * 60_000 - now : 0;
+  const timed = !!state && state.minutes > 0;
+  const left = timed ? state!.startedAt + state!.minutes * 60_000 - now : Infinity;
 
   const update = (s: ExamState | null) => {
     setState(s);
@@ -464,7 +566,7 @@ export function ExamPage() {
   const submit = () => state && update({ ...state, submittedAt: Date.now() });
 
   useEffect(() => {
-    if (running && left <= 0) submit();
+    if (running && timed && left <= 0) submit();
   }, [running, left <= 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const results = useMemo(
@@ -511,7 +613,7 @@ export function ExamPage() {
           src: 'k',
         }),
       );
-      track({ k: 'e', p: Math.round(got * 2) / 2, x: max, m: state.minutes, ch: state.chapters, kc: Object.fromEntries(Object.entries(k).map(([c, v]) => [c, v as [number, number]])) });
+      track({ k: 'e', p: Math.round(got * 2) / 2, x: max, m: Math.max(1, state.minutes), ch: state.chapters, kc: Object.fromEntries(Object.entries(k).map(([c, v]) => [c, v as [number, number]])) });
     }
   }, [state?.submittedAt, SQL, results]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -628,8 +730,8 @@ export function ExamPage() {
     );
   }
 
-  const mm = Math.max(0, Math.floor(left / 60000));
-  const ss = Math.max(0, Math.floor((left % 60000) / 1000));
+  const mm = timed ? Math.max(0, Math.floor(left / 60000)) : 0;
+  const ss = timed ? Math.max(0, Math.floor((left % 60000) / 1000)) : 0;
   const answered = items.filter((i) => state.answers[i.id] !== undefined && state.answers[i.id] !== '').length;
 
   return (
@@ -639,8 +741,8 @@ export function ExamPage() {
         <span className="text-sm text-muted">
           {answered} von {items.length} bearbeitet · {total} Punkte
         </span>
-        <span className={`font-mono text-lg font-bold tabular-nums ${left < 5 * 60000 ? 'text-bad' : ''}`} aria-live="off">
-          {String(mm).padStart(2, '0')}:{String(ss).padStart(2, '0')}
+        <span className={`font-mono text-lg font-bold tabular-nums ${timed && left < 5 * 60000 ? 'text-bad' : ''}`} aria-live="off">
+          {timed ? `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : 'ohne Zeitlimit'}
         </span>
       </div>
       <div className="space-y-4">

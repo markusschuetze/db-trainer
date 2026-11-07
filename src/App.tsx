@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { config } from './config';
 import { Layout } from './components/Layout';
 import { AuthorPage } from './pages/AuthorPage';
 import { DdlExercisePage } from './pages/DdlExercisePage';
@@ -63,7 +64,33 @@ function route(page?: string, id?: string): ReactNode {
   }
 }
 
+const PAGE_TITLE: Record<string, string> = {
+  normalisierung: 'Normalisierung',
+  ddl: 'SQL-DDL',
+  sql: 'SQL-Abfragen und -Änderungen',
+  modellierung: 'Modellierung',
+  relationen: 'Relationenmodell',
+  pruefung: 'Prüfungsmodus',
+  fortschritt: 'Fortschritt',
+  lernen: 'Wissensfragen lernen',
+  praktikum: 'Praktikum',
+  textaufgaben: 'Textaufgaben',
+  dozent: 'Dozentenmodus',
+  autor: 'Aufgabe hinzufügen',
+};
+
 export function App() {
   const [page, id] = useRoute();
+  // Barrierefreiheit: Seitentitel je Seite (WCAG 2.4.2) und Fokus auf den Inhalt nach Seitenwechsel (2.4.3)
+  useEffect(() => {
+    const base = config.title || config.appName;
+    document.title = page && PAGE_TITLE[page] ? `${PAGE_TITLE[page]} · ${base}` : base;
+    const main = document.getElementById('main');
+    const first = [...document.querySelectorAll<HTMLElement>('#main')][0];
+    if (main && first) {
+      main.setAttribute('tabindex', '-1');
+      if (id !== undefined || page) main.focus({ preventScroll: true });
+    }
+  }, [page, id]);
   return <Layout>{route(page, id)}</Layout>;
 }

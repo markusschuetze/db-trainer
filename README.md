@@ -152,6 +152,9 @@ für die oberste Abfrageebene. Echte Oracle-Übung bleibt die Schulungsdatenbank
 - Es werden keine Daten an Dritte übertragen, es gibt keinen eigenen Server.
 
 ## Barrierefreiheit
+
+Ziel WCAG 2.1 AA, selbst geprüft mit axe-core auf allen Seiten und Zuständen: keine Verstöße. Ausführlich, inklusive dessen, was NICHT geprüft wurde
+(Screenreader-Test steht aus): [ACCESSIBILITY.md](ACCESSIBILITY.md).
  Die Oberfläche nutzt semantisches HTML, Tastaturfokus,
 Skip-Link und Statusmeldungen für Screenreader; ein formaler BITV-/WCAG-Test steht noch aus.
 
@@ -159,3 +162,11 @@ Skip-Link und Statusmeldungen für Screenreader; ein formaler BITV-/WCAG-Test st
 
 Software: MIT (`LICENSE`). Inhalte: CC BY-SA 4.0 (`LICENSE-CONTENT.md`). Logos ausgenommen.
 Inspiriert von den OER-Trainern des Projekts EILD.nrw; der Code ist eine Neuentwicklung.
+
+## Neu in dieser Version
+
+- **Inhalte:** ca. 395 Aufgaben (272 Wissensfragen, 79 SQL-Aufgaben, 10 Textaufgaben, DDL- und Normalisierungsaufgaben). Textaufgaben sind Teil der Probeprüfung; die Prüfung kann auch ohne Zeitlimit laufen (zählt dann nicht für die Prüfungsreife).
+- **Dozentenmodus:** Tab „Inhalte“ (Review-Export aller Inhalte als CSV) und Formulare für DDL-, Normalisierungs- und ER-Phrasen-Aufgaben. `aufgaben.json` kennt zusätzlich die Abschnitte `ddl`, `nf`, `phrases`.
+- **Sprache:** `config.json` kennt `language` (`de`, `en`, `auto`) und `languageSwitcher`. Die englische Fassung übersetzt derzeit Oberfläche (Startseite, Navigation, Editor, Prüfergebnisse); Fragen und Aufgaben bleiben deutsch.
+- **Barrierefreiheit:** siehe [ACCESSIBILITY.md](ACCESSIBILITY.md).
+- **Logo:** Das TH-Köln-Logo ist eine Marke der Hochschule; für die Veröffentlichung schriftliche Freigabe einholen.

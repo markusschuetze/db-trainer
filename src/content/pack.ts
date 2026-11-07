@@ -8,7 +8,13 @@ import type { Database, SqlJsStatic } from 'sql.js';
 import { describeSchema } from '../sql/ddlGrading';
 import { createDatabase, runScript, userTables } from '../sql/oracle';
 import { runSqlExercise } from '../sql/sqlGrading';
-import { CARDS } from './erPhrases';
+import { CARDS, phrases, relPhrases, type Phrase } from './erPhrases';
+import { ddlExercises } from './ddlExercises';
+import type { DdlExercise } from './ddlTypes';
+import { nfExercises } from './exercises';
+import type { NfExercise } from './types';
+import { exerciseProblems } from '../logic/nfGrading';
+import { runExercise } from '../sql/ddlGrading';
 import { BUILTIN_CHAPTERS, CHAPTER_NAME, mcQuestions, type McQuestion } from './mcQuestions';
 import { scenarios, type Scenario } from './scenarios';
 import { dmlExercises, dqlExercises, sqlExercises } from './sqlExercises';
@@ -27,6 +33,9 @@ export interface Pack {
   scenarios?: (Partial<Scenario> & { id: string; name: string; schema: string; dataA: string })[];
   worksheets?: Omit<Worksheet, 'origin'>[];
   textTasks?: TextTask[];
+  ddl?: DdlExercise[];
+  nf?: NfExercise[];
+  phrases?: Phrase[];
 }
 
 export interface Problem {
@@ -63,7 +72,7 @@ const relationText = (db: Database) =>
  */
 export function applyPack(pack: Pack, SQL: SqlJsStatic | null): PackReport {
   const problems: Problem[] = [];
-  const counts: Record<string, number> = { chapters: 0, topics: 0, questions: 0, sql: 0, scenarios: 0, worksheets: 0, textTasks: 0 };
+  const counts: Record<string, number> = { chapters: 0, topics: 0, questions: 0, sql: 0, scenarios: 0, worksheets: 0, textTasks: 0, ddl: 0, nf: 0, phrases: 0 };
   const bad = (kind: string, id: string, message: string) => problems.push({ kind, id: id || '(ohne ID)', message });
 
   // 1. Kapitel
@@ -203,6 +212,59 @@ export function applyPack(pack: Pack, SQL: SqlJsStatic | null): PackReport {
     }
   }
 
+  // 8. DDL-Aufgaben (Pruefungen werden mit der Musterloesung getestet)
+  for (const e of pack.ddl ?? []) {
+    const id = e?.id;
+    if (!e || !ID.test(String(id))) bad('DDL-Aufgabe', id, 'ID fehlt oder ist ungültig.');
+    else if (ddlExercises.some((x) => x.id === id)) bad('DDL-Aufgabe', id, 'ID ist bereits vergeben.');
+    else if (!topicById(e.topicId)) bad('DDL-Aufgabe', id, `Thema „${e.topicId}“ existiert nicht.`);
+    else if (![1, 2, 3].includes(e.level) || !str(e.title, 120) || !str(e.task, 3000) || !str(e.solution, 6000) || !Array.isArray(e.checks) || !e.checks.length)
+      bad('DDL-Aufgabe', id, 'Titel, Aufgabentext, Musterlösung, Stufe (1–3) oder Prüfungen fehlen.');
+    else if (!SQL) bad('DDL-Aufgabe', id, 'SQL-Engine nicht verfügbar.');
+    else {
+      const ex: DdlExercise = { ...e, hints: Array.isArray(e.hints) ? e.hints : [], topic: e.topic ?? topicById(e.topicId)!.title, source: e.source ?? 'Aufgabenpaket' };
+      const run = runExercise(SQL, ex, ex.solution);
+      if (!run.passed) bad('DDL-Aufgabe', id, `Die Musterlösung besteht die eigenen Prüfungen nicht: ${run.checks.find((c) => !c.ok)?.label ?? ''} ${run.checks.find((c) => !c.ok)?.hint ?? ''}`);
+      else if (runExercise(SQL, ex, '-- nichts').passed) bad('DDL-Aufgabe', id, 'Eine leere Abgabe würde bestehen.');
+      else {
+        ddlExercises.push(ex);
+        counts.ddl++;
+      }
+    }
+  }
+
+  // 9. Normalisierungsaufgaben (Daten werden auf Konsistenz geprueft: gelten die Abhaengigkeiten?)
+  for (const e of pack.nf ?? []) {
+    const id = e?.id;
+    if (!e || !ID.test(String(id)) || !str(e.title, 120)) bad('Normalisierung', id, 'ID oder Titel fehlt.');
+    else if (nfExercises.some((x) => x.id === id)) bad('Normalisierung', id, 'ID ist bereits vergeben.');
+    else if (!topicById(e.topicId)) bad('Normalisierung', id, `Thema „${e.topicId}“ existiert nicht.`);
+    else if (!e.relation || !Array.isArray(e.relation.columns) || !e.oneNF || !Array.isArray(e.fds) || !Array.isArray(e.target)) bad('Normalisierung', id, 'relation, oneNF, fds oder target fehlt.');
+    else {
+      const problems = exerciseProblems(e);
+      if (problems.length) bad('Normalisierung', id, problems[0]);
+      else {
+        nfExercises.push({ ...e, tags: e.tags ?? [], source: e.source ?? 'Aufgabenpaket' });
+        counts.nf++;
+      }
+    }
+  }
+
+  // 10. ER-Phrasen (Kardinalitaeten und Relationenmodell)
+  for (const p of pack.phrases ?? []) {
+    const id = p?.id;
+    const ent = (e: { name?: string; key?: string; attr?: string; plural?: string } | undefined) => !!e && str(e.name, 60) && str(e.key, 60) && str(e.attr, 60) && str(e.plural, 60);
+    if (!p || !ID.test(String(id))) bad('ER-Phrase', id, 'ID fehlt oder ist ungültig.');
+    else if (phrases.some((x) => x.id === id)) bad('ER-Phrase', id, 'ID ist bereits vergeben.');
+    else if (!str(p.text, 800) || !str(p.verb, 60) || !ent(p.e1) || !ent(p.e2)) bad('ER-Phrase', id, 'Text, Verb oder Entitäten (name, key, attr, plural) fehlen.');
+    else if (!CARDS.includes(p.c12) || !CARDS.includes(p.c21)) bad('ER-Phrase', id, 'c12 und c21 müssen 11, 01, 1N oder 0N sein.');
+    else {
+      phrases.push(p);
+      if (!p.recursive) relPhrases.push(p);
+      counts.phrases++;
+    }
+  }
+
   rebuildCatalog();
   packReport.counts = counts;
   packReport.problems = problems;
@@ -218,6 +280,7 @@ export function validatePack(pack: Pack, SQL: SqlJsStatic | null): PackReport {
   const len = {
     chapters: CHAPTERS.length, topics: topics.length, questions: mcQuestions.length, scenarios: scenarios.length,
     sql: sqlExercises.length, dql: dqlExercises.length, dml: dmlExercises.length, ws: packWorksheets.length, tt: textTasks.length,
+    ddl: ddlExercises.length, nf: nfExercises.length, ph: phrases.length, rph: relPhrases.length,
   };
   const chapterNames = { ...CHAPTER_NAME };
   const before = { counts: packReport.counts, problems: packReport.problems, loaded: packReport.loaded };
@@ -232,6 +295,10 @@ export function validatePack(pack: Pack, SQL: SqlJsStatic | null): PackReport {
   dmlExercises.length = len.dml;
   packWorksheets.length = len.ws;
   textTasks.length = len.tt;
+  ddlExercises.length = len.ddl;
+  nfExercises.length = len.nf;
+  phrases.length = len.ph;
+  relPhrases.length = len.rph;
   for (const k of Object.keys(CHAPTER_NAME)) if (!(k in chapterNames)) delete CHAPTER_NAME[k];
   rebuildCatalog();
   Object.assign(packReport, before);

@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { useRef, useState, type ReactNode } from 'react';
 import { track } from '../analytics';
 import type { CheckResult } from '../sql/ddlGrading';
@@ -106,8 +107,8 @@ export function EditorExercise({
           </div>
           {aside}
           <div className="rounded-card border border-line bg-surface p-5">
-            <h2 className="mb-2 font-bold">Tipps</h2>
-            {hintsShown === 0 && <p className="text-sm text-muted">Noch keine Tipps aufgedeckt.</p>}
+            <h2 className="mb-2 font-bold">{t('Tipps')}</h2>
+            {hintsShown === 0 && <p className="text-sm text-muted">{t('Noch keine Tipps aufgedeckt.')}</p>}
             <ol className="list-decimal space-y-2 pl-5 text-sm">
               {hints.slice(0, hintsShown).map((h) => (
                 <li key={h}>{h}</li>
@@ -125,14 +126,14 @@ export function EditorExercise({
           <SqlEditor value={code} onChange={update} onRun={() => execute(false)} label="SQL-Editor" />
           <div className="flex flex-wrap items-center gap-3">
             <button className={btnGhost} onClick={() => execute(false)} disabled={!ready} title="Strg/Cmd + Enter">
-              Ausführen
+              {t('Ausführen')}
             </button>
             <button className={btn} onClick={() => execute(true)} disabled={!ready}>
-              Prüfen
+              {t('Prüfen')}
             </button>
             {attempts > 0 && !showSolution && (
               <button className={btnGhost} onClick={() => setShowSolution(true)}>
-                Musterlösung zeigen
+                {t('Musterlösung zeigen')}
               </button>
             )}
             <button
@@ -142,10 +143,10 @@ export function EditorExercise({
                 setOut(null);
               }}
             >
-              Zurücksetzen
+              {t('Zurücksetzen')}
             </button>
           </div>
-          {!ready && !loadError && <p className="text-sm text-muted">Datenbank wird geladen …</p>}
+          {!ready && !loadError && <p className="text-sm text-muted">{t('Datenbank wird geladen …')}</p>}
           {loadError && <p className="text-sm text-bad">Datenbank konnte nicht geladen werden: {loadError}</p>}
           <p className="text-xs text-muted">{freshNote} Fehler stoppen das Skript nicht, wie in SQL Developer.</p>
 
@@ -153,9 +154,9 @@ export function EditorExercise({
 
           {showSolution && (
             <div className="rounded-card border border-line bg-surface p-4">
-              <h2 className="mb-2 font-bold">Musterlösung</h2>
+              <h2 className="mb-2 font-bold">{t('Musterlösung')}</h2>
               <p className="mb-2 text-sm text-muted">Andere Schreibweisen sind genauso richtig, solange die Prüfung besteht.</p>
-              <pre className="overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{solution}</pre>
+              <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{solution}</pre>
             </div>
           )}
 

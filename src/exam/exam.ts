@@ -8,11 +8,13 @@ import { fkNotNull, phrases, relPhrases, validMappings, type Card, type Mapping,
 import { nfExercises } from '../content/exercises';
 import { mcQuestions, type Chapter, type McQuestion } from '../content/mcQuestions';
 import { specializations, type Specialization } from '../content/specializations';
-import { topicsOf } from '../content/topics';
+import { textTasks, type TextTask } from '../content/textTasks';
+import { topicById, topicsOf } from '../content/topics';
 import { dmlExercises, dqlExercises } from '../content/sqlExercises';
 import type { SqlExercise } from '../content/sqlTypes';
 import type { DepKind, NfExercise } from '../content/types';
 import { gradeFds, gradeHighest, gradeOneNf } from '../logic/nfGrading';
+import { correctKey, gradeCardinalities, gradeEntities, gradeRelationships, type CardAnswers } from '../logic/textTaskLogic';
 import { runExercise } from '../sql/ddlGrading';
 import { runSqlExercise } from '../sql/sqlGrading';
 
@@ -23,7 +25,8 @@ export type ExamItem =
   | { kind: 'rel'; id: string; chapter: Chapter; points: number; p: Phrase }
   | { kind: 'nf'; id: string; chapter: Chapter; points: number; ex: NfExercise }
   | { kind: 'ddl'; id: string; chapter: Chapter; points: number; ex: DdlExercise }
-  | { kind: 'sql'; id: string; chapter: Chapter; points: number; ex: SqlExercise };
+  | { kind: 'sql'; id: string; chapter: Chapter; points: number; ex: SqlExercise }
+  | { kind: 'tt'; id: string; chapter: Chapter; points: number; t: TextTask };
 
 export interface NfAnswer {
   says1NF?: boolean;
@@ -31,7 +34,15 @@ export interface NfAnswer {
   fds?: (DepKind | '')[];
   highest?: number;
 }
+export interface TtAnswer {
+  ents?: string[];
+  rels?: string[];
+  cards?: CardAnswers;
+  keys?: Record<string, string>;
+  spec?: Record<number, { disjoint?: boolean; total?: boolean }>;
+}
 export type Answer =
+  | TtAnswer
   | number[] // mc
   | { a12?: Card; a21?: Card } // er
   | { disjoint?: boolean; total?: boolean } // spez
@@ -78,7 +89,7 @@ function pick<T>(list: T[], n: number, r: () => number): T[] {
 
 export function buildExam(cfg: ExamConfig): ExamItem[] {
   const r = rng(cfg.seed);
-  const f = cfg.minutes / 60;
+  const f = (cfg.minutes || 60) / 60; // 0 = ohne Zeitlimit, Umfang wie bei 60 Minuten
   const n = (base: number) => Math.max(1, Math.round(base * f));
   const has = (c: Chapter) => cfg.chapters.includes(c);
   const items: ExamItem[] = [];
@@ -106,6 +117,9 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
   if (has('05'))
     for (const ex of pick(nfExercises, n(1), r))
       items.push({ kind: 'nf', id: `nf:${ex.id}`, chapter: '05', points: 3 + ex.fds.length, ex });
+  const ttPool = textTasks.filter((t) => has(topicById(t.topicId)?.chapter ?? ''));
+  for (const t of pick(ttPool, n(1), r))
+    items.push({ kind: 'tt', id: `tt:${t.id}`, chapter: topicById(t.topicId)!.chapter, points: 2 + t.relationships.length + 1 + (t.specializations?.length ? 1 : 0), t });
   if (has('06'))
     for (const ex of pick(ddlExercises, n(1), r)) items.push({ kind: 'ddl', id: `ddl:${ex.id}`, chapter: '06', points: 6, ex });
   if (has('SQL')) {
@@ -154,6 +168,17 @@ export function gradeItem(item: ExamItem, answer: Answer | undefined, SQL: SqlJs
       if (a.says1NF !== undefined && gradeOneNf(item.ex, a.says1NF, a.cols ?? [])) pts += 2;
       pts += gradeFds(item.ex, a.fds ?? item.ex.fds.map(() => '')).filter(Boolean).length;
       if (a.highest !== undefined && gradeHighest(item.ex, a.highest)) pts += 1;
+      return { max, points: pts };
+    }
+    case 'tt': {
+      const a = (answer as TtAnswer | undefined) ?? {};
+      const t = item.t;
+      let pts = 0;
+      if (gradeEntities(t, a.ents ?? [])) pts += 1;
+      if (gradeRelationships(t, a.rels ?? [])) pts += 1;
+      pts += Object.values(gradeCardinalities(t, a.cards ?? {})).filter(Boolean).length;
+      pts += half(t.entities.filter((e) => a.keys?.[e.name] === correctKey(t, e.name)).length / t.entities.length);
+      if (t.specializations?.length && t.specializations.every((s, i) => a.spec?.[i]?.disjoint === s.disjoint && a.spec?.[i]?.total === s.total)) pts += 1;
       return { max, points: pts };
     }
     case 'ddl': {

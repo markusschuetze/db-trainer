@@ -32,6 +32,16 @@ describe('Themen nach Vorlesungsfolien', () => {
     }
   });
 
+  it('jedes Thema hat mindestens 8 Wissensfragen', () => {
+    for (const t of topics) expect(itemsOfTopic(t.id).filter((i) => i.kind === 'frage').length, t.id).toBeGreaterThanOrEqual(8);
+  });
+
+  it('Wissensfragen: richtige Antwort steht nicht immer an derselben Stelle', () => {
+    const single = mcQuestions.filter((q) => q.correct.length === 1);
+    const pos = [0, 1, 2, 3].map((i) => single.filter((q) => q.correct[0] === i).length);
+    for (const n of pos) expect(n / single.length).toBeGreaterThan(0.15);
+  });
+
   it('Fortschritts-IDs sind eindeutig', () => {
     expect(new Set(catalog.map((c) => c.id)).size).toBe(catalog.length);
   });

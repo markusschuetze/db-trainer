@@ -242,7 +242,7 @@ function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   return (
     <Panel title="Schritt 4: Zielschema in 3NF-Richtung">
       <p className="mb-3 text-sm text-muted">So sieht das normalisierte Schema aus (Notation wie in Skript 05):</p>
-      <pre className="overflow-x-auto rounded-lg bg-bg p-4 font-mono text-sm leading-7">
+      <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-bg p-4 font-mono text-sm leading-7">
         {ex.target.join('\n')}
       </pre>
       {ex.targetNote && <p className="mt-3 text-sm">{ex.targetNote}</p>}

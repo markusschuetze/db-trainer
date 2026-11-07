@@ -3,7 +3,7 @@ import type { Pack } from './pack';
 
 const KEY = 'dbt:pack-draft';
 
-export const emptyPack = (): Pack => ({ version: 1, chapters: [], topics: [], questions: [], sql: [], scenarios: [], worksheets: [], textTasks: [] });
+export const emptyPack = (): Pack => ({ version: 1, chapters: [], topics: [], questions: [], sql: [], scenarios: [], worksheets: [], textTasks: [], ddl: [], nf: [], phrases: [] });
 
 export function loadDraft(): Pack {
   try {
@@ -23,7 +23,7 @@ export function saveDraft(p: Pack) {
   }
 }
 
-type Key = 'chapters' | 'topics' | 'questions' | 'sql' | 'scenarios' | 'worksheets' | 'textTasks';
+type Key = 'chapters' | 'topics' | 'questions' | 'sql' | 'scenarios' | 'worksheets' | 'textTasks' | 'ddl' | 'nf' | 'phrases';
 const LABEL: Record<Key, string> = {
   chapters: 'Kapitel',
   topics: 'Themen',
@@ -32,6 +32,9 @@ const LABEL: Record<Key, string> = {
   scenarios: 'Fall-Datenbanken',
   worksheets: 'Übungsblätter',
   textTasks: 'Textaufgaben',
+  ddl: 'DDL-Aufgaben',
+  nf: 'Normalisierungsaufgaben',
+  phrases: 'ER-Phrasen',
 };
 export const KEYS = Object.keys(LABEL) as Key[];
 export const keyLabel = (k: Key) => LABEL[k];
@@ -103,3 +106,51 @@ export const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 50);
+
+/* ---------- Normalisierungsaufgaben aus Text ---------- */
+
+import type { DepKind, FunctionalDependency, OneNfIssue, Table } from './types';
+
+const splitCells = (line: string) => (line.includes('\t') ? line.split('\t') : line.includes(';') ? line.split(';') : line.split('|')).map((c) => c.trim());
+
+/** Tabelle aus eingefuegtem Text (aus Excel kopiert oder mit ; getrennt): erste Zeile = Spaltennamen */
+export function parseTable(text: string, pk: string[]): { table: Table; error?: string } {
+  const lines = text.split('\n').map((l) => l.trimEnd()).filter((l) => l.trim());
+  if (lines.length < 2) return { table: { columns: [], rows: [], pk }, error: 'Mindestens eine Kopfzeile und eine Datenzeile nötig.' };
+  const columns = splitCells(lines[0]);
+  const rows = lines.slice(1).map(splitCells);
+  const bad = rows.findIndex((r) => r.length !== columns.length);
+  if (bad >= 0) return { table: { columns, rows, pk }, error: `Zeile ${bad + 2} hat ${rows[bad].length} statt ${columns.length} Spalten.` };
+  const missing = pk.filter((k) => !columns.includes(k));
+  if (missing.length) return { table: { columns, rows, pk }, error: `Schlüsselspalte nicht gefunden: ${missing.join(', ')}` };
+  return { table: { columns, rows, pk } };
+}
+
+/** Abhaengigkeiten: "A, B -> C, D | partiell | Begruendung" je Zeile */
+export function parseFds(text: string): { fds: FunctionalDependency[]; error?: string } {
+  const fds: FunctionalDependency[] = [];
+  for (const [i, raw] of text.split('\n').entries()) {
+    if (!raw.trim()) continue;
+    const m = raw.match(/^(.+?)\s*(?:->|→)\s*(.+?)\s*\|\s*(voll|partiell|transitiv)\s*\|\s*(.+)$/i);
+    if (!m) return { fds, error: `Zeile ${i + 1}: Format „A, B -> C | partiell | Begründung“ erwartet.` };
+    const list = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
+    fds.push({ lhs: list(m[1]), rhs: list(m[2]), kind: m[3].toLowerCase() as DepKind, why: m[4].trim() });
+  }
+  return { fds };
+}
+
+/** Verletzungen der 1NF: "Spalte | mehrwertig | Begruendung" je Zeile */
+export function parseIssues(text: string): { issues: OneNfIssue[]; error?: string } {
+  const issues: OneNfIssue[] = [];
+  for (const [i, raw] of text.split('\n').entries()) {
+    if (!raw.trim()) continue;
+    const m = raw.match(/^(.+?)\s*\|\s*(mehrwertig|strukturiert)\s*\|\s*(.+)$/i);
+    if (!m) return { issues, error: `Zeile ${i + 1}: Format „Spalte | mehrwertig | Begründung“ erwartet.` };
+    issues.push({ column: m[1].trim(), type: m[2].toLowerCase() as OneNfIssue['type'], why: m[3].trim() });
+  }
+  return { issues };
+}
+
+/** Hoechste erfuellte Normalform der 1NF-bereinigten Relation aus den Abhaengigkeiten */
+export const highestNfOf = (fds: FunctionalDependency[]): 1 | 2 | 3 =>
+  fds.some((f) => f.kind === 'partiell') ? 1 : fds.some((f) => f.kind === 'transitiv') ? 2 : 3;

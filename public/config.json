@@ -1,5 +1,10 @@
 {
-  "_hinweis": "Branding ohne Programmierung: Werte ändern, Datei speichern, Seite neu laden. Alle Felder sind optional, nicht genannte Felder behalten ihren Standardwert (TH-Köln-Design). Felder mit _ am Anfang sind Kommentare. Anleitung: BRANDING.md. Im Dozentenmodus (#/dozent) lässt sich diese Datei per Klick erzeugen.",
+  "_hinweis": "Branding ohne Programmierung: Werte ändern, Datei speichern, Seite neu laden. Alle Felder sind optional, nicht genannte Felder behalten ihren Standardwert. Felder mit _ am Anfang sind Kommentare. Anleitung: BRANDING.md. Im Dozentenmodus (#/dozent) lässt sich diese Datei per Klick erzeugen. Logo und Favicon sind Marken der TH Köln, siehe brand/README.md.",
+  "title": "DB-Trainer · TH Köln",
+  "institution": "TH Köln",
+  "logo": "logo.svg",
+  "favicon": "brand/favicon.png",
+  "header": "hell",
   "theme": "th-koeln",
   "themeSwitcher": false
 }

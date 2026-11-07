@@ -1,6 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { BUILTIN_CHAPTERS, CHAPTER_NAME } from '../content/mcQuestions';
-import { addItem, countOf, KEYS, keyLabel, loadDraft, mergePacks, parseTasks, removeItem, saveDraft, slugify, toFile } from '../content/draftPack';
+import { addItem, countOf, highestNfOf, KEYS, keyLabel, loadDraft, mergePacks, parseFds, parseIssues, parseTable, parseTasks, removeItem, saveDraft, slugify, toFile } from '../content/draftPack';
+import { CARD_LABEL, CARDS, type Card } from '../content/erPhrases';
+import type { DdlExercise } from '../content/ddlTypes';
+import type { NfExercise } from '../content/types';
+import { runExercise } from '../sql/ddlGrading';
+import { deriveChecks } from '../sql/deriveChecks';
 import { packReport, validatePack, type Pack, type PackReport } from '../content/pack';
 import { topics } from '../content/topics';
 import { useSql } from '../useSql';
@@ -89,6 +94,10 @@ export function PackEditor() {
   const [ws, setWs] = useState({ title: '', description: '', schema: '', tasks: '' });
   const [db, setDb] = useState({ name: '', description: '', schema: '', dataA: '', dataB: '' });
   const [tt, setTt] = useState('');
+  const [dd, setDd] = useState({ title: '', topicId: '06-create', level: 2, task: '', setup: '', solution: '', hints: '', names: false });
+  const [ddInfo, setDdInfo] = useState<{ labels: string[]; errors: string[]; ok: boolean } | null>(null);
+  const [nf, setNf] = useState({ title: '', topicId: '05-2nf', scenario: '', table: '', pk: '', issues: '', fixedTable: '', fixedPk: '', fixNote: '', fds: '', target: '', targetNote: '' });
+  const [ph, setPh] = useState({ text: '', e1: '', k1: '', a1: '', p1: '', verb: '', e2: '', k2: '', a2: '', p2: '', c12: '0N' as Card, c21: '0N' as Card });
 
   const chapters = [...BUILTIN_CHAPTERS, ...(draft.chapters ?? []).map((c) => c.id)];
   const chapterName = (id: string) => CHAPTER_NAME[id] ?? draft.chapters?.find((c) => c.id === id)?.name ?? id;
@@ -308,6 +317,139 @@ export function PackEditor() {
         >
           Fall-Datenbank hinzufügen
         </button>
+      </Form>
+
+
+      <Form title="Neue DDL-Aufgabe (CREATE, ALTER, DROP): Prüfungen entstehen aus der Musterlösung">
+        <p className="text-sm text-muted">
+          Du schreibst nur die Musterlösung. Der Trainer leitet daraus automatisch ab, was geprüft wird (Tabellen, Spalten mit Datentyp, Schlüssel, NOT NULL, UNIQUE,
+          Fremdschlüssel mit Löschverhalten, DEFAULT). Jede gleichwertige Schreibweise der Studierenden wird akzeptiert.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Titel"><input className={input} value={dd.title} onChange={(e) => setDd({ ...dd, title: e.target.value })} /></Field>
+          <Field label="Thema">
+            <select className={input} value={dd.topicId} onChange={(e) => setDd({ ...dd, topicId: e.target.value })}>
+              {topics.filter((t) => t.chapter === '06' || (draft.topics ?? []).some((x) => x.id === t.id)).concat((draft.topics ?? []) as never).map((t) => (
+                <option key={t.id} value={t.id}>{t.title}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Schwierigkeit">
+            <select className={input} value={dd.level} onChange={(e) => setDd({ ...dd, level: Number(e.target.value) })}>
+              <option value={1}>Leicht</option><option value={2}>Mittel</option><option value={3}>Schwer</option>
+            </select>
+          </Field>
+        </div>
+        <Field label="Aufgabentext"><textarea className={input} rows={4} value={dd.task} onChange={(e) => setDd({ ...dd, task: e.target.value })} /></Field>
+        <SqlField label="Vorhandene Tabellen (optional)" hint="Wird vor der Abgabe der Studierenden ausgeführt, z. B. für ALTER-Aufgaben." value={dd.setup} onChange={(v) => setDd({ ...dd, setup: v })} />
+        <SqlField label="Musterlösung" value={dd.solution} onChange={(v) => setDd({ ...dd, solution: v })} />
+        <Field label="Tipps" hint="Ein Tipp pro Zeile"><textarea className={input} rows={2} value={dd.hints} onChange={(e) => setDd({ ...dd, hints: e.target.value })} /></Field>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={dd.names} onChange={(e) => setDd({ ...dd, names: e.target.checked })} /> Constraint-Namen aus der Musterlösung verlangen</label>
+        <div className="flex flex-wrap gap-3">
+          <button className={btnGhost} disabled={!SQL || !dd.solution.trim()} onClick={() => {
+            const d = deriveChecks(SQL!, dd.setup, dd.solution, { requireNames: dd.names });
+            const ex = { id: 'x', topicId: dd.topicId, level: 1, title: 'x', task: 'x', hints: [], solution: dd.solution, setup: dd.setup, checks: d.checks, topic: 'x', source: 'x' } as unknown as DdlExercise;
+            const run = d.checks.length ? runExercise(SQL!, ex, dd.solution) : null;
+            setDdInfo({ labels: run?.checks.map((c) => c.label) ?? [], errors: d.errors, ok: !!run?.passed && !d.errors.length });
+          }}>Prüfungen ableiten und ansehen</button>
+          <button className={btn} disabled={!SQL || !dd.title.trim() || !dd.task.trim() || !dd.solution.trim()} onClick={() => {
+            const d = deriveChecks(SQL!, dd.setup, dd.solution, { requireNames: dd.names });
+            if (d.errors.length || !d.checks.length) return setDdInfo({ labels: [], errors: d.errors.length ? d.errors : ['Die Musterlösung ändert nichts am Ausgangszustand, es gibt nichts zu prüfen.'], ok: false });
+            const ex = { id: slugify(dd.title), topicId: dd.topicId, level: dd.level as 1 | 2 | 3, title: dd.title.trim(), task: dd.task.trim(), hints: dd.hints.split('\n').map((h) => h.trim()).filter(Boolean), solution: dd.solution.trim(), ...(dd.setup.trim() ? { setup: dd.setup } : {}), checks: d.checks, topic: topics.find((t) => t.id === dd.topicId)?.title ?? '', source: 'Ergänzt im Dozentenmodus' } as DdlExercise;
+            add('ddl', ex, `DDL-Aufgabe „${dd.title}“ hinzugefügt (${d.checks.length} Prüfungen abgeleitet).`);
+            setDd({ ...dd, title: '', task: '', setup: '', solution: '', hints: '' });
+            setDdInfo(null);
+          }}>DDL-Aufgabe hinzufügen</button>
+        </div>
+        {ddInfo && (
+          <div role="status" className={`rounded-lg p-3 text-sm ${ddInfo.ok ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
+            {ddInfo.errors.length > 0 && <ul className="list-disc pl-5">{ddInfo.errors.map((e) => <li key={e}>{e}</li>)}</ul>}
+            {ddInfo.labels.length > 0 && (<><strong>Das wird geprüft ({ddInfo.labels.length}):</strong><ul className="mt-1 list-disc pl-5">{ddInfo.labels.map((l) => <li key={l}>{l}</li>)}</ul></>)}
+          </div>
+        )}
+      </Form>
+
+      <Form title="Neue Normalisierungsaufgabe">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Titel"><input className={input} value={nf.title} onChange={(e) => setNf({ ...nf, title: e.target.value })} /></Field>
+          <Field label="Thema">
+            <select className={input} value={nf.topicId} onChange={(e) => setNf({ ...nf, topicId: e.target.value })}>
+              {topics.filter((t) => t.chapter === '05').map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
+            </select>
+          </Field>
+        </div>
+        <Field label="Ausgangslage (Text)"><textarea className={input} rows={2} value={nf.scenario} onChange={(e) => setNf({ ...nf, scenario: e.target.value })} /></Field>
+        <Field label="Relation" hint="Aus Excel einfügen oder mit ; trennen. Erste Zeile = Spaltennamen.">
+          <textarea className={`${input} font-mono text-sm`} rows={6} value={nf.table} onChange={(e) => setNf({ ...nf, table: e.target.value })} placeholder={'MA_ID;Projekt_ID;Rolle;Projektname\n1;A35;Leitung;SocioHub\n4;A35;IT;SocioHub'} />
+        </Field>
+        <Field label="Primärschlüssel" hint="Spaltennamen, durch Komma getrennt"><input className={input} value={nf.pk} onChange={(e) => setNf({ ...nf, pk: e.target.value })} placeholder="MA_ID, Projekt_ID" /></Field>
+        <Field label="Verletzungen der 1NF" hint="Leer lassen, wenn die Relation in 1NF ist. Eine Zeile je Verletzung: Spalte | mehrwertig | Begründung (oder strukturiert)">
+          <textarea className={`${input} font-mono text-sm`} rows={2} value={nf.issues} onChange={(e) => setNf({ ...nf, issues: e.target.value })} />
+        </Field>
+        {nf.issues.trim() && (
+          <>
+            <Field label="Relation nach Herstellung der 1NF" hint="Dieselbe Eingabe wie oben, nach der Auflösung"><textarea className={`${input} font-mono text-sm`} rows={5} value={nf.fixedTable} onChange={(e) => setNf({ ...nf, fixedTable: e.target.value })} /></Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Primärschlüssel danach"><input className={input} value={nf.fixedPk} onChange={(e) => setNf({ ...nf, fixedPk: e.target.value })} /></Field>
+              <Field label="Erklärung der Auflösung"><input className={input} value={nf.fixNote} onChange={(e) => setNf({ ...nf, fixNote: e.target.value })} /></Field>
+            </div>
+          </>
+        )}
+        <Field label="Funktionale Abhängigkeiten" hint="Eine Zeile je Abhängigkeit: A, B -> C, D | voll (oder partiell, transitiv) | Begründung. Ob sie in den Daten gelten, wird geprüft.">
+          <textarea className={`${input} font-mono text-sm`} rows={4} value={nf.fds} onChange={(e) => setNf({ ...nf, fds: e.target.value })} placeholder={'MA_ID -> Name | partiell | Der Name hängt nur an MA_ID.'} />
+        </Field>
+        <Field label="Zielschema in Vorlesungsnotation" hint="Eine Relation je Zeile, z. B. Arbeitet_in (MA_ID <fk>, Projekt_ID <fk>, Rolle)">
+          <textarea className={`${input} font-mono text-sm`} rows={3} value={nf.target} onChange={(e) => setNf({ ...nf, target: e.target.value })} />
+        </Field>
+        <Field label="Hinweis zum Ergebnis (optional)"><input className={input} value={nf.targetNote} onChange={(e) => setNf({ ...nf, targetNote: e.target.value })} /></Field>
+        <button className={btn} disabled={!nf.title.trim() || !nf.table.trim() || !nf.pk.trim() || !nf.fds.trim() || !nf.target.trim()} onClick={() => {
+          const pk = nf.pk.split(',').map((x) => x.trim()).filter(Boolean);
+          const t = parseTable(nf.table, pk);
+          const fds = parseFds(nf.fds);
+          const iss = parseIssues(nf.issues);
+          const fixed = iss.issues.length ? parseTable(nf.fixedTable, nf.fixedPk.split(',').map((x) => x.trim()).filter(Boolean)) : null;
+          const err = t.error ?? fds.error ?? iss.error ?? fixed?.error ?? (iss.issues.length && !fixed ? 'Relation nach der 1NF fehlt.' : '');
+          if (err) return setMsg(`Normalisierungsaufgabe: ${err}`);
+          const tags = highestNfOf(fds.fds) === 3 ? ['3NF'] : highestNfOf(fds.fds) === 2 ? ['3NF'] : ['2NF'];
+          const ex: NfExercise = {
+            id: slugify(nf.title), topicId: nf.topicId, title: nf.title.trim(), scenario: nf.scenario.trim(), relation: t.table,
+            oneNF: { ok: !iss.issues.length, issues: iss.issues, ...(fixed ? { fixed: fixed.table, fixNote: nf.fixNote } : {}) },
+            fds: fds.fds, highestNF: highestNfOf(fds.fds), target: nf.target.split('\n').map((l) => l.trim()).filter(Boolean), ...(nf.targetNote ? { targetNote: nf.targetNote } : {}),
+            tags: (iss.issues.length ? ['1NF', ...tags] : tags) as NfExercise['tags'], source: 'Ergänzt im Dozentenmodus',
+          };
+          add('nf', ex, `Normalisierungsaufgabe „${nf.title}“ hinzugefügt. Mit „Entwurf prüfen“ testest du, ob die Abhängigkeiten in den Daten gelten.`);
+          setNf({ ...nf, title: '', scenario: '', table: '', issues: '', fixedTable: '', fds: '', target: '', targetNote: '' });
+        }}>Normalisierungsaufgabe hinzufügen</button>
+      </Form>
+
+      <Form title="Neue ER-Phrase (Kardinalitäten und Relationenmodell)">
+        <Field label="Text" hint="z. B. „Ein Kunde kann beliebig viele Produkte bestellen, ein Produkt von beliebig vielen Kunden.“">
+          <textarea className={input} rows={2} value={ph.text} onChange={(e) => setPh({ ...ph, text: e.target.value })} />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(['1', '2'] as const).map((n) => (
+            <fieldset key={n} className="space-y-2 rounded-lg border border-line p-3">
+              <legend className="px-1 font-semibold">Entität {n}</legend>
+              {([['Name', `e${n}`], ['Primärschlüssel', `k${n}`], ['Weiteres Attribut', `a${n}`], ['Plural', `p${n}`]] as const).map(([label, key]) => (
+                <Field key={key} label={label}><input className={input} value={ph[key as keyof typeof ph] as string} onChange={(e) => setPh({ ...ph, [key]: e.target.value })} /></Field>
+              ))}
+            </fieldset>
+          ))}
+        </div>
+        <Field label="Verb der Beziehung"><input className={input} value={ph.verb} onChange={(e) => setPh({ ...ph, verb: e.target.value })} placeholder="bestellt" /></Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {([['c12', `Eine Instanz von ${ph.e1 || 'Entität 1'} ist verbunden mit … ${ph.p2 || 'Entität 2'}`], ['c21', `Eine Instanz von ${ph.e2 || 'Entität 2'} ist verbunden mit … ${ph.p1 || 'Entität 1'}`]] as const).map(([k, label]) => (
+            <Field key={k} label={label}>
+              <select className={input} value={ph[k]} onChange={(e) => setPh({ ...ph, [k]: e.target.value as Card })}>
+                {CARDS.map((c) => <option key={c} value={c}>{CARD_LABEL[c]}</option>)}
+              </select>
+            </Field>
+          ))}
+        </div>
+        <button className={btn} disabled={!ph.text.trim() || !ph.verb.trim() || !ph.e1.trim() || !ph.k1.trim() || !ph.a1.trim() || !ph.p1.trim() || !ph.e2.trim() || !ph.k2.trim() || !ph.a2.trim() || !ph.p2.trim()} onClick={() => {
+          add('phrases', { id: slugify(`${ph.e1}-${ph.verb}-${ph.e2}`), text: ph.text.trim(), e1: { name: ph.e1.trim(), key: ph.k1.trim(), attr: ph.a1.trim(), plural: ph.p1.trim() }, verb: ph.verb.trim(), e2: { name: ph.e2.trim(), key: ph.k2.trim(), attr: ph.a2.trim(), plural: ph.p2.trim() }, c12: ph.c12, c21: ph.c21 } as never, 'ER-Phrase hinzugefügt.');
+          setPh({ ...ph, text: '', verb: '' });
+        }}>ER-Phrase hinzufügen</button>
       </Form>
 
       <Form title="Neue Textaufgabe (Schema aus Text erkennen), für Fortgeschrittene">

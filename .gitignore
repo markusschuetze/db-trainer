@@ -5,4 +5,7 @@ release/
 # Logos der Institution liegen nur lokal (nicht Teil der offenen Lizenz)
 public/brand/*
 !public/brand/README.md
+# Logo und Favicon der TH Köln (Marke, siehe public/brand/README.md)
+!public/brand/logo.svg
+!public/brand/favicon.png
 events.jsonl

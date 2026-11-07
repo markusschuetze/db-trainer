@@ -173,7 +173,7 @@ function WorkspaceInner({ sheet, session: s }: { sheet: Worksheet; session: Sess
                           </button>
                           {showSol[t.id] && (
                             <>
-                              <pre className="mt-2 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{t.solution}</pre>
+                              <pre tabIndex={0} className="mt-2 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-xs leading-5">{t.solution}</pre>
                               <button className="mt-1 text-sm underline" onClick={() => setCode((c) => `${c.trimEnd()}\n\n${t.solution}\n`)}>
                                 In den Editor kopieren
                               </button>

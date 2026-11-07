@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import type { CheckResult } from '../sql/ddlGrading';
 import type { StatementResult } from '../sql/oracle';
 
@@ -5,7 +6,7 @@ const cell = (v: unknown) => (v === null || v === undefined ? 'NULL' : String(v)
 
 export function ResultTable({ columns, rows, tone }: { columns: string[]; rows: unknown[][]; tone?: 'bad' | 'ok' }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-line">
+    <div className="overflow-x-auto rounded-lg border border-line" tabIndex={0} role="region" aria-label={t('Ergebnistabelle')}>
       <table className="w-full text-xs">
         <thead className="bg-bg">
           <tr>
@@ -20,7 +21,7 @@ export function ResultTable({ columns, rows, tone }: { columns: string[]; rows: 
           {rows.length === 0 && (
             <tr>
               <td colSpan={columns.length || 1} className="px-2 py-1 text-muted">
-                (keine Zeilen)
+                {t('(keine Zeilen)')}
               </td>
             </tr>
           )}
@@ -41,7 +42,7 @@ export function ResultTable({ columns, rows, tone }: { columns: string[]; rows: 
 
 /** Ausgabe pro Anweisung wie im Skriptausgabe-Fenster von SQL Developer */
 export function StatementOutput({ results }: { results: StatementResult[] }) {
-  if (!results.length) return <p className="text-sm text-muted">Keine Anweisungen gefunden.</p>;
+  if (!results.length) return <p className="text-sm text-muted">{t('Keine Anweisungen gefunden.')}</p>;
   return (
     <ol className="space-y-2 text-sm">
       {results.map((r, i) => (
@@ -64,7 +65,7 @@ export function CheckList({ checks, passed, nextHref }: { checks: CheckResult[];
   return (
     <div role="status" className={`rounded-card border p-4 ${passed ? 'border-ok bg-ok-bg' : 'border-bad bg-bad-bg'}`}>
       <p className={`font-bold ${passed ? 'text-ok' : 'text-bad'}`}>
-        {passed ? 'Alles erfüllt.' : `${checks.filter((c) => c.ok).length} von ${checks.length} Anforderungen erfüllt.`}
+        {passed ? t('Alles erfüllt.') : t('{a} von {b} Anforderungen erfüllt.', { a: checks.filter((c) => c.ok).length, b: checks.length })}
       </p>
       <ul className="mt-2 space-y-1 text-sm">
         {checks.map((c, i) => (
@@ -72,7 +73,7 @@ export function CheckList({ checks, passed, nextHref }: { checks: CheckResult[];
             <span className={c.ok ? 'text-ok' : 'text-bad'} aria-hidden>
               {c.ok ? '✓' : '✗'}
             </span>{' '}
-            <span className="sr-only">{c.ok ? 'erfüllt:' : 'nicht erfüllt:'}</span>
+            <span className="sr-only">{c.ok ? t('erfüllt:') : t('nicht erfüllt:')}</span>
             {c.label}
             {c.hint && <div className="ml-5 text-muted">{c.hint}</div>}
           </li>
@@ -83,7 +84,7 @@ export function CheckList({ checks, passed, nextHref }: { checks: CheckResult[];
           href={nextHref}
           className="mt-4 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast no-underline"
         >
-          Nächste Aufgabe
+          {t('Nächste Aufgabe')}
         </a>
       )}
     </div>

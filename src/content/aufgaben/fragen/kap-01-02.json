@@ -1,0 +1,688 @@
+[
+ {
+  "id": "dbms-persistent",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Was bedeutet es, dass ein DBMS Daten „persistent“ speichert?",
+  "options": [
+   "Die Daten bleiben auch nach Beenden der Anwendung erhalten",
+   "Die Daten sind für alle Nutzer sichtbar",
+   "Die Daten werden nur im Arbeitsspeicher gehalten",
+   "Die Daten werden automatisch verschlüsselt"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Persistent heißt dauerhaft gespeichert, unabhängig von der Laufzeit einer Anwendung."
+ },
+ {
+  "id": "dbms-redundanz",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Warum ist Datenredundanz bei der Arbeit mit mehreren Dateikopien ein Problem?",
+  "options": [
+   "Redundante Daten sind immer falsch",
+   "Dateien lassen sich nicht kopieren",
+   "Sie verhindert das Sortieren",
+   "Änderungen müssen überall nachgezogen werden, sonst entstehen Inkonsistenzen"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Gleiche Information an mehreren Orten muss überall geändert werden. Ein DBMS ermöglicht Änderungen an einer Stelle, die dann referenziert wird."
+ },
+ {
+  "id": "dbms-dbs-def",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Was umfasst ein Datenbanksystem (DBS)?",
+  "options": [
+   "Datenbank und Datenbankmanagementsystem",
+   "Nur die gespeicherten Daten",
+   "Nur den Server, auf dem die Daten liegen",
+   "Nur die Anwendung, die auf die Daten zugreift"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "DBS = DBMS + Datenbank (DB). Anwendungen und Nutzer greifen über das DBMS darauf zu."
+ },
+ {
+  "id": "dbms-beispiele",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Welche der folgenden sind relationale Datenbankmanagementsysteme?",
+  "options": [
+   "Oracle Database",
+   "PostgreSQL",
+   "Microsoft Excel",
+   "MySQL"
+  ],
+  "correct": [
+   0,
+   1,
+   3
+  ],
+  "explanation": "Oracle, PostgreSQL und MySQL sind RDBMS. Excel ist eine Tabellenkalkulation ohne DBMS-Dienste wie Transaktionen und Mehrbenutzerbetrieb.",
+  "multi": true
+ },
+ {
+  "id": "dbms-parallel",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Was leistet ein DBMS beim gleichzeitigen Zugriff mehrerer Nutzer?",
+  "options": [
+   "Parallele Lesezugriffe sind möglich, Daten, die gerade geändert werden, werden gesperrt",
+   "Es kopiert die Datenbank für jeden Nutzer",
+   "Es erlaubt immer nur einem Nutzer den Zugriff",
+   "Es verhindert jede Änderung"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Das DBMS koordiniert den Zugriff: gleichzeitiges Lesen ist erlaubt, geänderte Daten werden bis zum Transaktionsende gesperrt."
+ },
+ {
+  "id": "dbms-schnittstelle",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Wie wird das DBMS auch genannt, weil es Anfragen von Anwendungen entgegennimmt?",
+  "options": [
+   "Datenbanksprache",
+   "Datentyp",
+   "Datenbankschema",
+   "Datenbankserver"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Das DBMS ist die zentrale Einheit und wird deshalb auch als Datenbankserver bezeichnet."
+ },
+ {
+  "id": "dbms-excel",
+  "topicId": "01-dbms",
+  "chapter": "01",
+  "question": "Warum reicht eine Tabellenkalkulation für große, gemeinsam genutzte Datenbestände meist nicht aus?",
+  "options": [
+   "Es fehlen Mehrbenutzerbetrieb, Transaktionen und Integritätsregeln",
+   "Sie kann keine Zahlen speichern",
+   "Sie kann keine Texte speichern",
+   "Sie ist grundsätzlich kostenpflichtig"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Tabellenkalkulationen bieten keine Transaktionen, keine Sperren bei gleichzeitigem Schreiben und keine Constraints."
+ },
+ {
+  "id": "phasen-konzeptionell",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Was ist das Ergebnis des konzeptionellen Entwurfs?",
+  "options": [
+   "Ein Oracle-Schema",
+   "Ein ER-Modell",
+   "Ein SQL-Skript",
+   "Eine Sicherungskopie"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Im konzeptionellen Entwurf entsteht das (datenbankunabhängige) Entity-Relationship-Modell."
+ },
+ {
+  "id": "phasen-physisch",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Welche Aufgabe hat der physische Entwurf?",
+  "options": [
+   "Normalformen prüfen",
+   "Anforderungen sammeln",
+   "Das Relationenmodell für ein konkretes DBMS umsetzen, z. B. als Oracle-Schema",
+   "Das ER-Modell zeichnen"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Der physische Entwurf erzeugt das DBMS-spezifische Schema, in der Vorlesung mit SQL-DDL für Oracle."
+ },
+ {
+  "id": "phasen-anforderung",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Warum ist die Anforderungsanalyse so wichtig?",
+  "options": [
+   "Sie ersetzt das ER-Modell",
+   "Sie ist nur Formsache",
+   "Sie wird automatisch erledigt",
+   "Fehler hier erzwingen später ein aufwendiges Redesign"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Je früher ein Fehler entsteht, desto teurer wird seine Korrektur in den späteren Phasen."
+ },
+ {
+  "id": "phasen-logisch",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Was geschieht im logischen Entwurf?",
+  "options": [
+   "Daten werden eingefügt",
+   "Abfragen werden optimiert",
+   "Das DBMS wird installiert",
+   "Das ER-Modell wird in das Relationenmodell überführt"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Der logische Entwurf überführt das ER-Modell in ein Datenmodell, hier das Relationenmodell, mit Normalisierung und Constraints."
+ },
+ {
+  "id": "phasen-normal",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "In welcher Phase werden Normalformen angewendet?",
+  "options": [
+   "Im logischen Entwurf",
+   "In der Anforderungsanalyse",
+   "Beim Einfügen der Daten",
+   "Bei der Installation"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Die Normalisierung gehört zum logischen Entwurf des Relationenmodells."
+ },
+ {
+  "id": "phasen-agnostisch",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Was bedeutet „datenbankagnostisch“ beim ER-Modell?",
+  "options": [
+   "Es funktioniert nur mit Oracle",
+   "Es ist unabhängig von einem konkreten DBMS",
+   "Es ist nicht grafisch",
+   "Es enthält keine Entitäten"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Das ER-Modell beschreibt Daten fachlich und legt sich noch nicht auf ein DBMS fest."
+ },
+ {
+  "id": "phasen-reihenfolge2",
+  "topicId": "01-phasen",
+  "chapter": "01",
+  "question": "Welche Aussagen zum Phasenmodell stimmen?",
+  "options": [
+   "Das Phasenmodell gilt nur für Datenbanken ohne SQL",
+   "Man beginnt mit dem physischen Entwurf",
+   "Die Phasen können iterativ mehrfach durchlaufen werden",
+   "Jede Phase liefert Ergebnisse, die Eingabe der nächsten sind"
+  ],
+  "correct": [
+   2,
+   3
+  ],
+  "explanation": "Der Entwurf läuft von der Analyse zur Implementierung, evolutionäre Vorgehensmodelle durchlaufen die Phasen zyklisch.",
+  "multi": true
+ },
+ {
+  "id": "sqlacid-dql",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Welcher SQL-Teil dient dem Abfragen von Daten?",
+  "options": [
+   "DQL (SELECT)",
+   "DDL",
+   "TCL",
+   "DCL"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "DQL (Data Query Language) fragt Daten ab, vor allem mit SELECT."
+ },
+ {
+  "id": "sqlacid-crud",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Wofür steht CRUD?",
+  "options": [
+   "Copy, Replace, Undo, Delete",
+   "Commit, Rollback, Undo, Do",
+   "Connect, Run, Use, Disconnect",
+   "Create, Read, Update, Delete"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "CRUD sind die elementaren Datenoperationen: anlegen, lesen, ändern, löschen."
+ },
+ {
+  "id": "sqlacid-c",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Wofür steht das „C“ in ACID?",
+  "options": [
+   "Consistency",
+   "Compression",
+   "Control",
+   "Concurrency"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Consistency: Die Daten sind vor und nach einer Transaktion konsistent."
+ },
+ {
+  "id": "sqlacid-d",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Was bedeutet Durability?",
+  "options": [
+   "Daten werden komprimiert",
+   "Die Datenbank läuft ohne Unterbrechung",
+   "Daten verfallen nach einer Zeit",
+   "Die Daten sind nach einer abgeschlossenen Transaktion dauerhaft gespeichert"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Durability (Dauerhaftigkeit): Bestätigte Änderungen gehen auch bei Systemausfällen nicht verloren."
+ },
+ {
+  "id": "sqlacid-a-bsp",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Eine Überweisung bucht 100 € vom Konto A ab und auf Konto B zu. Bricht das System nach der Abbuchung ab, wird sie zurückgenommen. Welche ACID-Eigenschaft ist das?",
+  "options": [
+   "Durability",
+   "Consistency",
+   "Atomicity",
+   "Isolation"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Atomicity: ganz oder gar nicht. Eine halbe Überweisung darf es nicht geben."
+ },
+ {
+  "id": "sqlacid-ddl",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Welche Befehle gehören zur DDL?",
+  "options": [
+   "INSERT",
+   "ALTER",
+   "CREATE",
+   "DROP"
+  ],
+  "correct": [
+   1,
+   2,
+   3
+  ],
+  "explanation": "DDL definiert Strukturen (CREATE, ALTER, DROP). INSERT ändert Daten und gehört zur DML.",
+  "multi": true
+ },
+ {
+  "id": "sqlacid-i",
+  "topicId": "01-sql-acid",
+  "chapter": "01",
+  "question": "Was bedeutet Isolation?",
+  "options": [
+   "Jede Tabelle hat einen eigenen Server",
+   "Gleichzeitige Transaktionen beeinflussen sich nicht gegenseitig",
+   "Daten sind verschlüsselt",
+   "Nutzer sehen nur ihre eigenen Daten"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Isolation sorgt dafür, dass parallele Transaktionen sich nicht gegenseitig stören, als liefen sie nacheinander."
+ },
+ {
+  "id": "elem-relationship",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Was beschreibt eine Beziehung (Relationship) im ER-Modell?",
+  "options": [
+   "Einen Datentyp",
+   "Welche Entitäten miteinander verknüpft sind",
+   "Eine Spalte einer Tabelle",
+   "Eine einzelne Instanz"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Beziehungen verbinden Entitäten, z. B. „Student besucht Kurs“. Nicht zu verwechseln mit der Relation (Tabelle)."
+ },
+ {
+  "id": "elem-relation-vs",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Worin unterscheiden sich „Relationship“ und „Relation“?",
+  "options": [
+   "Relationship = Beziehung im ER-Modell, Relation = Tabelle im Relationenmodell",
+   "Relation = Beziehung zwischen Personen",
+   "Relationship gibt es nur in SQL",
+   "Es ist dasselbe"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Das ER-Modell kennt Beziehungen, das Relationenmodell Relationen (Tabellen). Der Begriffsklang täuscht leicht."
+ },
+ {
+  "id": "elem-attribut",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Was ist ein Attribut?",
+  "options": [
+   "Ein SQL-Befehl",
+   "Eine Eigenschaft einer Entität oder Beziehung",
+   "Ein Primärschlüssel",
+   "Eine Verbindung zwischen zwei Tabellen"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Attribute beschreiben Entitäten oder Beziehungen näher, z. B. der Name eines Studenten."
+ },
+ {
+  "id": "elem-instanz",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "„Mia Wagner“ ist ein konkreter Student. Wie nennt man sie in Bezug auf die Entität Student?",
+  "options": [
+   "Instanz",
+   "Schema",
+   "Attribut",
+   "Beziehung"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Einzelne Elemente einer Entität heißen Instanzen."
+ },
+ {
+  "id": "elem-entitaet-gleich",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Welche Begriffe werden in der Vorlesung gleichgesetzt?",
+  "options": [
+   "Attribut",
+   "Entity-Menge",
+   "Entity-Typ",
+   "Entität"
+  ],
+  "correct": [
+   1,
+   2,
+   3
+  ],
+  "explanation": "Entität, Entity-Typ und Entity-Menge sind in der Vorlesung austauschbar. Ein Attribut ist etwas anderes.",
+  "multi": true
+ },
+ {
+  "id": "elem-obligatorisch",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Ein Attribut ist obligatorisch. Was folgt daraus?",
+  "options": [
+   "Es ist der Primärschlüssel",
+   "Es muss eindeutig sein",
+   "Der Wert darf NULL sein",
+   "Jede Instanz muss einen Wert dafür haben"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Obligatorische Attribute dürfen nicht fehlen, später als NOT NULL umgesetzt."
+ },
+ {
+  "id": "elem-chen",
+  "topicId": "02-elemente",
+  "chapter": "02",
+  "question": "Wie sind Entitäten und Beziehungen in der Chen-Notation verbunden?",
+  "options": [
+   "Durch ungerichtete Linien",
+   "Durch Pfeile von der Beziehung zur Entität",
+   "Gar nicht, sie stehen nur nebeneinander",
+   "Durch gestrichelte Pfeile"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "In der Chen-Notation verbinden ungerichtete Linien Entitäten, Beziehungen und Attribute."
+ },
+ {
+  "id": "kard-11-beispiele",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Welche der Beispiele sind typische 1:1-Beziehungen?",
+  "options": [
+   "Kunde – Produkt",
+   "Auto – Nummernschild",
+   "Person – Reisepass",
+   "Land – Hauptstadt"
+  ],
+  "correct": [
+   1,
+   2,
+   3
+  ],
+  "explanation": "Reisepass, Hauptstadt und Nummernschild gehören jeweils zu genau einem Gegenstück. Kunde – Produkt ist M:N.",
+  "multi": true
+ },
+ {
+  "id": "kard-1n",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Ein Land hat viele Hersteller, jeder Hersteller sitzt in genau einem Land. Welche Kardinalität?",
+  "options": [
+   "1:1",
+   "1:N",
+   "N:1:1",
+   "M:N"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Eine Seite hat „viele“, die andere „genau eins“: 1:N."
+ },
+ {
+  "id": "kard-mn-bsp",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Eine Schauspielerin spielt in mehreren Filmen, ein Film hat mehrere Schauspielerinnen. Welche Kardinalität?",
+  "options": [
+   "M:N",
+   "N:1",
+   "1:N",
+   "1:1"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Auf beiden Seiten „viele“: M:N."
+ },
+ {
+  "id": "kard-ausdruck",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Welche Einschränkung drückt die einfache Angabe 1:N nicht aus?",
+  "options": [
+   "Den Namen der Beziehung",
+   "Ob mehrere Partner möglich sind",
+   "Ob die Beziehung für jede Instanz Pflicht ist (Minimum)",
+   "Die Richtung der Beziehung"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "1:1, 1:N und M:N sagen nur etwas über das Maximum. „Kann“ oder „muss“ braucht die genauere Notation mit Minimum und Maximum."
+ },
+ {
+  "id": "kard-rel-integritaet",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Warum nennt man Kardinalitäten „Integritätsbedingungen“?",
+  "options": [
+   "Sie verschlüsseln die Daten",
+   "Sie sortieren die Daten",
+   "Sie benennen Tabellen",
+   "Sie legen fest, welche Verbindungen zwischen Daten zulässig sind"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Kardinalitäten schränken die erlaubten Datenzustände ein und sichern so die Konsistenz."
+ },
+ {
+  "id": "kard-fahrer",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Ein Fahrer besitzt null, ein oder mehrere Autos, ein Auto gehört höchstens einem Fahrer. Welche Kardinalität?",
+  "options": [
+   "N:1:N",
+   "1:N",
+   "M:N",
+   "1:1"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Ein Fahrer kann viele Autos besitzen, ein Auto höchstens einen Fahrer: 1:N."
+ },
+ {
+  "id": "kard-stuhl",
+  "topicId": "02-kardinalitaet",
+  "chapter": "02",
+  "question": "Ein Schüler sitzt auf genau einem Stuhl, ein Stuhl nimmt höchstens einen Schüler auf. Welche Kardinalität?",
+  "options": [
+   "1:1",
+   "1:N",
+   "M:N",
+   "N:M:1"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Beide Seiten höchstens eins: 1:1."
+ },
+ {
+  "id": "kf-krahe",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Was zeigt der „Krähenfuß“ an einer Entität?",
+  "options": [
+   "Das Minimum 1",
+   "Das Maximum „viele“ (N)",
+   "Den Primärschlüssel",
+   "Das Minimum 0"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Der Krähenfuß steht für „viele“ (N). Ein einfacher Strich steht für „höchstens eins“."
+ },
+ {
+  "id": "kf-kreis",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Was bedeutet ein Kreis am Beziehungsende?",
+  "options": [
+   "Das Minimum ist 1",
+   "Das Minimum ist 0 (optional)",
+   "Das Maximum ist 1",
+   "Die Beziehung ist schwach"
+  ],
+  "correct": [
+   1
+  ],
+  "explanation": "Der Kreis steht für Minimum 0: Die Beziehung ist optional („kann“)."
+ },
+ {
+  "id": "kf-strich",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Was bedeutet ein senkrechter Strich als erstes Zeichen (Minimum)?",
+  "options": [
+   "Das Minimum ist 0",
+   "Das Maximum ist N",
+   "Das Minimum ist 1 (Pflicht)",
+   "Der Schlüssel ist zusammengesetzt"
+  ],
+  "correct": [
+   2
+  ],
+  "explanation": "Ein Strich im Minimum-Bereich bedeutet: mindestens eine Beziehung muss bestehen („muss“)."
+ },
+ {
+  "id": "kf-lesen",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Wie liest man die Notation einer Entität?",
+  "options": [
+   "Von der Entität zur Mitte",
+   "Nur das Symbol ganz außen zählt",
+   "Beide Seiten werden gemeinsam gelesen",
+   "Von der Mitte der Beziehung zur Entität: erst Minimum, dann Maximum"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Man liest von der Beziehung zur Entität: Das Symbol an der Entität sagt, mit wie vielen Instanzen eine Instanz der anderen Seite verbunden ist."
+ },
+ {
+  "id": "kf-01",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Welche Kombination bedeutet (0,1)?",
+  "options": [
+   "Strich und Krähenfuß",
+   "Zwei Striche",
+   "Kreis und Krähenfuß",
+   "Kreis und einfacher Strich"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "(0,1): Minimum 0 (Kreis), Maximum 1 (Strich) – höchstens eine Beziehung."
+ },
+ {
+  "id": "kf-1n",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Welche Kombination bedeutet (1,N)?",
+  "options": [
+   "Nur ein Krähenfuß",
+   "Kreis und Krähenfuß",
+   "Kreis und Strich",
+   "Strich und Krähenfuß"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "(1,N): mindestens eine, beliebig viele. Strich für Minimum 1, Krähenfuß für Maximum N."
+ },
+ {
+  "id": "kf-hund",
+  "topicId": "02-kraehenfuss",
+  "chapter": "02",
+  "question": "Ein Hund wird von keiner oder einer Person besessen. Wie lautet die Angabe an der Seite „Person“?",
+  "options": [
+   "(1,1)",
+   "(1,N)",
+   "(0,N)",
+   "(0,1)"
+  ],
+  "correct": [
+   3
+  ],
+  "explanation": "Keine oder eine: Minimum 0, Maximum 1."
+ }
+]

@@ -28,6 +28,9 @@ const FAMILIES: Record<TypeFamily, string[]> = {
 };
 const ORACLE_TYPES = [...Object.values(FAMILIES).flat(), 'BLOB', 'RAW', 'LONG'];
 
+export const familyOf = (type: string): TypeFamily | undefined =>
+  (Object.keys(FAMILIES) as TypeFamily[]).find((f) => FAMILIES[f].includes(type.replace(/\(.*\)/, '').trim().toUpperCase()));
+
 const baseType = (t: string) => t.replace(/\(.*\)/, '').trim().toUpperCase();
 const lc = (s: string) => s.toLowerCase();
 const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.some((y) => lc(x) === lc(y)));

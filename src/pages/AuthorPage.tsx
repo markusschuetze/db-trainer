@@ -368,7 +368,7 @@ export function AuthorPage() {
             )}
             <details className="mt-3">
               <summary className="cursor-pointer text-sm font-semibold">Datei-Inhalt ansehen</summary>
-              <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-bg p-3 font-mono text-xs">{json}</pre>
+              <pre tabIndex={0} className="mt-2 max-h-80 overflow-auto rounded-lg bg-bg p-3 font-mono text-xs">{json}</pre>
             </details>
           </div>
         </section>
