@@ -40,10 +40,10 @@
   "chapter": "03",
   "question": "Was ist ein Nachteil natürlicher Schlüssel?",
   "options": [
-   "Sie sind nie eindeutig",
-   "Sie lassen sich nicht in SQL speichern",
+   "Sie sind in der Praxis niemals eindeutig und taugen nicht",
+   "Sie lassen sich in SQL nicht als Spalte speichern",
    "Sie können sich ändern oder irgendwann nicht mehr ausreichen",
-   "Sie sind immer zu kurz"
+   "Sie sind immer zu kurz und passen nicht in eine Spalte"
   ],
   "correct": [
    2
@@ -72,10 +72,10 @@
   "chapter": "03",
   "question": "Warum werden heute meist künstliche Primärschlüssel verwendet?",
   "options": [
-   "Sie sind in Oracle verpflichtend",
+   "Oracle schreibt für jede Tabelle einen künstlichen Schlüssel verbindlich vor, andere sind unzulässig",
    "Viele Entitäten haben keinen guten natürlichen Kandidaten, und einfache Schlüssel erleichtern den Zugriff",
-   "Sie sparen immer Speicherplatz",
-   "Sie müssen nicht eindeutig sein"
+   "Sie sparen in jedem Fall Speicherplatz gegenüber natürlichen Schlüsseln und beschleunigen jede Abfrage",
+   "Sie müssen nicht eindeutig sein, dürfen sich wiederholen und ändern sich laufend"
   ],
   "correct": [
    1
@@ -122,10 +122,10 @@
   "chapter": "03",
   "question": "Warum hat eine schwache Entität keinen eigenen vollständigen Schlüssel?",
   "options": [
-   "Sie hat keine Attribute",
-   "Sie wird nie gespeichert",
+   "Sie hat überhaupt keine Attribute und besteht nur aus Beziehungen",
+   "Sie wird nie in der Datenbank gespeichert, sondern nur berechnet",
    "Sie wird erst durch die starke Entität eindeutig identifiziert",
-   "Sie hat immer genau eine Beziehung"
+   "Sie hat immer genau eine Beziehung zu einer einzigen starken Entität"
   ],
   "correct": [
    2
@@ -154,10 +154,10 @@
   "chapter": "03",
   "question": "Wie heißt die Beziehung zwischen starker und schwacher Entität?",
   "options": [
-   "Ternäre Beziehung",
-   "Rekursive Beziehung",
+   "Ternäre Beziehung zwischen drei Entitäten",
+   "Rekursive Beziehung einer Entität zu sich selbst",
    "Identifizierende (abhängige) Beziehung",
-   "Optionale Beziehung"
+   "Optionale Beziehung mit Minimum null"
   ],
   "correct": [
    2
@@ -205,10 +205,10 @@
   "chapter": "03",
   "question": "Die M:N-Beziehung „Mitarbeiterin arbeitet in Projekt“ hat das Attribut „Rolle“. Wo steht es nach der Auflösung?",
   "options": [
-   "In Mitarbeiterin",
-   "Es entfällt",
+   "In Mitarbeiterin, weil sie die Rolle ausübt",
+   "Es entfällt, weil es keiner Entität zugeordnet werden kann",
    "In der neuen schwachen Entität",
-   "In Projekt"
+   "In Projekt, weil das Projekt die Rolle vorgibt"
   ],
   "correct": [
    2
@@ -221,9 +221,9 @@
   "chapter": "03",
   "question": "Woraus besteht der Schlüssel einer schwachen Entität, die eine M:N-Beziehung auflöst?",
   "options": [
-   "Er ist leer",
-   "Aus einem eigenen Namen",
-   "Aus dem Namen der Beziehung",
+   "Er ist leer, weil schwache Entitäten keinen Schlüssel haben",
+   "Aus einem eigenen, frei vergebenen Namen der schwachen Entität",
+   "Aus dem Namen der Beziehung zwischen den beiden Entitäten",
    "Aus den Schlüsseln der beiden starken Entitäten"
   ],
   "correct": [
@@ -237,9 +237,9 @@
   "chapter": "03",
   "question": "Wie nennt man die Beziehung zwischen Supertyp und Subtyp?",
   "options": [
-   "Enthält-Beziehung",
-   "Hat-ein-Beziehung",
-   "Rekursive Beziehung",
+   "Enthält-Beziehung („contains“) zwischen Ober- und Unterbegriff",
+   "Hat-ein-Beziehung („has a“) zwischen beiden Typen",
+   "Rekursive Beziehung des Supertyps zu sich selbst",
    "Ist-ein-Beziehung („is a“)"
   ],
   "correct": [
@@ -317,10 +317,10 @@
   "chapter": "03",
   "question": "Jede Instanz gehört zu mindestens einem Subtyp. Welche Eigenschaft liegt vor?",
   "options": [
-   "Partiell",
+   "Partiell, also nicht jede Instanz gehört zu einem Subtyp",
    "Vollständig (total)",
-   "Überlappend",
-   "Disjunkt"
+   "Überlappend, also eine Instanz kann mehreren Subtypen angehören",
+   "Disjunkt, also eine Instanz gehört höchstens einem Subtyp an"
   ],
   "correct": [
    1
@@ -365,10 +365,10 @@
   "chapter": "04",
   "question": "Was ist ein Datenbankschema?",
   "options": [
-   "Der Inhalt aller Tabellen",
+   "Der gesamte Inhalt aller Tabellen zu einem Zeitpunkt",
    "Die Menge aller Relationenschemata",
-   "Ein SQL-Befehl",
-   "Eine einzelne Zeile"
+   "Ein SQL-Befehl, der die Struktur einer Tabelle anlegt",
+   "Eine einzelne Zeile einer Tabelle mit allen Werten"
   ],
   "correct": [
    1
@@ -430,9 +430,9 @@
   "question": "Was heißt „minimale Menge von Attributen“ beim Primärschlüssel?",
   "options": [
    "Es darf kein Attribut weggelassen werden, ohne die Eindeutigkeit zu verlieren",
-   "Er besteht immer aus genau einem Attribut",
-   "Er hat möglichst kurze Namen",
-   "Er besteht aus möglichst wenigen Zeichen"
+   "Er besteht immer aus genau einem einzigen Attribut, mehrere Spalten sind nicht erlaubt",
+   "Er hat möglichst kurze Spaltennamen, damit das Schema übersichtlich bleibt",
+   "Er besteht aus möglichst wenigen Zeichen pro Wert, damit er wenig Speicher braucht"
   ],
   "correct": [
    0
@@ -445,9 +445,9 @@
   "chapter": "04",
   "question": "Was ist ein Wertebereich (Domäne) eines Attributs?",
   "options": [
-   "Der Primärschlüssel",
-   "Der Name der Tabelle",
-   "Die Anzahl der Zeilen",
+   "Der Primärschlüssel, der die Zeilen eindeutig kennzeichnet",
+   "Der Name der Tabelle, in der das Attribut steht",
+   "Die Anzahl der Zeilen, die eine Tabelle höchstens haben darf",
    "Die Menge der zulässigen Werte, z. B. ganze Zahlen oder Datum"
   ],
   "correct": [
@@ -461,10 +461,10 @@
   "chapter": "04",
   "question": "Was ist ein Fremdschlüssel?",
   "options": [
-   "Ein Schlüssel, der nicht eindeutig sein muss und nirgends verweist",
+   "Ein Schlüssel, der nicht eindeutig sein muss und auf keine andere Relation verweist",
    "Ein Attribut, dessen Werte auf Primärschlüsselwerte einer Relation verweisen",
-   "Ein verschlüsselter Primärschlüssel",
-   "Ein zweiter Primärschlüssel derselben Tabelle"
+   "Ein verschlüsselter Primärschlüssel, der für den Datenaustausch zwischen Systemen dient",
+   "Ein zweiter Primärschlüssel, der zusätzlich in derselben Tabelle gespeichert wird"
   ],
   "correct": [
    1
@@ -477,9 +477,9 @@
   "chapter": "04",
   "question": "Wann darf ein Fremdschlüssel NULL sein?",
   "options": [
-   "Immer, auch als Teil des Primärschlüssels",
-   "Nie",
-   "Nur bei 1:1-Beziehungen",
+   "Immer, auch dann, wenn er zugleich Teil des Primärschlüssels der Relation ist",
+   "Nie, ein Fremdschlüssel muss in jeder Zeile einen gültigen Wert enthalten",
+   "Nur bei 1:1-Beziehungen, bei allen anderen Beziehungen ist NULL ausgeschlossen",
    "Wenn er nicht Teil des Primärschlüssels und nicht als NOT NULL deklariert ist"
   ],
   "correct": [
@@ -493,10 +493,10 @@
   "chapter": "04",
   "question": "Was ist eine Self-Referencing Table?",
   "options": [
-   "Eine Tabelle mit nur einer Zeile",
+   "Eine Tabelle, die nur eine einzige Zeile enthalten darf und sich darauf selbst bezieht",
    "Eine Relation, deren Fremdschlüssel auf ihren eigenen Primärschlüssel zeigt",
-   "Eine Tabelle, die sich selbst löscht",
-   "Eine Tabelle ohne Primärschlüssel"
+   "Eine Tabelle, die sich nach einer festgelegten Zeit selbst wieder löscht",
+   "Eine Tabelle, die ohne eigenen Primärschlüssel auskommt, weil sie sich selbst kennt"
   ],
   "correct": [
    1
@@ -573,9 +573,9 @@
   "chapter": "04",
   "question": "Warum braucht eine M:N-Beziehung eine eigene Relation?",
   "options": [
-   "Weil SQL keine Fremdschlüssel kennt",
-   "Weil sonst der Primärschlüssel fehlt",
-   "Weil M:N seltener ist",
+   "Weil SQL grundsätzlich keine Fremdschlüssel kennt",
+   "Weil sonst für die Beziehung der Primärschlüssel fehlen würde",
+   "Weil M:N-Beziehungen nur selten in der Praxis vorkommen",
    "Ein einzelner Fremdschlüssel kann nicht auf mehrere Werte zeigen"
   ],
   "correct": [
@@ -590,9 +590,9 @@
   "question": "Wie nennt man die Relation, die eine M:N-Beziehung abbildet, noch?",
   "options": [
    "Zuordnungsrelation (Zuordnungstabelle)",
-   "Basisrelation",
-   "Sichtrelation",
-   "Referenzrelation ohne Schlüssel"
+   "Basisrelation (Zuordnung der Basisdaten)",
+   "Sichtrelation (View auf mehrere Tabellen)",
+   "Referenzrelation ohne eigenen Schlüssel"
   ],
   "correct": [
    0
@@ -621,9 +621,9 @@
   "chapter": "04",
   "question": "Die Beziehung „Student belegt Kurs“ hat das Attribut Semester. Wo steht Semester?",
   "options": [
-   "In Kurs",
-   "In Student",
-   "Es wird gelöscht",
+   "In Kurs, weil der Kurs im Semester stattfindet",
+   "In Student, weil jeder Student ein Semester hat",
+   "Es wird gelöscht, weil es keiner Entität gehört",
    "In der Zuordnungsrelation"
   ],
   "correct": [
@@ -653,10 +653,10 @@
   "chapter": "04",
   "question": "Warum verhindert der zusammengesetzte Primärschlüssel doppelte Zuordnungen?",
   "options": [
-   "Zuordnungen sind immer verboten",
-   "Fremdschlüssel sind automatisch UNIQUE",
+   "Zuordnungen sind in Zuordnungsrelationen grundsätzlich verboten",
+   "Fremdschlüssel sind in SQL automatisch UNIQUE",
    "Dieselbe Kombination aus beiden Schlüsseln kann nur einmal vorkommen",
-   "Er prüft die Reihenfolge"
+   "Er prüft zusätzlich die Reihenfolge der beiden Werte"
   ],
   "correct": [
    2
@@ -670,9 +670,9 @@
   "question": "Eine Komponente besteht aus mehreren Komponenten (M:N, rekursiv). Wie sieht die Abbildung aus?",
   "options": [
    "Eigene Zuordnungsrelation mit zwei Fremdschlüsseln auf Komponente",
-   "Ein Fremdschlüssel in Komponente",
-   "Keine Abbildung nötig",
-   "Ein mehrwertiges Attribut"
+   "Ein zusätzlicher Fremdschlüssel in der Relation Komponente selbst",
+   "Keine Abbildung nötig, die Beziehung bleibt im Modell",
+   "Ein mehrwertiges Attribut in der Relation Komponente"
   ],
   "correct": [
    0
@@ -685,9 +685,9 @@
   "chapter": "04",
   "question": "Bei einer 1:1-Beziehung gibt es keine N-Seite. Wohin kommt der Fremdschlüssel?",
   "options": [
-   "Nirgends",
-   "In eine dritte Relation",
-   "Immer in beide gleichzeitig",
+   "Nirgends, weil es keine N-Seite gibt",
+   "In eine dritte, zusätzliche Relation zwischen beiden",
+   "Immer in beide Relationen gleichzeitig, als Doppelverweis",
    "In mindestens eine der beiden Relationen"
   ],
   "correct": [
@@ -717,10 +717,10 @@
   "chapter": "04",
   "question": "Wann kann man eine 1:1-Beziehung auch in einer Relation zusammenfassen?",
   "options": [
-   "Nur bei rekursiven Beziehungen",
-   "Nie",
+   "Nur bei rekursiven Beziehungen derselben Entität",
+   "Nie, 1:1-Beziehungen müssen immer getrennt bleiben",
    "Wenn eine Relation keine weiteren Attribute hat",
-   "Immer"
+   "Immer, ohne Rücksicht auf die Attribute"
   ],
   "correct": [
    2
@@ -765,9 +765,9 @@
   "chapter": "04",
   "question": "Wie bildet man „Ein Teil besteht aus anderen Teilen und ist Bestandteil anderer Teile“ ab?",
   "options": [
-   "Gar nicht",
-   "Als mehrwertiges Attribut",
-   "Als einfachen Fremdschlüssel",
+   "Gar nicht, denn Beziehungen innerhalb derselben Entität sind im Relationenmodell nicht darstellbar",
+   "Als mehrwertiges Attribut, das alle Teile in einer Spalte als Liste aufführt",
+   "Als einfachen Fremdschlüssel, der in jeder Zeile genau ein anderes Teil nennt",
    "Als rekursive M:N-Beziehung mit Zuordnungsrelation"
   ],
   "correct": [
@@ -781,9 +781,9 @@
   "chapter": "04",
   "question": "Darf bei einer 1:1-Beziehung auch jede der beiden Relationen einen Fremdschlüssel erhalten?",
   "options": [
-   "Nein, nie",
-   "Nur bei schwachen Entitäten",
-   "Nur wenn eine Relation leer ist",
+   "Nein, nie, denn gegenseitige Verweise würden den Einfügevorgang unmöglich machen",
+   "Nur bei schwachen Entitäten, bei allen anderen 1:1-Beziehungen ist es verboten",
+   "Nur wenn eine der beiden Relationen noch leer ist und keine Zeilen enthält",
    "Ja, sie referenzieren sich dann gegenseitig"
   ],
   "correct": [
@@ -797,9 +797,9 @@
   "chapter": "04",
   "question": "Was ist ein Nachteil des Hausklassenmodells?",
   "options": [
-   "Es verliert die Subtyp-Attribute",
-   "Es braucht sehr viele Tabellen",
-   "Es ist nicht normalisierbar",
+   "Es verliert die Attribute der Subtypen, weil sie nicht abgebildet werden",
+   "Es braucht sehr viele Tabellen, weil für jede Instanz eine eigene Relation entsteht",
+   "Es ist grundsätzlich nicht normalisierbar und verletzt immer die erste Normalform",
    "Instanzen, die in keinem Subtyp liegen, lassen sich nicht speichern"
   ],
   "correct": [
@@ -814,9 +814,9 @@
   "question": "Wie ist der Primärschlüssel eines Subtyps im Partitionierungsmodell?",
   "options": [
    "Primärschlüssel und zugleich Fremdschlüssel auf den Supertyp",
-   "Nur Primärschlüssel ohne Verweis",
-   "Ein neuer künstlicher Schlüssel",
-   "Nur Fremdschlüssel"
+   "Nur ein Primärschlüssel ohne jeden Verweis auf den Supertyp",
+   "Ein neuer künstlicher Schlüssel, der unabhängig vom Supertyp vergeben wird",
+   "Nur ein Fremdschlüssel auf den Supertyp, aber kein Primärschlüssel"
   ],
   "correct": [
    0
@@ -846,9 +846,9 @@
   "question": "Warum enthält die Hierarchierelation viele NULL-Werte?",
   "options": [
    "Subtyp-Attribute sind für fremde Typen nicht belegt",
-   "Weil sie keinen Primärschlüssel hat",
-   "Weil sie Fremdschlüssel hat",
-   "Weil sie nur Zahlen speichert"
+   "Weil sie keinen eigenen Primärschlüssel besitzt und Werte offen lässt",
+   "Weil sie sehr viele Fremdschlüssel auf andere Relationen enthält",
+   "Weil sie ausschließlich Zahlen speichert und leere Texte als NULL ablegt"
   ],
   "correct": [
    0
@@ -861,10 +861,10 @@
   "chapter": "04",
   "question": "Wofür dient das Typ-Attribut der Hierarchierelation?",
   "options": [
-   "Als Primärschlüssel",
+   "Als Primärschlüssel der gesamten Hierarchierelation",
    "Zur Unterscheidung der Subtypen",
-   "Zur Sortierung",
-   "Als Fremdschlüssel"
+   "Zur Sortierung der Zeilen innerhalb der Hierarchierelation",
+   "Als Fremdschlüssel auf die Relation des Supertyps"
   ],
   "correct": [
    1
@@ -877,10 +877,10 @@
   "chapter": "04",
   "question": "Welche vier Abbildungsvarianten kennt die Vorlesung?",
   "options": [
-   "Nur Hausklassenmodell",
-   "Sternschema, Schneeflocke, Galaxie, Würfel",
+   "Nur das Hausklassenmodell, das in vier verschiedenen Ausprägungen vorkommt",
+   "Sternschema, Schneeflockenschema, Galaxie- und Würfelmodell (aus dem Data Warehouse)",
    "Hausklassen-, Partitionierungs-, Volle-Redundanz-Modell und Hierarchierelation",
-   "Nur Partitionierung und Hierarchie"
+   "Nur Partitionierung und Hierarchie, jeweils mit und ohne Typ-Attribut"
   ],
   "correct": [
    2
@@ -894,9 +894,9 @@
   "question": "Welches Modell eignet sich nicht gut für überlappende Spezialisierungen?",
   "options": [
    "Hierarchierelation, weil nur ein Typ-Wert je Zeile möglich ist",
-   "Partitionierungsmodell",
-   "Volle Redundanz",
-   "Alle drei gleich schlecht"
+   "Partitionierungsmodell, weil die Subtypen dort getrennt gespeichert werden",
+   "Volle Redundanz, weil Attribute des Supertyps in jedem Subtyp wiederholt werden",
+   "Alle drei Modelle sind gleich schlecht für überlappende Spezialisierungen"
   ],
   "correct": [
    0

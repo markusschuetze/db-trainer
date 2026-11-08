@@ -275,7 +275,7 @@ export function NfExercisePage({ id }: { id: string }) {
   const next = () => setStep((s) => s + 1);
   return (
     <>
-      <a href="#/normalisierung" className="text-sm underline">
+      <a href="#/normalisierung" className="inline-block py-2 text-sm underline">
         ← Aufgaben
       </a>
       <h1 className="mt-2 text-2xl font-bold">{ex.title}</h1>

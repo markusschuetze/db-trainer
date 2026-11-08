@@ -43,16 +43,16 @@ export function Layout({ children }: { children: ReactNode }) {
         <ConsentBanner />
       </div>
       <header className={`print:hidden ${light ? 'border-b border-line bg-surface text-ink' : 'bg-brand text-brand-contrast'}`}>
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3">
           <a href="#/" className="flex items-center gap-3 no-underline">
             {config.logo && <img src={assetUrl(config.logo)} alt={config.institution} className="h-10" />}
-            <span className={`text-xl font-bold ${fg}`}>{config.appName}</span>
+            <span className={`whitespace-nowrap text-xl font-bold ${fg}`}>{config.appName}</span>
           </a>
-          <nav aria-label={t('Hauptnavigation')} className="ml-auto flex gap-4 text-sm font-semibold">
-            <a href="#/fortschritt" className={`${fg} no-underline hover:underline`}>
+          <nav aria-label={t('Hauptnavigation')} className="ml-auto flex gap-2 text-sm font-semibold">
+            <a href="#/fortschritt" className={`${fg} inline-block px-2 py-2.5 no-underline hover:underline`}>
               {t('Fortschritt')}
             </a>
-            <a href="#/pruefung" className={`${fg} no-underline hover:underline`}>
+            <a href="#/pruefung" className={`${fg} inline-block px-2 py-2.5 no-underline hover:underline`}>
               {t('Probeklausur')}
             </a>
           </nav>
@@ -60,7 +60,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <label className="flex items-center gap-2 text-sm">
               <span className="sr-only">{t('Sprache')}</span>
               <select
-                className={`rounded border bg-transparent px-2 py-1 ${light ? 'border-line text-ink' : 'border-white/40 text-brand-contrast'}`}
+                className={`min-h-9 rounded border bg-transparent px-2 py-1 ${light ? 'border-line text-ink' : 'border-white/40 text-brand-contrast'}`}
                 value={getLang()}
                 onChange={(e) => setLang(e.target.value as Lang)}
                 aria-label={t('Sprache')}
@@ -77,7 +77,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <label className="flex items-center gap-2 text-sm">
               <span className="sr-only sm:not-sr-only">{t('Design')}</span>
               <select
-                className={`rounded border bg-transparent px-2 py-1 ${light ? 'border-line text-ink' : 'border-white/40 text-brand-contrast'}`}
+                className={`min-h-9 rounded border bg-transparent px-2 py-1 ${light ? 'border-line text-ink' : 'border-white/40 text-brand-contrast'}`}
                 defaultValue={currentTheme()}
                 onChange={(e) => applyTheme(e.target.value, true)}
               >
@@ -99,7 +99,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <span>{t(config.license)}</span>
           <nav className="flex gap-4" aria-label={t('Fußzeile')}>
             {config.footerLinks.map((l) => (
-              <a key={l.href} href={l.href} className="underline">
+              <a key={l.href} href={l.href} className="inline-block py-2 underline">
                 {t(l.label)}
               </a>
             ))}

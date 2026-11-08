@@ -386,10 +386,12 @@ function Result({ t, onFinish }: { t: TextTask; onFinish: () => void }) {
 
 /* ======================= Seiten ======================= */
 
+const preview = (x: string, n = 140) => (x.length <= n ? x : `${x.slice(0, x.lastIndexOf(' ', n))}…`);
+
 export function TextTaskList() {
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Textaufgaben</h1>
@@ -405,7 +407,7 @@ export function TextTaskList() {
               {isDone(`tt:${t.id}`) && <span className="ml-2 text-ok">✓ gelöst</span>}
             </span>
             <h2 className="mt-1 text-lg font-bold">{t.title}</h2>
-            <p className="mt-1 flex-1 text-sm text-muted">{t.text.slice(0, 140)}…</p>
+            <p className="mt-1 flex-1 text-sm text-muted">{preview(t.text)}</p>
             <a href={`#/textaufgaben/${t.id}`} className={`${btn} mt-4 self-start no-underline`}>
               Start
             </a>
@@ -453,7 +455,7 @@ export function TextTaskPage({ id }: { id: string }) {
 
   return (
     <>
-      <a href="#/textaufgaben" className="text-sm underline">
+      <a href="#/textaufgaben" className="inline-block py-2 text-sm underline">
         ← Textaufgaben
       </a>
       <h1 className="mt-2 text-2xl font-bold">{t.title}</h1>

@@ -37,10 +37,10 @@
   "chapter": "05",
   "question": "Was ist die gemeinsame Ursache der drei Anomalien?",
   "options": [
-   "Fehlende Indizes",
+   "Fehlende Indizes auf den Spalten, nach denen häufig gesucht wird",
    "Redundante Speicherung von Informationen in einer Relation",
-   "Ein falscher Datentyp",
-   "Zu wenige Spalten"
+   "Ein falsch gewählter Datentyp, der Werte abschneidet oder verfälscht",
+   "Zu wenige Spalten, sodass Informationen in Zeilen ausweichen müssen"
   ],
   "correct": [
    1
@@ -104,10 +104,10 @@
   "chapter": "05",
   "question": "In einer Relation steht der Standort der Abteilung in jeder Mitarbeiterzeile. Der Standort ändert sich. Was ist das Risiko?",
   "options": [
-   "Die Abteilung wird gelöscht",
+   "Die Abteilung wird dabei versehentlich aus der Datenbank gelöscht",
    "Wird eine Zeile vergessen, sind die Daten widersprüchlich",
-   "Es entsteht eine neue Abteilung",
-   "Der Standort kann nicht geändert werden"
+   "Es entsteht automatisch eine neue Abteilung mit dem neuen Standort",
+   "Der Standort kann in einer solchen Relation grundsätzlich nicht geändert werden"
   ],
   "correct": [
    1
@@ -120,10 +120,10 @@
   "chapter": "05",
   "question": "Welches Attribut verletzt die 1. Normalform?",
   "options": [
-   "Name: „Meier“",
+   "Name: „Meier“, ein einzelner Familienname in einer Zeile",
    "Telefonnummern: „0221 123, 0221 456“",
-   "Telefonnummer: „0221 123“",
-   "Geburtsdatum: „2004-05-12“"
+   "Telefonnummer: „0221 123“, eine einzelne Nummer in einem Feld",
+   "Geburtsdatum: „2004-05-12“, ein einzelnes Datum in einem Feld"
   ],
   "correct": [
    1
@@ -136,9 +136,9 @@
   "chapter": "05",
   "question": "Was ist ein strukturiertes Attribut?",
   "options": [
-   "Ein Primärschlüssel",
-   "Ein Fremdschlüssel",
-   "Ein Attribut mit vielen Buchstaben",
+   "Ein Primärschlüssel, der aus mehreren Attributen zusammengesetzt ist",
+   "Ein Fremdschlüssel, der auf mehrere andere Relationen zugleich verweist",
+   "Ein Attribut mit sehr vielen Buchstaben oder Zeichen in einem Feld",
    "Ein Attribut mit Werten aus mehr als einer Domäne, z. B. „3500 €“"
   ],
   "correct": [
@@ -152,10 +152,10 @@
   "chapter": "05",
   "question": "Wie löst man ein mehrwertiges Attribut auf?",
   "options": [
-   "Durch Löschen",
+   "Durch Löschen aller Werte außer dem ersten, der übrig bleibt",
    "Für jeden Wert ein eigenes Tupel, das Attribut wird Teil des Schlüssels",
-   "In eine zweite Spalte gleicher Art",
-   "Als eine Spalte mit Komma-Liste belassen"
+   "In eine zweite Spalte gleicher Art, die die weiteren Werte aufnimmt",
+   "Als eine einzige Spalte mit Komma-Liste, wie sie bisher vorlag"
   ],
   "correct": [
    1
@@ -168,10 +168,10 @@
   "chapter": "05",
   "question": "Wie löst man ein strukturiertes Attribut auf?",
   "options": [
-   "In eine neue Tabelle auslagern",
-   "Auf mehrere Zeilen verteilen",
+   "Das Attribut in eine neue Tabelle auslagern und dort mehrfach speichern",
+   "Auf mehrere Zeilen verteilen, sodass pro Zeile eine Domäne steht",
    "Jede Domäne in ein eigenes Attribut aufspalten",
-   "Als Text belassen"
+   "Als Text belassen und bei der Abfrage mit Funktionen zerlegen"
   ],
   "correct": [
    2
@@ -200,10 +200,10 @@
   "chapter": "05",
   "question": "Das Attribut „Gebäude/Raum“ enthält „A 304“. Warum ist das nicht atomar?",
   "options": [
-   "Es enthält ein Leerzeichen",
+   "Es enthält ein Leerzeichen, und Leerzeichen sind in Atomen nicht erlaubt",
    "Gebäude und Raum sind zwei Informationen in einem Feld",
-   "Es enthält Buchstaben",
-   "Es ist zu kurz"
+   "Es enthält Buchstaben und Zahlen gemischt, das verletzt die Atomarität",
+   "Es ist zu kurz, um das Gebäude und den Raum sicher zu bestimmen"
   ],
   "correct": [
    1
@@ -217,9 +217,9 @@
   "question": "Zu jedem Auftrag gibt es mehrere Arbeitsfolgen mit je einer Vorgabezeit (1, 2 → 15, 25). Wie löst man das auf?",
   "options": [
    "Je Arbeitsfolge ein Tupel mit der zugehörigen Vorgabezeit; nur AFO wird Teil des Schlüssels",
-   "Zwei Spalten, die unabhängig aufgeteilt werden",
-   "Beide Listen belassen",
-   "Eine Spalte mit „1:15, 2:25“"
+   "Zwei Spalten, in denen die Listen unabhängig voneinander aufgeteilt werden, ohne Zuordnung",
+   "Beide Listen in je einem Feld belassen und nur den Auftrag allein als Schlüssel nutzen",
+   "Eine einzige Spalte mit „1:15, 2:25“ als Text, die Folge und Zeit gemeinsam enthält"
   ],
   "correct": [
    0
@@ -232,9 +232,9 @@
   "chapter": "05",
   "question": "Wann muss die 2. Normalform überhaupt geprüft werden?",
   "options": [
-   "Immer bei mehr als 5 Spalten",
-   "Nur bei einem Fremdschlüssel",
-   "Nie",
+   "Immer dann, wenn eine Relation mehr als fünf Spalten besitzt",
+   "Nur dann, wenn die Relation mindestens einen Fremdschlüssel enthält",
+   "Nie, denn jede Relation in 1NF ist automatisch auch in 2NF",
    "Bei zusammengesetztem Primärschlüssel"
   ],
   "correct": [
@@ -248,10 +248,10 @@
   "chapter": "05",
   "question": "Wann ist X → Y eine volle funktionale Abhängigkeit?",
   "options": [
-   "Wenn X leer ist",
+   "Wenn X leer ist und Y damit für alle Zeilen denselben Wert hat",
    "Wenn jedes Attribut aus Y von der gesamten Menge X abhängt",
-   "Wenn Y ein Primärschlüssel ist",
-   "Wenn Y von einem Teil von X abhängt"
+   "Wenn Y selbst ein Primärschlüssel der Relation ist",
+   "Wenn Y bereits von einem Teil der Attributmenge X abhängt"
   ],
   "correct": [
    1
@@ -280,10 +280,10 @@
   "chapter": "05",
   "question": "Wie überführt man 1NF in 2NF?",
   "options": [
-   "Alle Attribute löschen",
+   "Alle Nichtschlüsselattribute löschen und nur den Schlüssel behalten",
    "Partiell abhängige Attribute mit dem Teilschlüssel in eigene Relationen auslagern",
-   "Einen weiteren Schlüssel ergänzen",
-   "Alle Zeilen zusammenfassen"
+   "Einen weiteren künstlichen Schlüssel ergänzen und die Zeilen neu nummerieren",
+   "Alle Zeilen mit gleichem Schlüsselteil zu einer einzigen Zeile zusammenfassen"
   ],
   "correct": [
    1
@@ -313,9 +313,9 @@
   "question": "Nach dem Auslagern bleibt in der Ursprungsrelation nur noch der ursprüngliche Schlüssel übrig. Was entsteht?",
   "options": [
    "Eine Zuordnungsrelation (M:N ohne Attribute)",
-   "Ein Fehler",
-   "Eine Relation ohne Schlüssel",
-   "Eine leere Relation"
+   "Ein Fehler, weil eine Relation ohne Nichtschlüsselattribute nicht erlaubt ist",
+   "Eine Relation ohne Schlüssel, weil der Schlüssel ausgelagert wurde",
+   "Eine leere Relation, die anschließend gelöscht werden muss"
   ],
   "correct": [
    0
@@ -328,10 +328,10 @@
   "chapter": "05",
   "question": "Ang_Nr → Name, Ort, Abt_Nr, Abt_Name. Schlüssel (Ang_Nr, ANr). Wovon hängt Abt_Name nicht nur ab?",
   "options": [
-   "Vom Namen des Angestellten",
-   "Von ANr",
+   "Vom Namen des Angestellten, weil dieser den Mitarbeiter identifiziert",
+   "Von ANr, dem Teil des Schlüssels, der das Projekt bezeichnet",
    "Von Abt_Nr, es ist zusätzlich transitiv abhängig",
-   "Von nichts"
+   "Von nichts, denn Abt_Name ist ein eigenständiges Attribut"
   ],
   "correct": [
    2
@@ -344,9 +344,9 @@
   "chapter": "05",
   "question": "Wann ist eine Relation in der 3. Normalform?",
   "options": [
-   "Wenn sie in 1NF ist und keinen Fremdschlüssel hat",
-   "Wenn sie genau drei Attribute hat",
-   "Wenn sie keinen Primärschlüssel hat",
+   "Wenn sie in 1NF ist und keinen einzigen Fremdschlüssel enthält, der auf andere Tabellen zeigt",
+   "Wenn sie genau drei Attribute hat, darunter den Primärschlüssel und zwei weitere Spalten",
+   "Wenn sie keinen Primärschlüssel hat und alle Spalten daher gleich behandelt werden können",
    "Wenn sie in 2NF ist und kein Nichtschlüsselattribut transitiv von einem Schlüssel abhängt"
   ],
   "correct": [
@@ -377,9 +377,9 @@
   "question": "Wie löst man s → a → b auf?",
   "options": [
    "a und b in eine neue Relation mit Schlüssel a; a bleibt als Fremdschlüssel zurück",
-   "Die Relation bleibt unverändert",
-   "a wird in den Schlüssel von s aufgenommen",
-   "b wird gelöscht"
+   "Die Relation bleibt unverändert, die Abhängigkeit wird nur im Modell dokumentiert",
+   "a wird in den Schlüssel von s aufgenommen, b bleibt in derselben Relation stehen",
+   "b wird aus der Relation gelöscht, weil es ohnehin von a abhängig ist"
   ],
   "correct": [
    0
@@ -393,9 +393,9 @@
   "question": "MitArb_ID → Büro-Nr, Büro-Nr → B_Größe, Etage. Wie sieht die 3NF aus?",
   "options": [
    "Mitarbeiter(MitArb_ID, Name, Büro-Nr) und Büro(Büro-Nr, B_Größe, Etage)",
-   "Eine Relation mit allen Attributen",
-   "Büro(Büro-Nr, MitArb_ID)",
-   "Mitarbeiter und Büro ohne Fremdschlüssel"
+   "Eine einzige Relation mit allen Attributen, ergänzt um eine Etagenspalte",
+   "Büro(Büro-Nr, MitArb_ID), alle anderen Attribute entfallen",
+   "Mitarbeiter und Büro als zwei Relationen, aber ohne Fremdschlüssel dazwischen"
   ],
   "correct": [
    0
@@ -408,10 +408,10 @@
   "chapter": "05",
   "question": "Was bedeutet eine transitive Abhängigkeit praktisch?",
   "options": [
-   "Es fehlen Daten",
+   "Es fehlen Daten, weil Abhängigkeiten nicht gespeichert werden können",
    "Eine Information wird mehrfach gespeichert",
-   "Die Tabelle hat zu viele Zeilen",
-   "Der Primärschlüssel ist zu lang"
+   "Die Tabelle hat zu viele Zeilen, sodass Abfragen sehr langsam werden",
+   "Der Primärschlüssel ist zu lang und passt nicht in eine Spalte"
   ],
   "correct": [
    1
@@ -456,9 +456,9 @@
   "chapter": "06",
   "question": "Wofür steht VARCHAR2(50) in Oracle?",
   "options": [
-   "Text fester Länge mit genau 50 Zeichen",
-   "Ein Datum mit 50 Feldern",
-   "Eine Zahl mit 50 Stellen",
+   "Text fester Länge mit genau 50 Zeichen, kürzere Werte werden aufgefüllt",
+   "Ein Datum mit 50 Feldern für Jahr, Monat, Tag und weitere Angaben",
+   "Eine Zahl mit bis zu 50 Stellen vor dem Komma, ohne Nachkommastellen",
    "Text variabler Länge mit höchstens 50 Zeichen"
   ],
   "correct": [
@@ -540,9 +540,9 @@
   "question": "Wie behandelt SQL Groß- und Kleinschreibung bei Schlüsselwörtern und Bezeichnern?",
   "options": [
    "Es unterscheidet sie nicht (ohne Anführungszeichen)",
-   "Nur bei Tabellennamen",
-   "Nur bei Datentypen",
-   "Es unterscheidet immer"
+   "Nur bei Tabellennamen, Schlüsselwörter sind immer groß zu schreiben",
+   "Nur bei Datentypen, alle anderen Bezeichner sind frei wählbar",
+   "Es unterscheidet immer streng zwischen Groß- und Kleinschreibung bei allen Namen"
   ],
   "correct": [
    0
@@ -555,10 +555,10 @@
   "chapter": "06",
   "question": "Wofür dient der Datentyp BLOB?",
   "options": [
-   "Datumswerte",
-   "Ganze Zahlen",
+   "Datumswerte mit Uhrzeit und Zeitzone, auf die Sekunde genau",
+   "Ganze Zahlen mit bis zu 38 Stellen, ohne Nachkommaanteil",
    "Große binäre Daten, z. B. Bilder",
-   "Kurze Texte"
+   "Kurze Texte fester Länge, z. B. Kürzel oder Postleitzahlen"
   ],
   "correct": [
    2
@@ -572,9 +572,9 @@
   "question": "Was bedeutet NOT NULL?",
   "options": [
    "Die Spalte darf keine leeren Werte enthalten",
-   "Die Spalte enthält nur Nullen",
-   "Die Spalte ist ein Primärschlüssel",
-   "Die Spalte ist eindeutig"
+   "Die Spalte enthält ausschließlich Nullen und keine anderen Zahlen",
+   "Die Spalte ist ein Primärschlüssel der gesamten Relation",
+   "Die Spalte ist eindeutig, kein Wert darf doppelt vorkommen"
   ],
   "correct": [
    0
@@ -603,10 +603,10 @@
   "chapter": "06",
   "question": "Wann wird ein DEFAULT-Wert verwendet?",
   "options": [
-   "Nur bei NULL im Primärschlüssel",
-   "Immer, auch wenn ein Wert angegeben ist",
+   "Nur dann, wenn im Primärschlüssel der Wert NULL steht",
+   "Immer, auch wenn beim Einfügen ein Wert angegeben ist",
    "Wenn beim Einfügen für die Spalte kein Wert angegeben wird",
-   "Nur bei UPDATE"
+   "Nur bei einer UPDATE-Anweisung, nie beim Einfügen"
   ],
   "correct": [
    2
@@ -619,10 +619,10 @@
   "chapter": "06",
   "question": "Wofür dient ein CHECK-Constraint?",
   "options": [
-   "Zum Sortieren",
-   "Zum Prüfen der Syntax",
+   "Zum Sortieren der Datensätze in einer vom Nutzer festgelegten Reihenfolge",
+   "Zum Prüfen der Syntax einer Anweisung vor ihrer Ausführung im Skript",
    "Für benutzerdefinierte Bedingungen, die jeder Datensatz erfüllen muss",
-   "Zum Kopieren"
+   "Zum Kopieren von Datensätzen in eine andere Tabelle der Datenbank"
   ],
   "correct": [
    2
@@ -636,9 +636,9 @@
   "question": "Wann braucht man ein Tabellenconstraint statt eines Spaltenconstraints?",
   "options": [
    "Bei Bedingungen über mehrere Spalten, z. B. zusammengesetzter Primärschlüssel",
-   "Nur für NOT NULL",
-   "Nie",
-   "Immer"
+   "Nur für NOT NULL, das sich nicht an einer Spalte angeben lässt",
+   "Nie, denn jede Bedingung lässt sich auch als Spaltenconstraint schreiben",
+   "Immer, Spaltenconstraints sind in Oracle nicht mehr zulässig"
   ],
   "correct": [
    0
@@ -651,10 +651,10 @@
   "chapter": "06",
   "question": "Welchen Vorteil hat ein benannter Constraint?",
   "options": [
-   "Er gilt für mehrere Tabellen",
-   "Er ist schneller",
+   "Er gilt gleichzeitig für mehrere Tabellen, die denselben Constraint-Namen verwenden",
+   "Er wird vom DBMS schneller geprüft als ein Constraint ohne eigenen Namen",
    "Fehlermeldungen nennen den Namen, und man kann ihn gezielt ändern oder löschen",
-   "Er benötigt weniger Speicher"
+   "Er benötigt weniger Speicher als ein Constraint mit vom System vergebenem Namen"
   ],
   "correct": [
    2
@@ -667,10 +667,10 @@
   "chapter": "06",
   "question": "Wie viele PRIMARY KEY-Constraints darf eine Tabelle haben?",
   "options": [
-   "Beliebig viele",
-   "Mindestens zwei",
+   "Beliebig viele, jede Spalte darf ihren eigenen Primärschlüssel erhalten",
+   "Mindestens zwei, damit die Zeilen sicher unterschieden werden können",
    "Höchstens einen (der aber mehrere Spalten umfassen kann)",
-   "Keinen"
+   "Keinen, ein Primärschlüssel ist in Oracle ausschließlich Konvention"
   ],
   "correct": [
    2
@@ -699,10 +699,10 @@
   "chapter": "06",
   "question": "Was bewirkt ON DELETE SET NULL?",
   "options": [
-   "Der Fremdschlüssel wird gelöscht",
+   "Die Fremdschlüsselspalte wird beim Löschen aus der Kindtabelle entfernt",
    "Beim Löschen des Elterndatensatzes wird der Fremdschlüssel der Kinder auf NULL gesetzt",
-   "Das Löschen wird abgelehnt",
-   "Die Kinder werden gelöscht"
+   "Das Löschen des Elterndatensatzes wird mit einem Fehler abgelehnt, solange Kinder existieren",
+   "Die Kinddatensätze werden zusammen mit dem Elterndatensatz ebenfalls gelöscht"
   ],
   "correct": [
    1
@@ -715,9 +715,9 @@
   "chapter": "06",
   "question": "Welchen Oracle-Fehler erhält man beim Einfügen einer Anmeldung zu einem nicht vorhandenen Kurs?",
   "options": [
-   "ORA-01400",
-   "ORA-00001",
-   "ORA-00942",
+   "ORA-01400 (NULL kann nicht in eine Pflichtspalte eingefügt werden)",
+   "ORA-00001 (Verstoß gegen eine Eindeutigkeitsbedingung)",
+   "ORA-00942 (Tabelle oder View existiert nicht)",
    "ORA-02291 (übergeordneter Schlüssel nicht gefunden)"
   ],
   "correct": [
@@ -732,9 +732,9 @@
   "question": "Wie lautet ein Fremdschlüssel als Tabellenconstraint?",
   "options": [
    "CONSTRAINT fk FOREIGN KEY (spalte) REFERENCES tabelle (spalte)",
-   "FOREIGN spalte TO tabelle",
-   "REFERENCES spalte tabelle",
-   "KEY spalte -> tabelle"
+   "FOREIGN spalte TO tabelle (spalte) als Tabellenconstraint",
+   "REFERENCES spalte tabelle ON PRIMARY KEY als Tabellenconstraint",
+   "KEY spalte -> tabelle (spalte) mit Namen des Constraints"
   ],
   "correct": [
    0
@@ -747,10 +747,10 @@
   "chapter": "06",
   "question": "Worauf muss ein Fremdschlüssel in Oracle verweisen?",
   "options": [
-   "Auf eine beliebige Spalte",
-   "Auf eine Spalte ohne Constraint",
+   "Auf eine beliebige Spalte, auch ohne weitere Bedingung",
+   "Auf eine Spalte ohne jedes Constraint, die frei änderbar ist",
    "Auf einen PRIMARY KEY oder UNIQUE-Schlüssel",
-   "Auf eine View"
+   "Auf eine View, die die Daten der Elterntabelle bündelt"
   ],
   "correct": [
    2
@@ -797,10 +797,10 @@
   "chapter": "06",
   "question": "Wie ergänzt man einer bestehenden Tabelle eine Spalte?",
   "options": [
-   "CREATE COLUMN spalte",
-   "UPDATE TABLE t ADD spalte",
+   "CREATE COLUMN spalte VARCHAR2(20) IN t",
+   "UPDATE TABLE t ADD spalte VARCHAR2(20) NOT NULL",
    "ALTER TABLE t ADD (spalte VARCHAR2(20))",
-   "INSERT COLUMN spalte"
+   "INSERT COLUMN spalte VARCHAR2(20) INTO t"
   ],
   "correct": [
    2
@@ -813,9 +813,9 @@
   "chapter": "06",
   "question": "Wie entfernt man einen benannten Constraint?",
   "options": [
-   "REMOVE name FROM t",
-   "DELETE CONSTRAINT name",
-   "DROP name",
+   "REMOVE name FROM t, wobei name der Constraint-Name ist",
+   "DELETE CONSTRAINT name FROM TABLE t",
+   "DROP name, ohne Angabe der Tabelle",
    "ALTER TABLE t DROP CONSTRAINT name"
   ],
   "correct": [
@@ -829,9 +829,9 @@
   "chapter": "06",
   "question": "Was bewirkt DROP TABLE t CASCADE CONSTRAINTS?",
   "options": [
-   "Verhindert das Löschen",
-   "Löscht alle Tabellen",
-   "Löscht nur die Daten",
+   "Verhindert das Löschen, solange noch Zeilen in der Tabelle vorhanden sind",
+   "Löscht alle Tabellen, die über Beziehungen mit dieser Tabelle zusammenhängen",
+   "Löscht nur die Daten der Tabelle, die Struktur und Constraints bleiben erhalten",
    "Löscht die Tabelle und die Fremdschlüssel anderer Tabellen, die auf sie verweisen"
   ],
   "correct": [
@@ -845,9 +845,9 @@
   "chapter": "06",
   "question": "Was ist der Unterschied zwischen DROP TABLE und DELETE FROM?",
   "options": [
-   "Es ist dasselbe",
-   "DROP entfernt nur Zeilen",
-   "DELETE entfernt die Struktur",
+   "Es ist dasselbe, beide Anweisungen entfernen Tabelle und Daten",
+   "DROP entfernt nur einzelne Zeilen, DELETE entfernt die ganze Tabelle",
+   "DELETE entfernt die Struktur der Tabelle samt der Constraints",
    "DROP entfernt die Tabelle samt Struktur, DELETE nur Zeilen"
   ],
   "correct": [
@@ -878,9 +878,9 @@
   "question": "Wie ändert man in Oracle den Datentyp einer vorhandenen Spalte?",
   "options": [
    "ALTER TABLE t MODIFY (spalte NUMBER(10))",
-   "RENAME spalte",
-   "ALTER TABLE t CHANGE spalte",
-   "UPDATE t SET TYPE"
+   "RENAME spalte TO NUMBER(10) in der Tabelle t",
+   "ALTER TABLE t CHANGE spalte NUMBER(10) wie in MySQL",
+   "UPDATE t SET TYPE = NUMBER(10) für die Spalte"
   ],
   "correct": [
    0
@@ -893,10 +893,10 @@
   "chapter": "06",
   "question": "Wie benennt man eine Spalte in Oracle um?",
   "options": [
-   "ALTER COLUMN alt AS neu",
+   "ALTER COLUMN alt AS neu in der Tabelle t",
    "ALTER TABLE t RENAME COLUMN alt TO neu",
-   "RENAME alt TO neu IN t",
-   "UPDATE COLUMN"
+   "RENAME alt TO neu IN t für die Spalte",
+   "UPDATE COLUMN alt SET NAME = neu in t"
   ],
   "correct": [
    1
@@ -910,9 +910,9 @@
   "question": "Was bewirkt GENERATED ALWAYS AS IDENTITY?",
   "options": [
    "Der Wert wird immer vom System erzeugt, eigene Werte sind nicht erlaubt",
-   "Die Spalte darf NULL sein",
-   "Der Wert muss immer angegeben werden",
-   "Die Spalte ist ein Fremdschlüssel"
+   "Die Spalte darf NULL enthalten, das System ergänzt den Wert beim nächsten Zugriff",
+   "Der Wert muss bei jedem INSERT vom Nutzer angegeben und selbst gezählt werden",
+   "Die Spalte ist automatisch ein Fremdschlüssel, der auf eine Sequenz verweist"
   ],
   "correct": [
    0
@@ -925,9 +925,9 @@
   "chapter": "06",
   "question": "Wofür eignen sich Identity Columns typischerweise?",
   "options": [
-   "Für Fremdschlüssel",
-   "Für Texte",
-   "Für Kommentare",
+   "Für Fremdschlüssel auf andere Tabellen",
+   "Für Texte mit variabler Länge",
+   "Für Kommentare und Beschreibungen",
    "Für künstliche Primärschlüssel"
   ],
   "correct": [
@@ -957,9 +957,9 @@
   "chapter": "06",
   "question": "Welche Anweisung legt eine Sequenz an?",
   "options": [
-   "CREATE COUNTER s",
-   "NEW SEQUENCE s",
-   "ALTER TABLE ADD SEQUENCE",
+   "CREATE COUNTER s START WITH 1 INCREMENT BY 1",
+   "NEW SEQUENCE s START WITH 1 INCREMENT BY 1",
+   "ALTER TABLE t ADD SEQUENCE s START WITH 1",
    "CREATE SEQUENCE s START WITH 1 INCREMENT BY 1"
   ],
   "correct": [
@@ -1005,10 +1005,10 @@
   "chapter": "06",
   "question": "Warum funktioniert AUTO_INCREMENT nicht in Oracle?",
   "options": [
-   "Es ist in Oracle verboten",
-   "Es ist ein Datentyp",
+   "Es ist in Oracle ausdrücklich verboten und wird abgelehnt",
+   "Es ist ein Datentyp, den es nur in Oracle nicht gibt",
    "Es ist MySQL-Syntax, Oracle nutzt Identity Columns oder Sequenzen",
-   "Es fehlt nur die Lizenz"
+   "Es fehlt in Oracle nur die entsprechende Lizenz für diese Funktion"
   ],
   "correct": [
    2

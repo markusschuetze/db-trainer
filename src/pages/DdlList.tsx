@@ -6,7 +6,7 @@ import { LEVEL_NAME as levelName } from '../content/scenarios';
 export function DdlList() {
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">SQL-DDL</h1>

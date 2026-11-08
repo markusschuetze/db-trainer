@@ -93,7 +93,7 @@ export function EditorExercise({
 
   return (
     <>
-      <a href={backHref} className="text-sm underline">
+      <a href={backHref} className="inline-block py-2 text-sm underline">
         ← {backLabel}
       </a>
       <h1 className="mt-2 text-2xl font-bold">{title}</h1>

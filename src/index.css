@@ -82,3 +82,32 @@ body {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Programmatisch fokussierter Hauptbereich (Seitenwechsel) braucht keinen sichtbaren Rahmen */
+#main:focus {
+  outline: none;
+}
+
+/* Touch-Geräte: größere Auswahlfelder, Trefferflächen mind. ca. 44 px */
+@media (pointer: coarse) {
+  input[type='radio'],
+  input[type='checkbox'] {
+    width: 1.375rem;
+    height: 1.375rem;
+    accent-color: var(--accent);
+  }
+  label:has(> input[type='radio']),
+  label:has(> input[type='checkbox']) {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (pointer: coarse) {
+  main button,
+  main select {
+    min-height: 2.75rem;
+  }
+}

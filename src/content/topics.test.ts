@@ -42,6 +42,17 @@ describe('Themen nach Vorlesungsfolien', () => {
     for (const n of pos) expect(n / single.length).toBeGreaterThan(0.15);
   });
 
+  it('Wissensfragen: die richtige Antwort ist nicht auffällig oft die längste Option', () => {
+    const single = mcQuestions.filter((q) => q.correct.length === 1);
+    const longest = single.filter((q) => {
+      const len = q.options.map((o) => o.length);
+      const max = Math.max(...len);
+      return len[q.correct[0]] === max && len.filter((l) => l === max).length === 1;
+    }).length;
+    expect(longest / single.length).toBeGreaterThan(0.1);
+    expect(longest / single.length).toBeLessThan(0.4);
+  });
+
   it('Fortschritts-IDs sind eindeutig', () => {
     expect(new Set(catalog.map((c) => c.id)).size).toBe(catalog.length);
   });

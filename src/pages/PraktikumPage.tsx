@@ -44,7 +44,7 @@ function Overview() {
 
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Praktikum</h1>
@@ -138,7 +138,7 @@ function WorkspaceInner({ sheet, session: s }: { sheet: Worksheet; session: Sess
 
   return (
     <>
-      <a href="#/praktikum" className="text-sm underline">
+      <a href="#/praktikum" className="inline-block py-2 text-sm underline">
         ← Alle Übungsblätter
       </a>
       <h1 className="mt-2 text-2xl font-bold">{sheet.title}</h1>

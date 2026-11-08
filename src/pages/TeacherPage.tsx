@@ -58,7 +58,7 @@ export function TeacherPage({ tab }: { tab?: string }) {
   const cur = TABS.some(([id]) => id === tab) ? tab! : 'auswertung';
   return (
     <>
-      <a href="#/" className="text-sm underline print:hidden">
+      <a href="#/" className="inline-block py-2 text-sm underline print:hidden">
         ← Zum Trainer
       </a>
       <h1 className="mt-2 text-3xl font-bold">Dozentenmodus</h1>

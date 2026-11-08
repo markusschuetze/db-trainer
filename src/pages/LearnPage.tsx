@@ -44,7 +44,7 @@ export function LearnPage({ topicId }: { topicId?: string }) {
 
   return (
     <>
-      <a href="#/fortschritt" className="text-sm underline">
+      <a href="#/fortschritt" className="inline-block py-2 text-sm underline">
         ← Fortschritt
       </a>
       <h1 className="mt-2 text-3xl font-bold">Wissensfragen lernen</h1>

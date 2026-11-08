@@ -12,11 +12,11 @@ const H = 130;
 const BOX_W = 170;
 const Y = 65;
 
-function EndSymbol({ x, dir, card }: { x: number; dir: 1 | -1; card?: Card }) {
+function EndSymbol({ x, dir, card, y = Y }: { x: number; dir: 1 | -1; card?: Card; y?: number }) {
   // x = Rand der Entitaet, dir zeigt von der Entitaet weg in Richtung Mitte
   if (!card)
     return (
-      <text x={x + dir * 22} y={Y - 10} textAnchor="middle" className="fill-muted" fontSize="14">
+      <text x={x + dir * 22} y={y - 10} textAnchor="middle" className="fill-muted" fontSize="14">
         ?
       </text>
     );
@@ -27,15 +27,15 @@ function EndSymbol({ x, dir, card }: { x: number; dir: 1 | -1; card?: Card }) {
   if (max === 'N') {
     const tip = x + dir * 18;
     parts.push(
-      <path key="crow" d={`M ${tip} ${Y} L ${x} ${Y - 11} M ${tip} ${Y} L ${x} ${Y} M ${tip} ${Y} L ${x} ${Y + 11}`} />,
+      <path key="crow" d={`M ${tip} ${y} L ${x} ${y - 11} M ${tip} ${y} L ${x} ${y} M ${tip} ${y} L ${x} ${y + 11}`} />,
     );
   } else {
-    parts.push(<line key="max" x1={x + dir * 12} x2={x + dir * 12} y1={Y - 10} y2={Y + 10} />);
+    parts.push(<line key="max" x1={x + dir * 12} x2={x + dir * 12} y1={y - 10} y2={y + 10} />);
   }
   // Minimum, weiter zur Mitte
   const mx = x + dir * 30;
-  if (min === '0') parts.push(<circle key="min" cx={mx} cy={Y} r={6} className="fill-surface" />);
-  else parts.push(<line key="min" x1={mx} x2={mx} y1={Y - 10} y2={Y + 10} />);
+  if (min === '0') parts.push(<circle key="min" cx={mx} cy={y} r={6} className="fill-surface" />);
+  else parts.push(<line key="min" x1={mx} x2={mx} y1={y - 10} y2={y + 10} />);
   return <g>{parts}</g>;
 }
 
@@ -87,7 +87,7 @@ export function ErDiagram({
   );
 }
 
-/** Kleine Legende der Symbole */
+/** Kleine Legende der Symbole (gleiche Geometrie wie im Diagramm; rechts die Entität als Kasten) */
 export function CrowLegend() {
   const items: [Card, string][] = [
     ['11', 'genau eins'],
@@ -96,23 +96,17 @@ export function CrowLegend() {
     ['0N', 'keins, eins oder mehrere'],
   ];
   return (
-    <ul className="grid grid-cols-2 gap-2 text-xs text-muted">
+    <ul className="grid grid-cols-1 gap-3 text-sm text-muted">
       {items.map(([c, t]) => (
-        <li key={c} className="flex items-center gap-2">
-          <svg viewBox="0 0 70 30" className="h-6 w-14 text-ink" aria-hidden>
+        <li key={c} className="flex items-center gap-3">
+          <svg viewBox="0 0 110 36" className="h-9 w-28 shrink-0 text-ink" aria-hidden>
             <g stroke="currentColor" strokeWidth={2} fill="none">
-              <line x1={0} x2={60} y1={15} y2={15} />
-              <rect x={60} y={2} width={10} height={26} className="fill-surface" stroke="none" />
-              <line x1={60} x2={60} y1={2} y2={28} />
-              {c[1] === 'N' ? (
-                <path d="M 42 15 L 60 4 M 42 15 L 60 26" />
-              ) : (
-                <line x1={48} x2={48} y1={5} y2={25} />
-              )}
-              {c[0] === '0' ? <circle cx={30} cy={15} r={6} className="fill-surface" /> : <line x1={30} x2={30} y1={5} y2={25} />}
+              <line x1={2} x2={84} y1={18} y2={18} />
+              <rect x={84} y={4} width={24} height={28} rx={4} className="fill-surface" />
+              <EndSymbol x={84} dir={-1} card={c} y={18} />
             </g>
           </svg>
-          {t}
+          <span>{t}</span>
         </li>
       ))}
     </ul>

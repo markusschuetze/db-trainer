@@ -38,7 +38,7 @@ export function RelPage() {
 
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Relationenmodell</h1>

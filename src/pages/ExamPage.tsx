@@ -134,10 +134,10 @@ function McInput({ item, value, onChange }: { item: Extract<ExamItem, { kind: 'm
 
 function CardSelect({ label, value, onChange }: { label: string; value?: Card; onChange: (c: Card) => void }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="text-sm">{label}</span>
       <select
-        className="mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2"
+        className="mt-1 block w-full min-w-0 max-w-full rounded-lg border border-line bg-surface px-3 py-2"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value as Card)}
       >
@@ -620,7 +620,7 @@ export function ExamPage() {
   if (!state)
     return (
       <>
-        <a href="#/" className="text-sm underline">
+        <a href="#/" className="inline-block py-2 text-sm underline">
           ← Übersicht
         </a>
         <h1 className="mt-2 text-3xl font-bold">Prüfungsmodus</h1>
@@ -717,7 +717,7 @@ export function ExamPage() {
               <div className="mt-2 space-y-2 text-sm">
                 <Solution item={item} />
               </div>
-              <a href={practiceHref(item)} className="mt-2 inline-block text-sm underline">
+              <a href={practiceHref(item)} className="mt-1 inline-block py-2 text-sm underline">
                 Dazu üben →
               </a>
             </article>
@@ -753,7 +753,7 @@ export function ExamPage() {
                 Aufgabe {k + 1}: {itemTitle(item)}
               </h2>
               <span className="text-sm text-muted">
-                {item.points} Punkte · {CHAPTER_NAME[item.chapter]}
+                {item.points} {item.points === 1 ? 'Punkt' : 'Punkte'} · {CHAPTER_NAME[item.chapter]}
               </span>
             </div>
             <ItemInput

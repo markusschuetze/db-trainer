@@ -246,7 +246,7 @@ export function ProgressPage() {
 
   return (
     <>
-      <a href="#/" className="text-sm underline">
+      <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Dein Fortschritt</h1>
@@ -304,7 +304,7 @@ export function ProgressPage() {
           <p className="mb-3 text-sm text-muted">Ergebnis in Prozent, die letzten {Math.min(20, d.exams.length)} Klausuren</p>
           <HistoryChart exams={d.exams} />
           <details className="mt-3">
-            <summary className="cursor-pointer text-sm font-semibold">Als Tabelle</summary>
+            <summary className="cursor-pointer py-2 text-sm font-semibold">Als Tabelle</summary>
             <div className="mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label="Probeklausuren als Tabelle">
               <table className="w-full text-sm">
                 <thead>

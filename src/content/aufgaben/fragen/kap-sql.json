@@ -6,9 +6,9 @@
   "question": "In welcher Reihenfolge stehen die Klauseln einer SELECT-Anweisung?",
   "options": [
    "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY",
-   "WHERE, SELECT, FROM, GROUP BY",
-   "SELECT, WHERE, FROM, ORDER BY",
-   "FROM, SELECT, ORDER BY, WHERE"
+   "WHERE, SELECT, FROM, GROUP BY, HAVING, ORDER BY",
+   "SELECT, WHERE, FROM, ORDER BY, GROUP BY, HAVING",
+   "FROM, SELECT, ORDER BY, WHERE, GROUP BY, HAVING"
   ],
   "correct": [
    0
@@ -21,10 +21,10 @@
   "chapter": "SQL",
   "question": "Wozu dient DISTINCT?",
   "options": [
-   "Es werden alle Spalten ausgegeben",
-   "Das Ergebnis wird sortiert",
+   "Es werden alle Spalten der Tabelle ausgegeben",
+   "Das Ergebnis wird aufsteigend sortiert ausgegeben",
    "Doppelte Ergebniszeilen werden entfernt",
-   "Es zählt die Zeilen"
+   "Es zählt die Zeilen des Ergebnisses"
   ],
   "correct": [
    2
@@ -37,9 +37,9 @@
   "chapter": "SQL",
   "question": "Welche Zeilen liefert WHERE Gehalt BETWEEN 3000 AND 4000?",
   "options": [
-   "Nur Werte zwischen den Grenzen, ohne diese",
-   "Alle Werte außerhalb",
-   "Nur 3000 und 4000",
+   "Nur Werte zwischen den Grenzen, ohne diese selbst einzuschließen",
+   "Alle Werte, die außerhalb des Bereichs liegen",
+   "Nur die beiden Grenzwerte 3000 und 4000",
    "Gehalt von 3000 bis 4000, beide Grenzen eingeschlossen"
   ],
   "correct": [
@@ -101,9 +101,9 @@
   "chapter": "SQL",
   "question": "Was bewirkt AS in SELECT Gehalt * 12 AS Jahresgehalt?",
   "options": [
-   "Es ändert die Tabelle",
-   "Es speichert das Ergebnis",
-   "Es multipliziert nochmals",
+   "Es ändert den Namen der Tabelle dauerhaft",
+   "Es speichert das Ergebnis in einer neuen Tabelle",
+   "Es multipliziert das Ergebnis nochmals mit zwölf",
    "Es gibt der Ergebnisspalte einen Namen (Spaltenalias)"
   ],
   "correct": [
@@ -181,10 +181,10 @@
   "chapter": "SQL",
   "question": "Wie verbindet man in Oracle zwei Texte?",
   "options": [
-   "Mit +",
-   "Mit JOIN",
+   "Mit dem Operator + wie in vielen anderen Sprachen",
+   "Mit JOIN zwischen den beiden Spaltenwerten",
    "Mit dem Operator || oder CONCAT",
-   "Mit &"
+   "Mit dem Operator & wie in Tabellenkalkulationen"
   ],
   "correct": [
    2
@@ -213,10 +213,10 @@
   "chapter": "SQL",
   "question": "Wozu dient TO_CHAR(datum, 'DD.MM.YYYY')?",
   "options": [
-   "Text in ein Datum umwandeln",
+   "Einen Text in ein Datum im Format DD.MM.YYYY umwandeln",
    "Ein Datum als Text in einem gewünschten Format ausgeben",
-   "Das heutige Datum liefern",
-   "Tage addieren"
+   "Das heutige Datum im Format DD.MM.YYYY liefern",
+   "Zum Datum eine Anzahl von Tagen addieren"
   ],
   "correct": [
    1
@@ -229,9 +229,9 @@
   "chapter": "SQL",
   "question": "Was liefert SYSDATE?",
   "options": [
-   "Das Datum der letzten Änderung",
-   "Den Systemnamen",
-   "Ein festes Datum",
+   "Das Datum der letzten Änderung der Tabelle",
+   "Den Systemnamen des Datenbankservers",
+   "Ein festes Datum, das bei der Installation gesetzt wird",
    "Das aktuelle Datum mit Uhrzeit des Datenbankservers"
   ],
   "correct": [
@@ -246,9 +246,9 @@
   "question": "Wofür dient die Tabelle DUAL in Oracle?",
   "options": [
    "Als Dummy-Tabelle, um Ausdrücke ohne echte Tabelle auszuwerten",
-   "Zum Speichern zweier Werte",
-   "Für doppelte Zeilen",
-   "Als Sicherungskopie"
+   "Zum Speichern zweier zusammengehöriger Werte in einer Zeile",
+   "Zum Ausgeben doppelter Zeilen einer anderen Tabelle",
+   "Als Sicherungskopie einer wichtigen Tabelle"
   ],
   "correct": [
    0
@@ -261,10 +261,10 @@
   "chapter": "SQL",
   "question": "Was zählt COUNT(*)?",
   "options": [
-   "Die Anzahl der Spalten",
+   "Die Anzahl der Spalten der Tabelle",
    "Alle Zeilen der Gruppe, auch mit NULL-Werten",
-   "Nur Zeilen ohne NULL",
-   "Die Anzahl verschiedener Werte"
+   "Nur Zeilen der Gruppe ohne NULL-Werte",
+   "Die Anzahl der verschiedenen Werte der Gruppe"
   ],
   "correct": [
    1
@@ -328,10 +328,10 @@
   "chapter": "SQL",
   "question": "Welche Spalten dürfen bei GROUP BY im SELECT stehen?",
   "options": [
-   "Nur Primärschlüssel",
+   "Nur Primärschlüssel und Aggregatfunktionen",
    "Gruppierte Spalten und Aggregatfunktionen",
-   "Beliebige Spalten",
-   "Nur Aggregatfunktionen"
+   "Beliebige Spalten der Tabelle, auch nicht gruppierte",
+   "Nur Aggregatfunktionen, aber keine gruppierten Spalten"
   ],
   "correct": [
    1
@@ -345,9 +345,9 @@
   "question": "Was passiert bei SELECT Name, COUNT(*) FROM Student; ohne GROUP BY?",
   "options": [
    "Fehler: Name ist weder gruppiert noch aggregiert (ORA-00937)",
-   "Es liefert den ersten Namen",
-   "Es zählt pro Name",
-   "Es funktioniert wie WHERE"
+   "Es liefert den ersten Namen und die Anzahl aller Zeilen",
+   "Es zählt pro Name und gibt jede Zeile einzeln aus",
+   "Es funktioniert wie eine WHERE-Bedingung auf Name"
   ],
   "correct": [
    0
@@ -376,10 +376,10 @@
   "chapter": "SQL",
   "question": "Welche Verarbeitungsreihenfolge gilt logisch?",
   "options": [
-   "GROUP BY, FROM, WHERE",
+   "GROUP BY, FROM, WHERE, SELECT, HAVING, ORDER BY",
    "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY",
-   "ORDER BY, WHERE, FROM",
-   "SELECT, FROM, WHERE, GROUP BY"
+   "ORDER BY, WHERE, FROM, GROUP BY, HAVING, SELECT",
+   "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY"
   ],
   "correct": [
    1
@@ -392,10 +392,10 @@
   "chapter": "SQL",
   "question": "Was liefert ein CROSS JOIN zweier Tabellen mit 3 und 4 Zeilen?",
   "options": [
-   "4 Zeilen",
+   "4 Zeilen, wie die größere der beiden Tabellen",
    "12 Zeilen (alle Kombinationen)",
-   "7 Zeilen",
-   "3 Zeilen"
+   "7 Zeilen (die Summe der beiden Zeilenzahlen)",
+   "3 Zeilen, wie die kleinere der beiden Tabellen"
   ],
   "correct": [
    1
@@ -409,9 +409,9 @@
   "question": "Wofür steht die ON-Bedingung beim JOIN?",
   "options": [
    "Sie legt fest, welche Zeilen der beiden Tabellen zusammengehören",
-   "Sie zählt Zeilen",
-   "Sie sortiert das Ergebnis",
-   "Sie wählt Spalten"
+   "Sie zählt die Zeilen, die beim Zusammenführen der beiden Tabellen entstehen",
+   "Sie sortiert das Ergebnis nach den Spalten beider beteiligter Tabellen",
+   "Sie wählt aus, welche Spalten beider Tabellen im Ergebnis ausgegeben werden"
   ],
   "correct": [
    0
@@ -472,9 +472,9 @@
   "chapter": "SQL",
   "question": "Wozu braucht man einen Self-Join?",
   "options": [
-   "Um eine Tabelle zu kopieren",
-   "Um Duplikate zu entfernen",
-   "Um zwei Datenbanken zu verbinden",
+   "Um eine Tabelle vollständig in eine zweite Tabelle zu kopieren und zu vergleichen",
+   "Um Duplikate aus einer einzelnen Tabelle zu entfernen und zu zählen",
+   "Um zwei verschiedene Datenbanken miteinander zu verbinden und abzugleichen",
    "Um eine Tabelle mit sich selbst zu verbinden, z. B. Mitarbeiter und Vorgesetzte"
   ],
   "correct": [
@@ -488,10 +488,10 @@
   "chapter": "SQL",
   "question": "Was bewirkt JOIN … USING (Kurs_ID)?",
   "options": [
-   "Erzeugt Kurs_ID",
+   "Erzeugt die Spalte Kurs_ID in beiden Tabellen, falls sie noch fehlt",
    "Verbindet über die gleichnamige Spalte Kurs_ID in beiden Tabellen",
-   "Löscht Kurs_ID",
-   "Sortiert nach Kurs_ID"
+   "Löscht die Spalte Kurs_ID aus dem Ergebnis, damit sie nicht doppelt erscheint",
+   "Sortiert das Ergebnis aufsteigend nach der Spalte Kurs_ID beider Tabellen"
   ],
   "correct": [
    1
@@ -537,9 +537,9 @@
   "question": "Wann nutzt man IN mit einer Unterabfrage?",
   "options": [
    "Wenn die Unterabfrage mehrere Werte liefert",
-   "Nur bei Zahlen",
-   "Nie",
-   "Nur bei genau einem Wert"
+   "Nur dann, wenn die Unterabfrage Zahlen liefert",
+   "Nie, IN ist nur mit fest eingegebenen Werten zulässig",
+   "Nur dann, wenn die Unterabfrage genau einen Wert liefert"
   ],
   "correct": [
    0
@@ -552,9 +552,9 @@
   "chapter": "SQL",
   "question": "Was prüft EXISTS (Unterabfrage)?",
   "options": [
-   "Ob ein Wert NULL ist",
-   "Ob die Tabelle existiert",
-   "Ob die Syntax stimmt",
+   "Ob ein bestimmter Wert in der Spalte NULL ist",
+   "Ob die angegebene Tabelle in der Datenbank existiert",
+   "Ob die Syntax der Unterabfrage fehlerfrei ist",
    "Ob die Unterabfrage mindestens eine Zeile liefert"
   ],
   "correct": [
@@ -568,10 +568,10 @@
   "chapter": "SQL",
   "question": "Welche Falle gibt es bei NOT IN, wenn die Unterabfrage NULL enthält?",
   "options": [
-   "NULL wird als 0 gewertet",
+   "NULL wird wie der Wert 0 gewertet und bei der Prüfung mitgezählt",
    "Das Ergebnis ist leer, weil Vergleiche mit NULL nie wahr sind",
-   "Es gibt einen Syntaxfehler",
-   "Es werden alle Zeilen geliefert"
+   "Es gibt einen Syntaxfehler, weil NULL in einer Unterabfrage nicht erlaubt ist",
+   "Es werden alle Zeilen der äußeren Abfrage geliefert, NULL wird ignoriert"
   ],
   "correct": [
    1
@@ -584,9 +584,9 @@
   "chapter": "SQL",
   "question": "Was kennzeichnet eine korrelierte Unterabfrage?",
   "options": [
-   "Sie hat keinen WHERE-Teil",
-   "Sie liefert immer NULL",
-   "Sie wird nur einmal ausgeführt",
+   "Sie hat keinen WHERE-Teil und liefert alle Zeilen",
+   "Sie liefert immer NULL, weil sie sich selbst aufruft",
+   "Sie wird nur einmal ausgeführt, bevor die äußere beginnt",
    "Sie bezieht sich auf Spalten der äußeren Abfrage"
   ],
   "correct": [
@@ -600,10 +600,10 @@
   "chapter": "SQL",
   "question": "Was liefert UNION im Unterschied zu UNION ALL?",
   "options": [
-   "UNION ALL sortiert",
+   "UNION ALL sortiert das Ergebnis, UNION nicht",
    "UNION entfernt Duplikate, UNION ALL behält sie",
-   "UNION behält Duplikate",
-   "Es gibt keinen Unterschied"
+   "UNION behält Duplikate, UNION ALL entfernt sie",
+   "Es gibt keinen Unterschied, beide liefern dasselbe Ergebnis"
   ],
   "correct": [
    1
@@ -632,10 +632,10 @@
   "chapter": "SQL",
   "question": "Was bedeutet WHERE Gehalt > ALL (Unterabfrage)?",
   "options": [
-   "Größer als mindestens ein Wert",
-   "Es gibt keine Bedeutung",
+   "Das Gehalt ist größer als mindestens ein Wert der Unterabfrage",
+   "Die Bedingung hat keine Bedeutung und führt zu einem Fehler",
    "Das Gehalt ist größer als jeder Wert der Unterabfrage",
-   "Gleich allen Werten"
+   "Das Gehalt ist gleich allen Werten der Unterabfrage"
   ],
   "correct": [
    2
@@ -649,9 +649,9 @@
   "question": "Warum sollte man bei INSERT die Spaltennamen angeben?",
   "options": [
    "Die Reihenfolge der Werte hängt dann nicht von der Tabellendefinition ab",
-   "Es geht sonst nicht in Oracle",
-   "Es macht das Einfügen schneller",
-   "Es ist Pflicht"
+   "Ohne Angabe der Spaltennamen funktioniert INSERT in Oracle gar nicht",
+   "Es macht das Einfügen deutlich schneller als ohne Angabe der Spalten",
+   "Es ist in jeder SQL-Anweisung Pflicht und wird vom DBMS geprüft"
   ],
   "correct": [
    0
@@ -664,10 +664,10 @@
   "chapter": "SQL",
   "question": "Wofür dient INSERT INTO … SELECT?",
   "options": [
-   "Eine Spalte hinzufügen",
-   "Eine Tabelle löschen",
+   "Eine Spalte zu einer vorhandenen Tabelle hinzufügen",
+   "Eine Tabelle löschen und aus der Abfrage neu anlegen",
    "Mehrere Zeilen aus einer Abfrage einfügen",
-   "Zeilen ändern"
+   "Bereits vorhandene Zeilen einer Tabelle ändern"
   ],
   "correct": [
    2
@@ -681,9 +681,9 @@
   "question": "Welche Anweisung ändert nur den Studenten 1001?",
   "options": [
    "UPDATE Student SET Semester = 2 WHERE Matrikelnummer = 1001",
-   "SET Semester = 2 IN Student",
-   "UPDATE Student SET Semester = 2",
-   "UPDATE Student WHERE Matrikelnummer = 1001"
+   "SET Semester = 2 IN Student WHERE Matrikelnummer = 1001",
+   "UPDATE Student SET Semester = 2, ohne weitere Bedingung",
+   "UPDATE Student WHERE Matrikelnummer = 1001 SET Semester = 2"
   ],
   "correct": [
    0
@@ -697,9 +697,9 @@
   "question": "Was bewirkt DELETE FROM Student; ohne WHERE?",
   "options": [
    "Alle Zeilen der Tabelle werden gelöscht",
-   "Nichts",
-   "Die Tabelle wird gelöscht",
-   "Die erste Zeile wird gelöscht"
+   "Nichts, die Anweisung wird ohne WHERE nicht ausgeführt",
+   "Die Tabelle wird samt Struktur und Constraints gelöscht",
+   "Nur die erste Zeile der Tabelle wird gelöscht"
   ],
   "correct": [
    0
@@ -712,9 +712,9 @@
   "chapter": "SQL",
   "question": "Was bewirkt COMMIT?",
   "options": [
-   "Startet den Server neu",
-   "Löscht die Tabelle",
-   "Macht Änderungen rückgängig",
+   "Startet den Datenbankserver neu und lädt Änderungen",
+   "Löscht die Tabelle samt allen Änderungen",
+   "Macht alle Änderungen der Transaktion rückgängig",
    "Bestätigt alle Änderungen der Transaktion dauerhaft"
   ],
   "correct": [
@@ -744,10 +744,10 @@
   "chapter": "SQL",
   "question": "Was passiert mit offenen Änderungen, wenn man ein DDL-Statement wie CREATE TABLE ausführt?",
   "options": [
-   "Sie werden verworfen",
+   "Sie werden vom DBMS stillschweigend verworfen",
    "Sie werden implizit bestätigt (COMMIT)",
-   "Es entsteht ein Fehler",
-   "Sie bleiben ungeschützt offen"
+   "Es entsteht ein Fehler, und die Anweisung wird abgelehnt",
+   "Sie bleiben ungeschützt offen und können später zurückgenommen werden"
   ],
   "correct": [
    1
@@ -760,10 +760,10 @@
   "chapter": "SQL",
   "question": "Beim Löschen eines Kurses mit Anmeldungen kommt ORA-02292. Was ist zu tun?",
   "options": [
-   "Die Primärschlüssel ändern",
+   "Die Primärschlüssel der Anmeldungen ändern",
    "Zuerst die abhängigen Anmeldungen löschen, dann den Kurs",
-   "Die Tabelle löschen",
-   "Den Fehler ignorieren"
+   "Die Tabelle Anmeldung komplett löschen und neu anlegen",
+   "Den Fehler ignorieren, das Löschen wird später nachgeholt"
   ],
   "correct": [
    1

@@ -6,9 +6,9 @@
   "question": "Was bedeutet es, dass ein DBMS Daten „persistent“ speichert?",
   "options": [
    "Die Daten bleiben auch nach Beenden der Anwendung erhalten",
-   "Die Daten sind für alle Nutzer sichtbar",
-   "Die Daten werden nur im Arbeitsspeicher gehalten",
-   "Die Daten werden automatisch verschlüsselt"
+   "Die Daten sind für alle angemeldeten Nutzer gleichzeitig sichtbar",
+   "Die Daten werden nur im Arbeitsspeicher gehalten und beim Beenden verworfen",
+   "Die Daten werden automatisch verschlüsselt auf der Festplatte abgelegt"
   ],
   "correct": [
    0
@@ -21,9 +21,9 @@
   "chapter": "01",
   "question": "Warum ist Datenredundanz bei der Arbeit mit mehreren Dateikopien ein Problem?",
   "options": [
-   "Redundante Daten sind immer falsch",
-   "Dateien lassen sich nicht kopieren",
-   "Sie verhindert das Sortieren",
+   "Redundante Daten sind immer falsch und müssen deshalb sofort gelöscht werden",
+   "Dateien lassen sich nur einmal kopieren, danach sind sie gesperrt",
+   "Sie verhindert, dass die Daten sortiert und für Auswertungen genutzt werden können",
    "Änderungen müssen überall nachgezogen werden, sonst entstehen Inkonsistenzen"
   ],
   "correct": [
@@ -73,9 +73,9 @@
   "question": "Was leistet ein DBMS beim gleichzeitigen Zugriff mehrerer Nutzer?",
   "options": [
    "Parallele Lesezugriffe sind möglich, Daten, die gerade geändert werden, werden gesperrt",
-   "Es kopiert die Datenbank für jeden Nutzer",
-   "Es erlaubt immer nur einem Nutzer den Zugriff",
-   "Es verhindert jede Änderung"
+   "Es legt für jeden Nutzer eine eigene Kopie der gesamten Datenbank an, sobald er zugreift",
+   "Es erlaubt zu jedem Zeitpunkt nur einem einzigen Nutzer den Zugriff, alle anderen warten",
+   "Es verhindert jede Änderung, solange mindestens ein anderer Nutzer die Daten liest"
   ],
   "correct": [
    0
@@ -105,9 +105,9 @@
   "question": "Warum reicht eine Tabellenkalkulation für große, gemeinsam genutzte Datenbestände meist nicht aus?",
   "options": [
    "Es fehlen Mehrbenutzerbetrieb, Transaktionen und Integritätsregeln",
-   "Sie kann keine Zahlen speichern",
-   "Sie kann keine Texte speichern",
-   "Sie ist grundsätzlich kostenpflichtig"
+   "Sie kann keine Zahlen speichern, nur Texte und Datumswerte",
+   "Sie kann keine Texte speichern, nur Zahlen und Formeln",
+   "Sie ist grundsätzlich kostenpflichtig und deshalb nicht verfügbar"
   ],
   "correct": [
    0
@@ -136,10 +136,10 @@
   "chapter": "01",
   "question": "Welche Aufgabe hat der physische Entwurf?",
   "options": [
-   "Normalformen prüfen",
-   "Anforderungen sammeln",
+   "Die Tabellen auf Redundanzen prüfen und schrittweise in Normalformen überführen, z. B. 3NF",
+   "Die Anforderungen der Fachabteilung sammeln und in einem Dokument schriftlich festhalten",
    "Das Relationenmodell für ein konkretes DBMS umsetzen, z. B. als Oracle-Schema",
-   "Das ER-Modell zeichnen"
+   "Das ER-Modell mit Entitäten und Beziehungen zeichnen und mit der Fachabteilung abstimmen"
   ],
   "correct": [
    2
@@ -152,9 +152,9 @@
   "chapter": "01",
   "question": "Warum ist die Anforderungsanalyse so wichtig?",
   "options": [
-   "Sie ersetzt das ER-Modell",
-   "Sie ist nur Formsache",
-   "Sie wird automatisch erledigt",
+   "Sie ersetzt das ER-Modell und macht den späteren Entwurf überflüssig",
+   "Sie ist nur Formsache und hat auf das Ergebnis kaum Einfluss",
+   "Sie wird vom DBMS automatisch aus den vorhandenen Daten erledigt",
    "Fehler hier erzwingen später ein aufwendiges Redesign"
   ],
   "correct": [
@@ -168,9 +168,9 @@
   "chapter": "01",
   "question": "Was geschieht im logischen Entwurf?",
   "options": [
-   "Daten werden eingefügt",
-   "Abfragen werden optimiert",
-   "Das DBMS wird installiert",
+   "Die ersten Daten werden in die fertigen Tabellen eingefügt",
+   "Die Abfragen werden für das gewählte DBMS optimiert und indiziert",
+   "Das DBMS wird installiert und auf dem Server konfiguriert",
    "Das ER-Modell wird in das Relationenmodell überführt"
   ],
   "correct": [
@@ -200,10 +200,10 @@
   "chapter": "01",
   "question": "Was bedeutet „datenbankagnostisch“ beim ER-Modell?",
   "options": [
-   "Es funktioniert nur mit Oracle",
+   "Es funktioniert ausschließlich mit Oracle-Datenbanken",
    "Es ist unabhängig von einem konkreten DBMS",
-   "Es ist nicht grafisch",
-   "Es enthält keine Entitäten"
+   "Es ist nicht grafisch, sondern nur als Text beschreibbar",
+   "Es enthält ausschließlich Beziehungen, aber keine Entitäten"
   ],
   "correct": [
    1
@@ -235,9 +235,9 @@
   "question": "Welcher SQL-Teil dient dem Abfragen von Daten?",
   "options": [
    "DQL (SELECT)",
-   "DDL",
-   "TCL",
-   "DCL"
+   "DDL (CREATE, ALTER, DROP)",
+   "TCL (COMMIT, ROLLBACK)",
+   "DCL (GRANT, REVOKE)"
   ],
   "correct": [
    0
@@ -282,9 +282,9 @@
   "chapter": "01",
   "question": "Was bedeutet Durability?",
   "options": [
-   "Daten werden komprimiert",
-   "Die Datenbank läuft ohne Unterbrechung",
-   "Daten verfallen nach einer Zeit",
+   "Daten werden nach einer Weile automatisch komprimiert, um Speicherplatz zu sparen",
+   "Die Datenbank läuft dauerhaft und ohne jede Unterbrechung, auch bei Wartungsarbeiten",
+   "Daten verfallen nach einer festgelegten Zeit automatisch und werden dann gelöscht",
    "Die Daten sind nach einer abgeschlossenen Transaktion dauerhaft gespeichert"
   ],
   "correct": [
@@ -333,10 +333,10 @@
   "chapter": "01",
   "question": "Was bedeutet Isolation?",
   "options": [
-   "Jede Tabelle hat einen eigenen Server",
+   "Jede Tabelle liegt auf einem eigenen, abgeschotteten Server",
    "Gleichzeitige Transaktionen beeinflussen sich nicht gegenseitig",
-   "Daten sind verschlüsselt",
-   "Nutzer sehen nur ihre eigenen Daten"
+   "Alle Daten sind verschlüsselt und nur mit Passwort lesbar",
+   "Jeder Nutzer sieht ausschließlich die Daten, die er selbst angelegt hat"
   ],
   "correct": [
    1
@@ -349,10 +349,10 @@
   "chapter": "02",
   "question": "Was beschreibt eine Beziehung (Relationship) im ER-Modell?",
   "options": [
-   "Einen Datentyp",
+   "Den Datentyp, den ein Attribut speichern darf",
    "Welche Entitäten miteinander verknüpft sind",
-   "Eine Spalte einer Tabelle",
-   "Eine einzelne Instanz"
+   "Eine einzelne Spalte einer Tabelle im Relationenmodell",
+   "Eine einzelne konkrete Instanz einer Entität"
   ],
   "correct": [
    1
@@ -366,9 +366,9 @@
   "question": "Worin unterscheiden sich „Relationship“ und „Relation“?",
   "options": [
    "Relationship = Beziehung im ER-Modell, Relation = Tabelle im Relationenmodell",
-   "Relation = Beziehung zwischen Personen",
-   "Relationship gibt es nur in SQL",
-   "Es ist dasselbe"
+   "Relation = Beziehung im ER-Modell, Relationship = Tabelle im Relationenmodell",
+   "Relationship gibt es nur in SQL-Befehlen, Relation nur im ER-Modell der Vorlesung",
+   "Beide Begriffe bedeuten dasselbe und sind im ER- und Relationenmodell austauschbar"
   ],
   "correct": [
    0
@@ -381,10 +381,10 @@
   "chapter": "02",
   "question": "Was ist ein Attribut?",
   "options": [
-   "Ein SQL-Befehl",
+   "Ein SQL-Befehl, der Daten in eine Tabelle einfügt",
    "Eine Eigenschaft einer Entität oder Beziehung",
-   "Ein Primärschlüssel",
-   "Eine Verbindung zwischen zwei Tabellen"
+   "Ein Primärschlüssel, der jede Instanz eindeutig kennzeichnet",
+   "Eine Verbindung, die zwei Tabellen miteinander verknüpft"
   ],
   "correct": [
    1
@@ -432,9 +432,9 @@
   "chapter": "02",
   "question": "Ein Attribut ist obligatorisch. Was folgt daraus?",
   "options": [
-   "Es ist der Primärschlüssel",
-   "Es muss eindeutig sein",
-   "Der Wert darf NULL sein",
+   "Es ist automatisch der Primärschlüssel der Entität",
+   "Sein Wert muss in der gesamten Tabelle eindeutig sein",
+   "Sein Wert darf bei einzelnen Instanzen auch NULL sein",
    "Jede Instanz muss einen Wert dafür haben"
   ],
   "correct": [
@@ -515,10 +515,10 @@
   "chapter": "02",
   "question": "Welche Einschränkung drückt die einfache Angabe 1:N nicht aus?",
   "options": [
-   "Den Namen der Beziehung",
-   "Ob mehrere Partner möglich sind",
+   "Den Namen, den die Beziehung im Modell trägt",
+   "Ob einer Instanz mehrere Partner zugeordnet sein können",
    "Ob die Beziehung für jede Instanz Pflicht ist (Minimum)",
-   "Die Richtung der Beziehung"
+   "In welcher Richtung die Beziehung gelesen wird"
   ],
   "correct": [
    2
@@ -531,9 +531,9 @@
   "chapter": "02",
   "question": "Warum nennt man Kardinalitäten „Integritätsbedingungen“?",
   "options": [
-   "Sie verschlüsseln die Daten",
-   "Sie sortieren die Daten",
-   "Sie benennen Tabellen",
+   "Sie verschlüsseln die Daten, damit niemand sie verändern kann",
+   "Sie sortieren die Daten in einer festen Reihenfolge",
+   "Sie vergeben die Namen der Tabellen und Spalten",
    "Sie legen fest, welche Verbindungen zwischen Daten zulässig sind"
   ],
   "correct": [
@@ -627,9 +627,9 @@
   "chapter": "02",
   "question": "Wie liest man die Notation einer Entität?",
   "options": [
-   "Von der Entität zur Mitte",
-   "Nur das Symbol ganz außen zählt",
-   "Beide Seiten werden gemeinsam gelesen",
+   "Von der Entität zur Mitte der Beziehung, erst Maximum, dann Minimum",
+   "Nur das Symbol ganz außen an der Entität ist relevant",
+   "Beide Seiten werden gemeinsam als ein Symbol gelesen",
    "Von der Mitte der Beziehung zur Entität: erst Minimum, dann Maximum"
   ],
   "correct": [
@@ -643,9 +643,9 @@
   "chapter": "02",
   "question": "Welche Kombination bedeutet (0,1)?",
   "options": [
-   "Strich und Krähenfuß",
-   "Zwei Striche",
-   "Kreis und Krähenfuß",
+   "Strich und Krähenfuß, also mindestens eins und beliebig viele",
+   "Zwei Striche, also genau eins und nicht mehr",
+   "Kreis und Krähenfuß, also keins bis beliebig viele",
    "Kreis und einfacher Strich"
   ],
   "correct": [

@@ -37,7 +37,7 @@ export function Playground() {
 
   return (
     <>
-      <a href="#/sql" className="text-sm underline">
+      <a href="#/sql" className="inline-block py-2 text-sm underline">
         ← Aufgaben
       </a>
       <h1 className="mt-2 text-2xl font-bold">Spielwiese</h1>
