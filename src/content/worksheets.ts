@@ -53,7 +53,7 @@ const UEBUNG05: Worksheet = {
     },
     {
       id: 'a4',
-      text: 'Ergänze CHECK-Constraints: Anmeldedatum darf nicht in der Zukunft liegen ist hier nicht möglich (kein SYSDATE in CHECK), aber Kurs-Bezeichnungen sollen mindestens 3 Zeichen haben (LENGTH).',
+      text: 'Ergänze einen CHECK-Constraint: Die Bezeichnung eines Kurses soll mindestens 3 Zeichen lang sein (Funktion LENGTH). Hinweis: Eine Bedingung wie „Anmeldedatum nicht in der Zukunft“ geht in Oracle nicht, weil SYSDATE in einem CHECK nicht erlaubt ist.',
       solution: "ALTER TABLE Kurs ADD CONSTRAINT c_bez_check CHECK (LENGTH(Bezeichnung) >= 3);",
     },
   ],

@@ -223,8 +223,8 @@ function StepCardinalities({ t, onNext, flag }: { t: TextTask; onNext?: () => vo
                 <ErDiagram e1={r.e1} e2={r.e2} verb={r.verb} c21={locked ? r.c21 : a[k]?.c21} c12={locked ? r.c12 : a[k]?.c12} />
               </div>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                {sel(k, 'c21', `Ein(e) ${r.e2} ist verbunden mit wie vielen ${r.e1}?`, a[k]?.c21, r.c21)}
-                {sel(k, 'c12', `Ein(e) ${r.e1} ist verbunden mit wie vielen ${r.e2}?`, a[k]?.c12, r.c12)}
+                {sel(k, 'c21', `Eine Instanz von „${r.e2}“ ist verbunden mit wie vielen „${r.e1}“-Instanzen?`, a[k]?.c21, r.c21)}
+                {sel(k, 'c12', `Eine Instanz von „${r.e1}“ ist verbunden mit wie vielen „${r.e2}“-Instanzen?`, a[k]?.c12, r.c12)}
               </div>
               {locked && <p className="mt-2 text-sm text-muted">{r.why}</p>}
               {status === 'wrong' && !res[k] && <p className="mt-1 text-sm text-bad">Hier stimmt noch etwas nicht.</p>}

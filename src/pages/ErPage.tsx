@@ -67,8 +67,8 @@ function CardinalityTrainer() {
         <ErDiagram e1={p.e1.name} e2={p.e2.name} verb={p.verb} c12={a12 || undefined} c21={a21 || undefined} />
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {select(a21, setA21, `Ein(e) ${p.e2.name} ist verbunden mit wie vielen ${p.e1.plural}?`, ok21)}
-        {select(a12, setA12, `Ein(e) ${p.e1.name} ist verbunden mit wie vielen ${p.e2.plural}?`, ok12)}
+        {select(a21, setA21, `Eine Instanz von „${p.e2.name}“ ist verbunden mit wie vielen „${p.e1.name}“-Instanzen?`, ok21)}
+        {select(a12, setA12, `Eine Instanz von „${p.e1.name}“ ist verbunden mit wie vielen „${p.e2.name}“-Instanzen?`, ok12)}
       </div>
       <p className="mt-2 text-xs text-muted">
         Das Symbol erscheint an der Entität, nach deren Anzahl gefragt ist. Gelesen wird von der Mitte zur Entität:

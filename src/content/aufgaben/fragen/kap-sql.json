@@ -157,7 +157,7 @@
   "correct": [
    1
   ],
-  "explanation": "Datenbank hat 9 Zeichen."
+  "explanation": "„Datenbank“ besteht aus 9 Zeichen, LENGTH zählt alle Zeichen einschließlich Leerzeichen."
  },
  {
   "id": "fu-substr",

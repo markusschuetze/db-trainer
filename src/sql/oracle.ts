@@ -12,6 +12,7 @@
 //   - Fehlermeldungen auf Deutsch inkl. dem passenden ORA-Code
 // Bekannte Grenzen stehen in README.md.
 
+import { checkOracleStatement, guardTriggers, singleRowSubqueries } from './oracleChecks';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { checkGroupBy, registerOracleFunctions, rewriteQuery } from './dialect';
 
@@ -131,20 +132,35 @@ export function splitTopLevel(body: string): string[] {
 /* Fehlerabbildung                                                     */
 /* ------------------------------------------------------------------ */
 
-export function mapError(raw: string): { message: string; ora?: string } {
+export function mapError(raw: string, kw?: string): { message: string; ora?: string } {
   let m: RegExpMatchArray | null;
   if ((m = raw.match(/UNIQUE constraint failed: (.+)/)))
     return { message: `Eindeutigkeit verletzt (UNIQUE/PRIMARY KEY): ${m[1]}`, ora: 'ORA-00001' };
   if ((m = raw.match(/NOT NULL constraint failed: (.+)/)))
     return { message: `NULL ist nicht erlaubt (NOT NULL): ${m[1]}`, ora: 'ORA-01400' };
-  if (/FOREIGN KEY constraint failed/.test(raw))
+  if (/FOREIGN KEY constraint failed/.test(raw)) {
+    if (kw === 'INSERT')
+      return {
+        message: 'Übergeordneter Schlüssel nicht gefunden: In der Elterntabelle gibt es keinen passenden Datensatz.',
+        ora: 'ORA-02291',
+      };
+    if (kw === 'DELETE')
+      return {
+        message: 'Kind-Datensatz gefunden: Es gibt noch Datensätze, die auf diesen Datensatz verweisen. Erst diese löschen oder ON DELETE CASCADE verwenden.',
+        ora: 'ORA-02292',
+      };
     return {
       message:
         'Fremdschlüssel verletzt: Entweder fehlt der Eltern-Datensatz (ORA-02291) oder es existieren noch Kind-Datensätze (ORA-02292).',
       ora: 'ORA-02291 / ORA-02292',
     };
+  }
   if ((m = raw.match(/CHECK constraint failed: (.+)/)))
     return { message: `CHECK-Bedingung verletzt: ${m[1]}`, ora: 'ORA-02290' };
+  if (/ORA-01722/.test(raw))
+    return { message: 'Ungültige Zahl: Der Wert passt nicht zum Datentyp NUMBER (Text in einer Zahlenspalte).', ora: 'ORA-01722' };
+  if ((m = raw.match(/ORA-12899:([^:]+):(\d+)/)))
+    return { message: `Wert zu groß für die Spalte ${m[1]} (höchstens ${m[2]} Zeichen).`, ora: 'ORA-12899' };
   if ((m = raw.match(/table (.+) already exists/)))
     return { message: `Der Name ${m[1]} wird bereits von einem Objekt verwendet.`, ora: 'ORA-00955' };
   if ((m = raw.match(/no such table: (?:main\.)?(.+)/)))
@@ -153,11 +169,38 @@ export function mapError(raw: string): { message: string; ora?: string } {
     return { message: `Ungültiger Bezeichner (Spalte ${m[1]} unbekannt).`, ora: 'ORA-00904' };
   if ((m = raw.match(/has no column named (.+)/)))
     return { message: `Ungültiger Bezeichner (Spalte ${m[1]} unbekannt).`, ora: 'ORA-00904' };
+  if ((m = raw.match(/table (.+) has (\d+) columns but (\d+) values were supplied/)))
+    return Number(m[3]) < Number(m[2])
+      ? { message: `Nicht genügend Werte: ${m[1]} hat ${m[2]} Spalten, angegeben sind ${m[3]}. Gib alle Werte an oder nenne die Spalten: INSERT INTO ${m[1]} (spalte1, …) VALUES (…).`, ora: 'ORA-00947' }
+      : { message: `Zu viele Werte: ${m[1]} hat ${m[2]} Spalten, angegeben sind ${m[3]}.`, ora: 'ORA-00913' };
+  if ((m = raw.match(/(\d+) values for (\d+) columns/)))
+    return Number(m[1]) < Number(m[2])
+      ? { message: `Nicht genügend Werte: ${m[2]} Spalten, aber nur ${m[1]} Werte.`, ora: 'ORA-00947' }
+      : { message: `Zu viele Werte: ${m[2]} Spalten, aber ${m[1]} Werte.`, ora: 'ORA-00913' };
+  if ((m = raw.match(/duplicate column name: (.+)/)))
+    return { message: `Doppelter Spaltenname: ${m[1]}.`, ora: 'ORA-00957' };
+  if ((m = raw.match(/wrong number of arguments to function (\w+)/i)))
+    return { message: `Falsche Anzahl von Argumenten für die Funktion ${m[1].toUpperCase()}.`, ora: 'ORA-00909' };
+  if ((m = raw.match(/no such function: (\w+)/i)))
+    return { message: `Ungültiger Bezeichner: ${m[1].toUpperCase()} ist keine bekannte Funktion.`, ora: 'ORA-00904' };
+  if (/ORDER BY term out of range/i.test(raw))
+    return { message: 'ORDER BY: Die Spaltennummer liegt außerhalb der SELECT-Liste.', ora: 'ORA-01785' };
+  if (/sub-?select returns \d+ columns|only a single result allowed/i.test(raw))
+    return { message: 'Die Unterabfrage liefert eine andere Spaltenzahl, als der Vergleich erwartet.', ora: 'ORA-00913' };
+  if (/misuse of aggregate/i.test(raw))
+    return { message: 'Gruppenfunktion hier nicht erlaubt (z. B. COUNT in WHERE). Nutze HAVING nach GROUP BY.', ora: 'ORA-00934' };
+  if (/HAVING clause on a non-aggregate/i.test(raw))
+    return { message: 'HAVING braucht GROUP BY oder eine Aggregatfunktion.', ora: 'ORA-00979' };
+  if (/unrecognized token: "'/.test(raw) || /unrecognized token: "\\'/.test(raw))
+    return { message: 'Zeichenfolge nicht richtig mit Hochkomma abgeschlossen (schließendes \' fehlt).', ora: 'ORA-01756' };
+  if ((m = raw.match(/unrecognized token: "(.*)"/)))
+    return { message: `Ungültiges Zeichen oder ungültiger Name: ${m[1]}. Namen beginnen mit einem Buchstaben.`, ora: 'ORA-00911' };
   if (/syntax error/.test(raw)) {
     const near = raw.match(/near "([^"]*)"/);
+    const first = near && kw && near[1].toUpperCase() === kw.toUpperCase();
     return {
-      message: `Syntaxfehler${near ? ` nahe „${near[1]}“` : ''}. Prüfe Klammern, Kommas und Schlüsselwörter.`,
-      ora: 'ORA-00900-Familie (z. B. ORA-00907, ORA-00905)',
+      message: `Syntaxfehler${near ? ` nahe „${near[1]}“` : ''}. Prüfe Klammern, Kommas und Schlüsselwörter${first ? ' (Schreibfehler im Befehl?)' : ''}.`,
+      ora: first ? 'ORA-00900' : 'ORA-00933',
     };
   }
   if (/incomplete input/.test(raw))
@@ -287,6 +330,7 @@ function rebuild(db: Database, table: string, transform: (items: string[]) => st
   } finally {
     db.exec('PRAGMA foreign_keys=ON');
   }
+  installGuards(db, table);
 }
 
 /** Entfernt eine benannte Constraint aus einem Definitionselement. null = Element entfernen. */
@@ -394,13 +438,37 @@ function runAlter(db: Database, stmt: string): string {
   }
   if ((c = rest.match(re('^ADD\\s+(?:COLUMN\\s+)?\\(?(.*?)\\)?$', 'ius'))) && !/^MODIFY/i.test(rest)) {
     db.exec(`ALTER TABLE "${table}" ADD COLUMN ${c[1]}`);
+    installGuards(db, table);
     return `Tabelle ${table} geändert (Spalte hinzugefügt).`;
   }
   if (/^DROP\s+COLUMN\s+/i.test(rest) || /^RENAME\s+/i.test(rest)) {
     db.exec(`ALTER TABLE "${table}" ${rest}`);
     return `Tabelle ${table} geändert.`;
   }
-  throw new OracleError('Diese ALTER-TABLE-Variante (z. B. MODIFY) wird im Trainer noch nicht unterstützt.');
+  if ((c = rest.match(re(`^MODIFY\\s+\\(?\\s*(${ID})\\s+(.*?)\\)?$`, 'ius')))) {
+    const col = c[1];
+    const mod = c[2].trim();
+    const typeM = mod.match(re('^((?:NUMBER|INTEGER|INT|FLOAT|DECIMAL|NUMERIC|REAL|DATE|TIMESTAMP|BLOB|CLOB|N?VARCHAR2?|N?CHAR)(?:\\s*\\([^)]*\\))?)\\s*(.*)$'));
+    let found = false;
+    rebuild(db, table, (items) =>
+      items.map((item) => {
+        const head = item.trim().match(re(`^"?(${ID})"?\\s+(\\S+?(?:\\s*\\([^)]*\\))?)(?=\\s|$)\\s*(.*)$`, 'ius'));
+        if (!head || head[1].toLowerCase() !== col.toLowerCase()) return item;
+        found = true;
+        const oldRest = head[3];
+        const newType = typeM ? typeM[1] : head[2];
+        const extra = typeM ? typeM[2] : mod;
+        const keepNotNull = /NOT\s+NULL/i.test(oldRest) && !/^NULL\b/i.test(extra) && !/\bNULL\b/i.test(extra.replace(/NOT\s+NULL/i, ''));
+        const rest2 = oldRest.replace(/NOT\s+NULL/i, '').trim();
+        const wantsNotNull = /NOT\s+NULL/i.test(extra) || keepNotNull;
+        const withoutNn = extra.replace(/NOT\s+NULL/i, '').replace(/^NULL$/i, '').trim();
+        return [`"${head[1]}"`, newType, withoutNn, rest2, wantsNotNull ? 'NOT NULL' : ''].filter(Boolean).join(' ');
+      }),
+    );
+    if (!found) throw new OracleError(`Ungültiger Bezeichner: Spalte ${col} existiert nicht.`, 'ORA-00904');
+    return `Tabelle ${table} geändert (Spalte ${col} angepasst).`;
+  }
+  throw new OracleError('Diese ALTER-TABLE-Variante wird im Trainer noch nicht unterstützt.');
 }
 
 function runCreateTable(db: Database, stmt: string): string {
@@ -416,14 +484,46 @@ function runCreateTable(db: Database, stmt: string): string {
     db.exec('PRAGMA foreign_keys=ON');
     throw e;
   }
+  installGuards(db, created);
   return `Tabelle ${created} erstellt.`;
+}
+
+/** Datentyp-Waechter (Zahl, Textlaenge) fuer eine Tabelle neu anlegen. */
+function installGuards(db: Database, table: string) {
+  const cols = query(db, `PRAGMA table_info("${table}")`).map((c) => ({ name: String(c.name), type: String(c.type) }));
+  try {
+    db.exec(`DROP TRIGGER IF EXISTS "__guard_${table}_i"; DROP TRIGGER IF EXISTS "__guard_${table}_u";`);
+    const sql = guardTriggers(table, cols);
+    if (sql) db.exec(sql);
+  } catch {
+    /* Waechter sind eine Zusatzpruefung: nie die Anweisung selbst scheitern lassen */
+  }
+}
+
+/** Unabhaengige Unterabfragen nach einem Vergleichsoperator duerfen hoechstens eine Zeile liefern. */
+function checkSingleRow(db: Database, stmt: string) {
+  for (const inner of singleRowSubqueries(stmt)) {
+    let n = 0;
+    try {
+      n = Number(query(db, `SELECT COUNT(*) AS n FROM (${rewriteQuery(inner)})`)[0]?.n ?? 0);
+    } catch {
+      continue; // abhaengige Unterabfrage oder Fehler: der eigentliche Lauf meldet es
+    }
+    if (n > 1)
+      throw new OracleError(
+        `Einzeilige Unterabfrage liefert mehr als eine Zeile (${n} Zeilen). Bei = < > muss die Unterabfrage genau einen Wert liefern. Nutze IN, ANY oder ALL.`,
+        'ORA-01427',
+      );
+  }
 }
 
 export function executeStatement(db: Database, raw: string): StatementResult {
   const stmt = raw.trim();
+  let kw: string | undefined;
   try {
     rejectNonOracle(stmt);
-    const kw = stmt.match(/^\s*(\w+)/)?.[1]?.toUpperCase();
+    kw = stmt.match(/^\s*(\w+)/)?.[1]?.toUpperCase();
+    checkOracleStatement(stmt, kw);
     let message: string;
     if (kw === 'CREATE' && /^CREATE\s+TABLE/i.test(stmt)) message = runCreateTable(db, stmt);
     else if (kw === 'DROP' && /^DROP\s+TABLE/i.test(stmt)) message = runDrop(db, stmt);
@@ -439,6 +539,7 @@ export function executeStatement(db: Database, raw: string): StatementResult {
       message = `Tabelle ${name} geleert.`;
     }
     else {
+      checkSingleRow(db, stmt);
       if (kw === 'SELECT' || kw === 'WITH') {
         checkGroupBy(stmt);
         // prepare statt exec, damit Spaltennamen auch bei 0 Zeilen bekannt sind
@@ -465,7 +566,7 @@ export function executeStatement(db: Database, raw: string): StatementResult {
     return { sql: stmt, ok: true, message };
   } catch (e) {
     if (e instanceof OracleError) return { sql: stmt, ok: false, message: e.message, ora: e.ora };
-    const mapped = mapError(e instanceof Error ? e.message : String(e));
+    const mapped = mapError(e instanceof Error ? e.message : String(e), kw);
     return { sql: stmt, ok: false, ...mapped };
   }
 }

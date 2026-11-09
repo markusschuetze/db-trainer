@@ -70,7 +70,7 @@ export const phrases: Phrase[] = [
   {
     id: 'schueler-stuhl',
     text: 'Ein Schüler muss auf genau einem Stuhl sitzen. Ein Stuhl kann höchstens einen Schüler aufnehmen.',
-    e1: E('Schueler', 'Schueler_ID', 'Name', 'Schüler'),
+    e1: E('Schüler', 'Schueler_ID', 'Name', 'Schüler'),
     verb: 'sitzt auf',
     e2: E('Stuhl', 'Stuhl_Nr', 'Modell', 'Stühle'),
     c12: '11',
@@ -99,7 +99,7 @@ export const phrases: Phrase[] = [
     text: 'In einem Raum können sich beliebig viele Büromaterialien befinden, auch keine. Ein Büromaterial befindet sich in genau einem Raum.',
     e1: E('Raum', 'Raum_Nr', 'Kapazitaet', 'Räume'),
     verb: 'enthält',
-    e2: E('Bueromaterial', 'Material_ID', 'Bezeichnung', 'Büromaterialien'),
+    e2: E('Büromaterial', 'Material_ID', 'Bezeichnung', 'Büromaterialien'),
     c12: '0N',
     c21: '11',
   },
