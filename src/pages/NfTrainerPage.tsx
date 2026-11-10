@@ -6,8 +6,8 @@ import { isDone } from '../progress';
 import { NfExercisePage } from './NfExercisePage';
 
 export type NfArea = '1' | '2' | '3' | 'M' | 'A';
-export const NF_AREA_SLUG: Record<string, NfArea> = { '1nf': '1', '2nf': '2', '3nf': '3', mix: 'M', ganzheitlich: 'M', alle: 'A' };
-const SLUG_OF: Record<NfArea, string> = { '1': '1nf', '2': '2nf', '3': '3nf', M: 'mix', A: 'alle' };
+export const NF_AREA_SLUG: Record<string, NfArea> = { '1nf': '1', '2nf': '2', '3nf': '3', alle: 'A' };
+const SLUG_OF: Record<NfArea, string> = { '1': '1nf', '2': '2nf', '3': '3nf', M: 'alle', A: 'alle' };
 
 const areaOf = (ex: NfExercise): NfArea => (ex.tags.length >= 3 ? 'M' : (ex.tags[0].charAt(0) as NfArea));
 const inArea = (ex: NfExercise, a: NfArea) => a === 'A' || areaOf(ex) === a;
@@ -15,8 +15,7 @@ const AREAS: { id: NfArea; title: string; text: string }[] = [
   { id: '1', title: '1NF trainieren', text: 'Atomare Werte: mehrwertige und strukturierte Attribute erkennen und auflösen.' },
   { id: '2', title: '2NF trainieren', text: 'Abhängigkeiten erkennen und Relationen mit zusammengesetztem Schlüssel zerlegen.' },
   { id: '3', title: '3NF trainieren', text: 'Transitive Abhängigkeiten erkennen und auslagern.' },
-  { id: 'M', title: 'Mix: bis wohin ist es möglich?', text: 'Du stellst selbst fest, bis zu welcher Normalform sich die Relation überführen lässt.' },
-  { id: 'A', title: 'Normalformen: alles gemischt', text: 'Alle Aufgaben zu 1NF, 2NF, 3NF und Mix bunt durcheinander.' },
+  { id: 'A', title: 'Normalformen: alles gemischt', text: 'Alle Aufgaben bunt durcheinander, auch mit Relationen, bei denen du selbst feststellst, bis zu welcher Normalform es geht.' },
 ];
 
 const shuffle = <T,>(a: T[]): T[] => {
@@ -78,7 +77,7 @@ export function NfOverview() {
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Normalisierung</h1>
-      <p className="mt-2 max-w-2xl text-muted">Vier Bereiche mit je 8 Aufgaben (Skript 05) oder alle zusammen gemischt. Wähle einen Bereich.</p>
+      <p className="mt-2 max-w-2xl text-muted">1NF, 2NF und 3NF einzeln trainieren (Skript 05) oder alle Aufgaben zusammen gemischt. Wähle, was du übst.</p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {AREAS.map((a) => {
           const list = nfExercises.filter((e) => inArea(e, a.id));

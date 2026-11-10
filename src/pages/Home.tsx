@@ -32,7 +32,7 @@ const modules: Module[] = [
   {
     title: L('Normalformen'),
     script: L('Skript 05'),
-    text: L('1NF, 2NF und 3NF einzeln trainieren, ein Mix mit eigener Feststellung oder alles gemischt: 32 Aufgaben.'),
+    text: L('1NF, 2NF und 3NF einzeln trainieren oder alles gemischt, auch mit Aufgaben, bei denen du selbst feststellst, wie weit es geht: 32 Aufgaben.'),
     href: '#/normalisierung',
   },
   {
