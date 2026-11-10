@@ -9,15 +9,15 @@ export function NfList() {
       </a>
       <h1 className="mt-2 text-3xl font-bold">Normalisierung</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Überführe jede Relation, soweit es möglich ist, in die 3. Normalform. Du entscheidest selbst, wie weit es geht:
-        1NF prüfen, Abhängigkeiten einordnen, höchste Normalform bestimmen und das Zielschema ansehen. Die Schreibweise
-        entspricht Skript 05.
+        Aufgabe 1 bis 3 trainieren je eine Normalform. Aufgabe 4 ist ganzheitlich: Du stellst selbst fest, bis zu welcher
+        Normalform sich die Relation überführen lässt. Pro Aufgabe: 1NF prüfen, Abhängigkeiten einordnen, höchste
+        Normalform bestimmen und das Zielschema ansehen. Die Schreibweise entspricht Skript 05.
       </p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {nfExercises.map((ex, i) => (
           <li key={ex.id} className="flex flex-col rounded-card border border-line bg-surface p-5">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Aufgabe {i + 1}
+              Aufgabe {i + 1} · {ex.tags.length >= 3 ? 'Ganzheitlich: bis wohin ist es möglich?' : `${ex.tags.join(' · ')} trainieren`}
             </span>
             <h2 className="mt-1 text-lg font-bold">{ex.title}</h2>
             <p className="mt-1 flex-1 text-sm text-muted">{ex.scenario}</p>

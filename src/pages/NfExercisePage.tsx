@@ -97,7 +97,11 @@ function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
   return (
     <Panel title="Schritt 1: Erste Normalform">
       <p className="text-sm text-muted">{ex.scenario}</p>
-      <p className="mb-3 mt-2 font-semibold">Aufgabe: Überführe die Relation, soweit möglich, in die 3. Normalform.</p>
+      <p className="mb-3 mt-2 font-semibold">
+        {ex.tags.length >= 3
+          ? 'Aufgabe: Stelle selbst fest, bis zu welcher Normalform sich die Relation überführen lässt, und überführe sie so weit wie möglich (höchstens bis zur 3NF).'
+          : `Schwerpunkt dieser Aufgabe: ${ex.tags.join(' und ')}.`}
+      </p>
       {ex.hint && <HintButton text={ex.hint} />}
       <DataTable table={ex.relation} highlight={flagged} caption={ex.title} />
       <fieldset className="mt-4" disabled={locked}>
@@ -255,7 +259,7 @@ function StepHighest({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
 /* ---------- Schritt 4: Zielschema ---------- */
 function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   return (
-    <Panel title="Schritt 4: Zielschema (so weit wie möglich in 3NF)">
+    <Panel title={ex.tags.length >= 3 ? 'Schritt 4: Zielschema (so weit wie möglich, höchstens 3NF)' : 'Schritt 4: Zielschema'}>
       <p className="mb-3 text-sm text-muted">So sieht das normalisierte Schema aus (Notation wie in Skript 05):</p>
       <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-bg p-4 font-mono text-sm leading-7">
         {ex.target.join('\n')}

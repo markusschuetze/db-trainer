@@ -68,7 +68,7 @@ export const nfExercises: NfExercise[] = [
     ],
     targetNote:
       'Die partiell abhängigen Attribute werden mit dem Teilschlüssel TNr ausgelagert. Übrig bleibt eine Relation, die nur aus dem ursprünglichen Schlüssel besteht (M:N-Beziehung ohne Attribut).',
-    tags: ['1NF', '2NF'],
+    tags: ['1NF'],
     source: SRC,
   },
   {
