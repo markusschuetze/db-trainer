@@ -30,34 +30,10 @@ const modules: Module[] = [
     href: '#/relationen',
   },
   {
-    title: L('1NF trainieren'),
+    title: L('Normalformen'),
     script: L('Skript 05'),
-    text: L('Atomare Werte: mehrwertige und strukturierte Attribute erkennen und auflösen. 8 Aufgaben.'),
-    href: '#/normalisierung/1nf',
-  },
-  {
-    title: L('2NF trainieren'),
-    script: L('Skript 05'),
-    text: L('Abhängigkeiten erkennen und Relationen mit zusammengesetztem Schlüssel zerlegen. 8 Aufgaben.'),
-    href: '#/normalisierung/2nf',
-  },
-  {
-    title: L('3NF trainieren'),
-    script: L('Skript 05'),
-    text: L('Transitive Abhängigkeiten erkennen und auslagern. 8 Aufgaben.'),
-    href: '#/normalisierung/3nf',
-  },
-  {
-    title: L('Normalisierung: Mix'),
-    script: L('Skript 05'),
-    text: L('Du stellst selbst fest, bis zu welcher Normalform sich die Relation überführen lässt. 8 Aufgaben.'),
-    href: '#/normalisierung/mix',
-  },
-  {
-    title: L('Normalformen: alles gemischt'),
-    script: L('Skript 05'),
-    text: L('Alle Aufgaben zu 1NF, 2NF, 3NF und Mix bunt durcheinander. 32 Aufgaben.'),
-    href: '#/normalisierung/alle',
+    text: L('1NF, 2NF und 3NF einzeln trainieren, ein Mix mit eigener Feststellung oder alles gemischt: 32 Aufgaben.'),
+    href: '#/normalisierung',
   },
   {
     title: L('SQL-DDL'),
