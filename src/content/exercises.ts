@@ -1,8 +1,9 @@
+import { moreNfExercises } from './exercisesMore';
 import type { NfExercise } from './types';
 
 const SRC = 'Nach Skript 05 Normalisierung (Schaible/Bertelsmeier, TH Köln)';
 
-export const nfExercises: NfExercise[] = [
+const baseNfExercises: NfExercise[] = [
   {
     id: 'fahrradteile',
     topicId: '05-1nf',
@@ -113,6 +114,9 @@ export const nfExercises: NfExercise[] = [
       },
     ],
     highestNF: 1,
+    stages: [
+      { title: 'Schritt 4: Tabellen der 2NF bilden', hint: 'Partielle Abhängigkeiten werden mit dem Teilschlüssel, von dem sie abhängen, in eine eigene Relation ausgelagert. Die ursprüngliche Relation behält nur noch Attribute, die vom ganzen Schlüssel abhängen.', relations: [{ name: 'Mitarbeiter', columns: [{ name: 'MitArb_ID', pk: true }, { name: 'MitArb_Name' }] }, { name: 'Projekt', columns: [{ name: 'Projekt_ID', pk: true }, { name: 'ProjektName' }] }, { name: 'Arbeitet_in', columns: [{ name: 'MitArb_ID', pk: true, fk: 'Mitarbeiter' }, { name: 'Projekt_ID', pk: true, fk: 'Projekt' }, { name: 'Rolle' }] }] },
+    ],
     target: [
       'Mitarbeiter (MitArb_ID, MitArb_Name)',
       'Projekt (Projekt_ID, ProjektName)',
@@ -156,6 +160,9 @@ export const nfExercises: NfExercise[] = [
       },
     ],
     highestNF: 2,
+    stages: [
+      { title: 'Schritt 4: Tabellen der 3NF bilden', hint: 'Bei einer transitiven Abhängigkeit wird das bestimmende Attribut zum Schlüssel einer neuen Relation. Es bleibt in der alten Relation als Fremdschlüssel stehen.', relations: [{ name: 'Bestellung', columns: [{ name: 'BNR', pk: true }, { name: 'BDAT' }, { name: 'LNR', fk: 'Lieferant' }] }, { name: 'Lieferant', columns: [{ name: 'LNR', pk: true }, { name: 'LNAME' }, { name: 'LADR' }] }] },
+    ],
     target: ['Bestellung (BNR, BDAT, LNR <fk>)', 'Lieferant (LNR, LNAME, LADR)'],
     targetNote:
       'Das Attribut LNR, über das die Abhängigkeit läuft, wird Primärschlüssel der neuen Relation und bleibt in der Ursprungsrelation als Fremdschlüssel.',
@@ -230,6 +237,10 @@ export const nfExercises: NfExercise[] = [
       },
     ],
     highestNF: 1,
+    stages: [
+      { title: 'Schritt 4: Tabellen der 2NF bilden', hint: 'Partielle Abhängigkeiten werden mit dem Teilschlüssel, von dem sie abhängen, in eine eigene Relation ausgelagert. Die ursprüngliche Relation behält nur noch Attribute, die vom ganzen Schlüssel abhängen.', relations: [{ name: 'Teilnehmer', columns: [{ name: 'TeilnNr', pk: true }, { name: 'Vorname' }, { name: 'Nachname' }] }, { name: 'Kurs', columns: [{ name: 'KursNr', pk: true }, { name: 'KursTitel' }, { name: 'DozNr' }, { name: 'DozName' }] }, { name: 'Belegt', columns: [{ name: 'TeilnNr', pk: true, fk: 'Teilnehmer' }, { name: 'KursNr', pk: true, fk: 'Kurs' }, { name: 'Note' }] }] },
+      { title: 'Schritt 5: Tabellen der 3NF bilden', hint: 'Bei einer transitiven Abhängigkeit wird das bestimmende Attribut zum Schlüssel einer neuen Relation. Es bleibt in der alten Relation als Fremdschlüssel stehen.', relations: [{ name: 'Teilnehmer', columns: [{ name: 'TeilnNr', pk: true }, { name: 'Vorname' }, { name: 'Nachname' }] }, { name: 'Dozent', columns: [{ name: 'DozNr', pk: true }, { name: 'DozName' }] }, { name: 'Kurs', columns: [{ name: 'KursNr', pk: true }, { name: 'KursTitel' }, { name: 'DozNr', fk: 'Dozent' }] }, { name: 'Belegt', columns: [{ name: 'TeilnNr', pk: true, fk: 'Teilnehmer' }, { name: 'KursNr', pk: true, fk: 'Kurs' }, { name: 'Note' }] }] },
+    ],
     target: [
       'Teilnehmer (TeilnNr, Vorname, Nachname)',
       'Dozent (DozNr, DozName)',
@@ -242,3 +253,6 @@ export const nfExercises: NfExercise[] = [
     source: SRC,
   },
 ];
+
+/** Alle Normalisierungsaufgaben: die ersten vier (je Bereich eine) plus die ergänzten, je Bereich mindestens 8. */
+export const nfExercises: NfExercise[] = [...baseNfExercises, ...moreNfExercises];

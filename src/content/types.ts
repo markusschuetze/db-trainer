@@ -1,3 +1,5 @@
+import type { Relation } from './erPhrases';
+
 // Aufgabenformat des NF-Trainers. Neue Aufgaben = neuer Eintrag in
 // exercises.ts, kein weiterer Code noetig. Notation wie in Skript 05.
 
@@ -47,6 +49,11 @@ export interface NfExercise {
   fds: FunctionalDependency[];
   /** Hoechste erfuellte Normalform der (1NF-bereinigten) Ausgangsrelation */
   highestNF: 1 | 2 | 3;
+  /**
+   * Schrittweises Zielschema zum Selberbauen (z. B. erst 2NF, dann 3NF). Ohne Angabe wird nur das fertige
+   * Zielschema (target) angezeigt.
+   */
+  stages?: { title: string; hint: string; relations: Relation[] }[];
   /** Zielschema in Vorlesungsnotation, eine Relation pro Zeile */
   target: string[];
   targetNote?: string;

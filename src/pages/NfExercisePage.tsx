@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { DataTable } from '../components/DataTable';
+import { RelationView } from '../components/RelationView';
+import type { Relation } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
 import type { DepKind, NfExercise, Table } from '../content/types';
 import { gradeHighest, gradeOneNf } from '../logic/nfGrading';
@@ -156,7 +158,11 @@ function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
         )}
       </fieldset>
       <Feedback status={status}>
-        {locked && ex.oneNF.ok && <p>Alle Attribute sind atomar. Die Relation ist in 1NF.</p>}
+        {locked && ex.oneNF.ok && (
+          <p>
+            Alle Attribute sind atomar. Die Relation ist in 1NF. {ex.oneNF.fixNote}
+          </p>
+        )}
         {locked && !ex.oneNF.ok && (
           <>
             <ul className="list-disc pl-5">
@@ -348,6 +354,187 @@ function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   );
 }
 
+/* ---------- Schritt 4/5: Tabellen selbst bilden ---------- */
+
+interface DraftRel {
+  name: string;
+  cols: string[];
+  pk: string[];
+  fk: string[];
+}
+const sig = (cols: string[], pk: string[], fk: string[]) =>
+  [[...cols].sort().join(','), [...pk].sort().join(','), [...fk].sort().join(',')].join('|');
+const toDraft = (r: Relation): DraftRel => ({
+  name: r.name,
+  cols: r.columns.map((c) => c.name),
+  pk: r.columns.filter((c) => c.pk).map((c) => c.name),
+  fk: r.columns.filter((c) => c.fk).map((c) => c.name),
+});
+
+function StepBuild({
+  ex,
+  stage,
+  from,
+  title,
+  last,
+  onNext,
+  doneNow,
+}: {
+  ex: NfExercise;
+  stage: Relation[];
+  from: Relation[] | null;
+  title: string;
+  last: boolean;
+  onNext?: () => void;
+  doneNow: () => void;
+}) {
+  const base = ex.oneNF.fixed ?? ex.relation;
+  const hint = ex.stages!.find((s) => s.relations === stage)?.hint;
+  // Erste Stufe: leer beginnen. Folgestufen: mit dem (richtigen) Ergebnis der vorigen Stufe starten und weiter zerlegen.
+  const [rels, setRels] = useState<DraftRel[]>(from ? from.map(toDraft) : [{ name: '', cols: [], pk: [], fk: [] }]);
+  const [status, setStatus] = useState<Status>('open');
+  const [result, setResult] = useState<boolean[]>([]);
+  const [showHint, setShowHint] = useState(false);
+  const locked = status === 'right' || status === 'revealed';
+
+  const upd = (i: number, f: (r: DraftRel) => DraftRel) => setRels(rels.map((r, j) => (j === i ? f(r) : r)));
+  const toggle = (list: string[], c: string, on: boolean) => (on ? [...list, c] : list.filter((x) => x !== c));
+
+  const check = () => {
+    const expected = stage.map((r) => {
+      const d = toDraft(r);
+      return sig(d.cols, d.pk, d.fk);
+    });
+    const left = [...expected];
+    const res = rels.map((r) => {
+      const k = left.indexOf(sig(r.cols, r.pk, r.fk));
+      if (k >= 0) left.splice(k, 1);
+      return k >= 0;
+    });
+    setResult(res);
+    setStatus(res.every(Boolean) && rels.length === expected.length ? 'right' : 'wrong');
+  };
+
+  return (
+    <Panel title={title}>
+      <p className="mb-3 text-sm text-muted">
+        {from
+          ? 'Du startest mit dem Ergebnis des letzten Schritts. Zerlege die Relationen weiter, bis das Schema in 3NF ist.'
+          : 'Bilde die Relationen der Zielnormalform: Welche Attribute gehören zusammen in eine Relation? Wähle pro Relation ihre Attribute, ihren Primärschlüssel (PK) und ihre Fremdschlüssel (FK).'}
+      </p>
+      {hint && !locked && (showHint ? (
+        <p className="mb-3 rounded-lg bg-bg p-3 text-sm">
+          <strong>Hinweis:</strong> {hint}
+        </p>
+      ) : (
+        <button className="mb-3 text-sm underline" onClick={() => setShowHint(true)}>
+          Hinweis anzeigen
+        </button>
+      ))}
+      {locked ? (
+        <div className="rounded-lg bg-surface p-3">
+          <RelationView relations={stage} />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {rels.map((r, i) => (
+            <fieldset key={i} className="rounded-lg border border-line p-3">
+              <legend className="px-1 text-sm font-semibold">
+                Relation {i + 1}
+                {status === 'wrong' && <span className={`ml-2 ${result[i] ? 'text-ok' : 'text-bad'}`}>{result[i] ? '✓' : '✗'}</span>}
+              </legend>
+              <label className="flex flex-wrap items-center gap-2 text-sm">
+                Name
+                <input
+                  className="rounded border border-line bg-surface px-2 py-1"
+                  value={r.name}
+                  placeholder="z. B. Kurs"
+                  onChange={(e) => upd(i, (x) => ({ ...x, name: e.target.value }))}
+                />
+              </label>
+              <table className="mt-2 text-sm">
+                <thead>
+                  <tr className="text-left text-muted">
+                    <th className="pr-4 font-normal">Attribut</th>
+                    <th className="pr-3 font-normal">PK</th>
+                    <th className="font-normal">FK</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {base.columns.map((c) => {
+                    const inRel = r.cols.includes(c);
+                    return (
+                      <tr key={c}>
+                        <td className="pr-4">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={inRel}
+                              onChange={(e) =>
+                                upd(i, (x) => ({
+                                  ...x,
+                                  cols: toggle(x.cols, c, e.target.checked),
+                                  pk: e.target.checked ? x.pk : x.pk.filter((y) => y !== c),
+                                  fk: e.target.checked ? x.fk : x.fk.filter((y) => y !== c),
+                                }))
+                              }
+                            />
+                            <span className="font-mono">{c}</span>
+                          </label>
+                        </td>
+                        <td className="pr-3">
+                          <input type="checkbox" aria-label={`${c} ist Primärschlüssel`} disabled={!inRel} checked={r.pk.includes(c)} onChange={(e) => upd(i, (x) => ({ ...x, pk: toggle(x.pk, c, e.target.checked) }))} />
+                        </td>
+                        <td>
+                          <input type="checkbox" aria-label={`${c} ist Fremdschlüssel`} disabled={!inRel} checked={r.fk.includes(c)} onChange={(e) => upd(i, (x) => ({ ...x, fk: toggle(x.fk, c, e.target.checked) }))} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {rels.length > 1 && (
+                <button className="mt-2 text-sm underline" onClick={() => setRels(rels.filter((_, j) => j !== i))}>
+                  Relation entfernen
+                </button>
+              )}
+            </fieldset>
+          ))}
+          <button className={btnGhost} onClick={() => setRels([...rels, { name: '', cols: [], pk: [], fk: [] }])}>
+            + Relation hinzufügen
+          </button>
+        </div>
+      )}
+      <Feedback status={status}>
+        {status === 'wrong' && <p>Noch nicht ganz. Prüfe Attribute, Primärschlüssel und Fremdschlüssel der markierten Relationen und die Anzahl der Relationen.</p>}
+        {locked && last && ex.targetNote && <p>{ex.targetNote}</p>}
+      </Feedback>
+      <div className="mt-4 flex flex-wrap gap-3">
+        {!locked && (
+          <button className={btn} onClick={check} disabled={rels.some((r) => !r.cols.length || !r.pk.length)}>
+            Prüfen
+          </button>
+        )}
+        {status === 'wrong' && (
+          <button className={btnGhost} onClick={() => setStatus('revealed')}>
+            Lösung zeigen
+          </button>
+        )}
+        {locked && !last && onNext && (
+          <button className={btn} onClick={onNext}>
+            Weiter
+          </button>
+        )}
+        {locked && last && (
+          <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
+            Aufgabe abschließen
+          </a>
+        )}
+      </div>
+    </Panel>
+  );
+}
+
 /* ---------- Abschluss der reinen 1NF-Aufgabe ---------- */
 function StepFinishOneNf({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   const base = ex.oneNF.fixed ?? ex.relation;
@@ -382,7 +569,8 @@ export function NfExercisePage({ id }: { id: string }) {
   }
   // Reine 1NF-Aufgabe: Abhaengigkeiten kommen erst in den Aufgaben zur 2NF und 3NF (wie im Skript).
   const oneOnly = ex.tags.length === 1 && ex.tags[0] === '1NF';
-  const steps = oneOnly ? 2 : 4;
+  const stages = ex.stages;
+  const steps = oneOnly ? 2 : stages ? 3 + stages.length : 4;
   const next = () => setStep((s) => s + 1);
   return (
     <>
@@ -400,7 +588,23 @@ export function NfExercisePage({ id }: { id: string }) {
         <>
           {step >= 1 && <StepFds key="s2" ex={ex} onNext={step === 1 ? next : undefined} />}
           {step >= 2 && <StepHighest key="s3" ex={ex} onNext={step === 2 ? next : undefined} />}
-          {step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />}
+          {stages
+            ? stages.map(
+                (st, k) =>
+                  step >= 3 + k && (
+                    <StepBuild
+                      key={`b${k}`}
+                      ex={ex}
+                      stage={st.relations}
+                      from={k > 0 ? stages[k - 1].relations : null}
+                      title={st.title}
+                      last={k === stages.length - 1}
+                      onNext={step === 3 + k ? next : undefined}
+                      doneNow={() => markDone(`nf:${ex.id}`)}
+                    />
+                  ),
+              )
+            : step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />}
         </>
       )}
     </>

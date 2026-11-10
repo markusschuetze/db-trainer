@@ -8,6 +8,25 @@ describe('Aufgabendaten', () => {
       expect(exerciseProblems(ex)).toEqual([]);
     });
   }
+  it('Zielschema-Stufen sind konsistent (Attribute aus der 1NF-Relation, jede Relation mit PK)', () => {
+    for (const ex of nfExercises.filter((e) => e.stages)) {
+      const cols = (ex.oneNF.fixed ?? ex.relation).columns;
+      for (const st of ex.stages!) {
+        for (const r of st.relations) {
+          expect(r.columns.length).toBeGreaterThan(0);
+          expect(r.columns.some((c) => c.pk)).toBe(true);
+          for (const c of r.columns) expect(cols).toContain(c.name);
+        }
+        // jedes Attribut der 1NF-Relation kommt mindestens einmal vor
+        for (const c of cols) expect(st.relations.some((r) => r.columns.some((x) => x.name === c))).toBe(true);
+      }
+    }
+  });
+  it('mindestens 8 Aufgaben je Bereich, und jeder Bereich mit Fallen-Hinweis oder Zerlegung', () => {
+    const area = (e: (typeof nfExercises)[number]) => (e.tags.length >= 3 ? 'M' : e.tags[0]);
+    for (const a of ['1NF', '2NF', '3NF', 'M']) expect(nfExercises.filter((e) => area(e) === a).length).toBeGreaterThanOrEqual(8);
+    for (const e of nfExercises.filter((x) => x.tags[0] !== '1NF' || x.tags.length >= 3)) expect(e.stages?.length ?? 0).toBeGreaterThan(0);
+  });
   it('IDs sind eindeutig', () => {
     const ids = nfExercises.map((e) => e.id);
     expect(new Set(ids).size).toBe(ids.length);
