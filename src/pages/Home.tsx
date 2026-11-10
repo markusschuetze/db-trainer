@@ -30,10 +30,28 @@ const modules: Module[] = [
     href: '#/relationen',
   },
   {
-    title: L('Normalisierung'),
+    title: L('1NF trainieren'),
     script: L('Skript 05'),
-    text: L('Von der Tabelle zur 3. Normalform, Schritt für Schritt mit Begründung.'),
-    href: '#/normalisierung',
+    text: L('Atomare Werte: mehrwertige und strukturierte Attribute erkennen und auflösen. 8 Aufgaben.'),
+    href: '#/normalisierung/1nf',
+  },
+  {
+    title: L('2NF trainieren'),
+    script: L('Skript 05'),
+    text: L('Abhängigkeiten erkennen und Relationen mit zusammengesetztem Schlüssel zerlegen. 8 Aufgaben.'),
+    href: '#/normalisierung/2nf',
+  },
+  {
+    title: L('3NF trainieren'),
+    script: L('Skript 05'),
+    text: L('Transitive Abhängigkeiten erkennen und auslagern. 8 Aufgaben.'),
+    href: '#/normalisierung/3nf',
+  },
+  {
+    title: L('Normalisierung: Mix'),
+    script: L('Skript 05'),
+    text: L('Du stellst selbst fest, bis zu welcher Normalform sich die Relation überführen lässt. 8 Aufgaben.'),
+    href: '#/normalisierung/mix',
   },
   {
     title: L('SQL-DDL'),
