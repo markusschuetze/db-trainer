@@ -1,19 +1,22 @@
 import { useMemo, useState } from 'react';
 import { nfExercises } from '../content/exercises';
 import type { NfExercise } from '../content/types';
+import { mixedOrder } from '../logic/order';
 import { isDone } from '../progress';
 import { NfExercisePage } from './NfExercisePage';
 
-export type NfArea = '1' | '2' | '3' | 'M';
-export const NF_AREA_SLUG: Record<string, NfArea> = { '1nf': '1', '2nf': '2', '3nf': '3', mix: 'M', ganzheitlich: 'M' };
-const SLUG_OF: Record<NfArea, string> = { '1': '1nf', '2': '2nf', '3': '3nf', M: 'mix' };
+export type NfArea = '1' | '2' | '3' | 'M' | 'A';
+export const NF_AREA_SLUG: Record<string, NfArea> = { '1nf': '1', '2nf': '2', '3nf': '3', mix: 'M', ganzheitlich: 'M', alle: 'A' };
+const SLUG_OF: Record<NfArea, string> = { '1': '1nf', '2': '2nf', '3': '3nf', M: 'mix', A: 'alle' };
 
 const areaOf = (ex: NfExercise): NfArea => (ex.tags.length >= 3 ? 'M' : (ex.tags[0].charAt(0) as NfArea));
+const inArea = (ex: NfExercise, a: NfArea) => a === 'A' || areaOf(ex) === a;
 const AREAS: { id: NfArea; title: string; text: string }[] = [
   { id: '1', title: '1NF trainieren', text: 'Atomare Werte: mehrwertige und strukturierte Attribute erkennen und auflösen.' },
   { id: '2', title: '2NF trainieren', text: 'Abhängigkeiten erkennen und Relationen mit zusammengesetztem Schlüssel zerlegen.' },
   { id: '3', title: '3NF trainieren', text: 'Transitive Abhängigkeiten erkennen und auslagern.' },
   { id: 'M', title: 'Mix: bis wohin ist es möglich?', text: 'Du stellst selbst fest, bis zu welcher Normalform sich die Relation überführen lässt.' },
+  { id: 'A', title: 'Normalformen: alles gemischt', text: 'Alle Aufgaben zu 1NF, 2NF, 3NF und Mix bunt durcheinander.' },
 ];
 
 const shuffle = <T,>(a: T[]): T[] => {
@@ -31,7 +34,8 @@ export function NfTrainerPage({ initialArea = '1' }: { initialArea?: NfArea }) {
   const [round, setRound] = useState(0);
   const [pos, setPos] = useState(0);
   const order = useMemo(() => {
-    const list = nfExercises.filter((e) => areaOf(e) === area);
+    const list = nfExercises.filter((e) => inArea(e, area));
+    if (area === 'A') return mixedOrder(list, (e) => areaOf(e)).map((i) => list[i]); // nie zwei Aufgaben desselben Bereichs hintereinander
     return [...shuffle(list.filter((e) => !isDone(`nf:${e.id}`))), ...shuffle(list.filter((e) => isDone(`nf:${e.id}`)))];
   }, [area, round]); // eslint-disable-line react-hooks/exhaustive-deps
   const ex = order[pos];
@@ -74,10 +78,10 @@ export function NfOverview() {
         ← Übersicht
       </a>
       <h1 className="mt-2 text-3xl font-bold">Normalisierung</h1>
-      <p className="mt-2 max-w-2xl text-muted">Vier Bereiche mit je 8 Aufgaben (Skript 05). Wähle einen Bereich.</p>
+      <p className="mt-2 max-w-2xl text-muted">Vier Bereiche mit je 8 Aufgaben (Skript 05) oder alle zusammen gemischt. Wähle einen Bereich.</p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {AREAS.map((a) => {
-          const list = nfExercises.filter((e) => areaOf(e) === a.id);
+          const list = nfExercises.filter((e) => inArea(e, a.id));
           const done = list.filter((e) => isDone(`nf:${e.id}`)).length;
           return (
             <li key={a.id} className="flex flex-col rounded-card border border-line bg-surface p-5">

@@ -54,6 +54,12 @@ const modules: Module[] = [
     href: '#/normalisierung/mix',
   },
   {
+    title: L('Normalformen: alles gemischt'),
+    script: L('Skript 05'),
+    text: L('Alle Aufgaben zu 1NF, 2NF, 3NF und Mix bunt durcheinander. 32 Aufgaben.'),
+    href: '#/normalisierung/alle',
+  },
+  {
     title: L('SQL-DDL'),
     script: L('Skript 06'),
     text: L('CREATE, ALTER, DROP und Constraints, geprüft an echtem Verhalten.'),

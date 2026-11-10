@@ -52,6 +52,8 @@ export const en: Record<string, string> = {
   'Arbeiten wie im SQL Developer, aber im Browser: Datenbank bleibt erhalten, Fehlermeldungen, COMMIT/ROLLBACK, ER-Modell auf Knopfdruck.': 'Work as in SQL Developer, but in the browser: persistent database, error messages, COMMIT/ROLLBACK, ER model at the click of a button.',
   'Zufallsmodus': 'Random mode',
   '1NF trainieren': 'Practise 1NF',
+  'Normalformen: alles gemischt': 'Normal forms: everything mixed',
+  'Alle Aufgaben zu 1NF, 2NF, 3NF und Mix bunt durcheinander. 32 Aufgaben.': 'All tasks on 1NF, 2NF, 3NF and mix, shuffled. 32 tasks.',
   '2NF trainieren': 'Practise 2NF',
   '3NF trainieren': 'Practise 3NF',
   'Normalisierung: Mix': 'Normalization: mix',

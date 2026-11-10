@@ -27,3 +27,14 @@ describe('gemischte Reihenfolge', () => {
     }
   });
 });
+
+describe('Normalformen alles gemischt', () => {
+  it('nie zwei Aufgaben desselben Bereichs hintereinander', async () => {
+    const { nfExercises } = await import('../content/exercises');
+    const area = (e: (typeof nfExercises)[number]) => (e.tags.length >= 3 ? 'M' : e.tags[0]);
+    for (let n = 0; n < 100; n++) {
+      const o = mixedOrder(nfExercises, area).map((i) => area(nfExercises[i]));
+      expect(maxRun(o)).toBe(1);
+    }
+  });
+});
