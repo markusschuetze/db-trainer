@@ -80,6 +80,7 @@ function CardinalityTrainer() {
           verb={p.verb}
           c12={step === 1 || checked ? a12 || undefined : undefined}
           c21={a21 || undefined}
+          laterRight={step === 0}
         />
       </div>
       <div className="mt-4">
