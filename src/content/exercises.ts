@@ -6,6 +6,7 @@ export const nfExercises: NfExercise[] = [
   {
     id: 'fahrradteile',
     topicId: '05-1nf',
+    glossary: { TNr: 'Teilenummer', Bezeichnung: 'Name des Fahrrads', Artikel_Typ: 'Art des Fahrrads', Umsatz_J: 'Jahresumsatz', Lief_Nr: 'Lieferantennummer', Zeitstempel: 'Datum der Erfassung' },
     title: 'Fahrradteile und Lieferanten',
     scenario:
       'Zu Fahrrädern wird gespeichert, welche Lieferanten sie liefern.',
@@ -74,6 +75,7 @@ export const nfExercises: NfExercise[] = [
   {
     id: 'mitarbeiter-projekte',
     topicId: '05-2nf',
+    glossary: { MitArb_ID: 'Mitarbeiternummer', Projekt_ID: 'Projektnummer', Rolle: 'Rolle im Projekt', ProjektName: 'Name des Projekts', MitArb_Name: 'Name der Mitarbeiterin bzw. des Mitarbeiters' },
     title: 'Mitarbeitende in Projekten',
     scenario:
       'Welche Mitarbeitenden arbeiten in welchen Projekten und in welcher Rolle?',
@@ -124,6 +126,7 @@ export const nfExercises: NfExercise[] = [
   {
     id: 'bestellung-lieferant',
     topicId: '05-3nf',
+    glossary: { BNR: 'Bestellnummer', BDAT: 'Bestelldatum', LNR: 'Liefernummer (Lieferant)', LNAME: 'Name des Lieferanten', LADR: 'Adresse des Lieferanten' },
     title: 'Bestellungen und Lieferanten',
     scenario:
       'Eine Bestellung (BNR) erfolgt zu einem Datum und wird über eine Liefernummer abgeschlossen, die durch Name und Adresse beschrieben wird.',
@@ -162,6 +165,7 @@ export const nfExercises: NfExercise[] = [
   {
     id: 'kursbuchung',
     topicId: '05-3nf',
+    glossary: { TeilnNr: 'Teilnehmernummer', KursNr: 'Kursnummer', Teilnehmer: 'Vor- und Nachname', KursTitel: 'Titel des Kurses', DozNr: 'Dozentennummer', DozName: 'Name des Dozenten', Note: 'erreichte Note' },
     title: 'Kursbuchungen',
     scenario:
       'Teilnehmende buchen Kurse, die von Dozierenden gehalten werden. Gespeichert werden Teilnehmende, Kurse, Dozierende und die erreichte Note.',

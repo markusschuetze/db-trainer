@@ -32,6 +32,8 @@ export interface NfExercise {
   scenario: string;
   /** Optionaler Hinweis, wird nur auf Wunsch angezeigt (darf nichts verraten, was die Aufgabe selbst abfragt) */
   hint?: string;
+  /** Bedeutung kurzer Spaltennamen, wird neben der Tabelle angezeigt */
+  glossary?: Record<string, string>;
   /** Ausgangsrelation */
   relation: Table;
   oneNF: {

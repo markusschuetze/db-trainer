@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { DataTable } from '../components/DataTable';
 import { nfExercises } from '../content/exercises';
-import type { DepKind, NfExercise } from '../content/types';
+import type { DepKind, NfExercise, Table } from '../content/types';
 import { gradeHighest, gradeOneNf } from '../logic/nfGrading';
 import { markDone } from '../progress';
 
@@ -17,6 +17,31 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
       <h2 className="mb-3 text-lg font-bold">{title}</h2>
       {children}
     </section>
+  );
+}
+
+/** Tabelle mit einer Erklaerung der Spaltenkuerzel rechts daneben (auf schmalen Bildschirmen darunter). */
+function TableWithGlossary({ ex, table, caption, highlight }: { ex: NfExercise; table: Table; caption: string; highlight?: string[] }) {
+  const entries = Object.entries(ex.glossary ?? {}).filter(([k]) => table.columns.includes(k));
+  return (
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+      <div className="min-w-0 flex-1">
+        <DataTable table={table} highlight={highlight} caption={caption} />
+      </div>
+      {entries.length > 0 && (
+        <aside className="rounded-lg border border-line p-3 text-sm lg:w-64 lg:shrink-0" aria-label="Bedeutung der Spalten">
+          <h3 className="mb-1 font-semibold">Bedeutung der Spalten</h3>
+          <dl className="space-y-1">
+            {entries.map(([k, v]) => (
+              <div key={k}>
+                <dt className="inline font-mono font-semibold">{k}</dt>
+                <dd className="inline text-muted"> = {v}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      )}
+    </div>
   );
 }
 
@@ -101,7 +126,7 @@ function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
           : `Schwerpunkt dieser Aufgabe: ${ex.tags.join(' und ')}.`}
       </p>
       {ex.hint && <HintButton text={ex.hint} />}
-      <DataTable table={ex.relation} highlight={flagged} caption={ex.title} />
+      <TableWithGlossary ex={ex} table={ex.relation} highlight={flagged} caption={ex.title} />
       <fieldset className="mt-4" disabled={locked}>
         <legend className="font-semibold">Befindet sich die Relation in 1NF?</legend>
         <div className="mt-2 flex gap-4">
@@ -196,7 +221,7 @@ function StepFds({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
         Welches Attribut hängt wovon ab? Kreuze für jedes Attribut an, von welchen Attributen es funktional abhängt, und
         ordne die Abhängigkeit als voll, partiell oder transitiv ein.
       </p>
-      <DataTable table={base} caption="Relation in 1NF" />
+      <TableWithGlossary ex={ex} table={base} caption="Relation in 1NF" />
       <ul className="mt-4 space-y-3">
         {attrs.map((a) => {
           const v = shown(a);
@@ -332,7 +357,7 @@ function StepFinishOneNf({ ex, doneNow }: { ex: NfExercise; doneNow: () => void 
         Die Relation ist jetzt in 1NF: alle Attribute sind atomar, der Schlüssel ist <strong>{base.pk.join(', ')}</strong>.
         Abhängigkeiten zwischen den Attributen (partiell, transitiv) sind Thema der Aufgaben zur 2NF und 3NF.
       </p>
-      <DataTable table={base} caption="Relation in 1NF" />
+      <TableWithGlossary ex={ex} table={base} caption="Relation in 1NF" />
       <div className="mt-4 flex flex-wrap gap-3">
         <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
           Aufgabe abschließen
