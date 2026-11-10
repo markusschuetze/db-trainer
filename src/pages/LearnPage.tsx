@@ -14,7 +14,13 @@ const PRIORITY: Mastery[] = ['falsch', 'neu', 'gelernt', 'sicher'];
 function nextQuestion(pool: McQuestion[], d: ProgressData, skip?: string): McQuestion | null {
   for (const m of PRIORITY) {
     const cands = pool.filter((q) => mastery(d.items[`mc:${q.id}`]) === m && q.id !== skip);
-    if (cands.length) return cands[Math.floor(Math.random() * cands.length)];
+    if (cands.length) {
+      // gleiches Thema wie zuvor moeglichst vermeiden, damit sich die Fragen abwechseln
+      const prevTopic = pool.find((q) => q.id === skip)?.topicId;
+      const other = cands.filter((q) => q.topicId !== prevTopic);
+      const from = other.length ? other : cands;
+      return from[Math.floor(Math.random() * from.length)];
+    }
   }
   return pool.find((q) => q.id !== skip) ?? pool[0] ?? null;
 }

@@ -4,6 +4,7 @@ import { ErDiagram } from '../components/ErDiagram';
 import { RelationView } from '../components/RelationView';
 import { previewTables, RelPreview, type PkChoice } from '../components/RelPreview';
 import { fkNotNull, relPhrases, relType, toRelations, validMappings, type Mapping } from '../content/erPhrases';
+import { useMixed } from '../useMixed';
 import { markDone } from '../progress';
 import { relTopic } from '../progressCatalog';
 
@@ -11,7 +12,7 @@ const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast dis
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
 
 export function RelPage() {
-  const [i, setI] = useState(0);
+  const { item: p, pos: i, next: nextItem } = useMixed(relPhrases, relType);
   const [mapping, setMapping] = useState<Mapping | null>(null);
   const [nullable, setNullable] = useState<boolean | null>(null);
   const [pk, setPk] = useState<PkChoice | null>(null);
@@ -19,7 +20,6 @@ export function RelPage() {
   const [hint, setHint] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
   const started = useRef(Date.now());
-  const p = relPhrases[i];
   const valid = validMappings(p);
   const mappingOk = mapping !== null && valid.includes(mapping);
   const secondOk =
@@ -27,8 +27,7 @@ export function RelPage() {
   const allOk = mappingOk && secondOk;
   const shown = mappingOk ? mapping! : valid[0];
 
-  const reset = (n: number) => {
-    setI(n);
+  const reset = () => {
     setMapping(null);
     setNullable(null);
     setPk(null);
@@ -168,12 +167,12 @@ export function RelPage() {
               Prüfen
             </button>
           ) : (
-            <button className={btn} onClick={() => reset((i + 1) % relPhrases.length)}>
+            <button className={btn} onClick={() => { nextItem(); reset(); }}>
               Nächste Beziehung
             </button>
           )}
           {!checked && (
-            <button className={btnGhost} onClick={() => reset((i + 1) % relPhrases.length)}>
+            <button className={btnGhost} onClick={() => { nextItem(); reset(); }}>
               Überspringen
             </button>
           )}

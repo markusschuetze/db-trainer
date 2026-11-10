@@ -2,21 +2,21 @@ import { useRef, useState } from 'react';
 import { track } from '../analytics';
 import { CrowLegend, ErDiagram } from '../components/ErDiagram';
 import { CARD_LABEL, CARDS, phrases, relType, type Card } from '../content/erPhrases';
+import { useMixed } from '../useMixed';
 import { SpecDiagram, SpecLegend } from '../components/SpecDiagram';
-import { specializations } from '../content/specializations';
+import { specMarker, specializations } from '../content/specializations';
 import { markDone } from '../progress';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
 
 function CardinalityTrainer() {
-  const [i, setI] = useState(0);
+  const { item: p, pos: i, next: nextItem } = useMixed(phrases, relType);
   const [a12, setA12] = useState<Card | ''>('');
   const [a21, setA21] = useState<Card | ''>('');
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
   const started = useRef(Date.now());
-  const p = phrases[i];
   const ok12 = a12 === p.c12;
   const ok21 = a21 === p.c21;
 
@@ -27,7 +27,7 @@ function CardinalityTrainer() {
     track({ k: 'i', i: `er:${p.id}`, tp: '02-kraehenfuss', ch: '02', ok: ok12 && ok21 ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: 0, src: 'u' });
   };
   const next = () => {
-    setI((i + 1) % phrases.length);
+    nextItem();
     setA12('');
     setA21('');
     setChecked(false);
@@ -116,12 +116,11 @@ function CardinalityTrainer() {
 }
 
 function SpecializationTrainer() {
-  const [i, setI] = useState(0);
+  const { item: s, pos: i, next: nextSpec } = useMixed(specializations, specMarker);
   const [mode, setMode] = useState<'text' | 'diagramm'>('text');
   const [disjoint, setDisjoint] = useState<boolean | null>(null);
   const [total, setTotal] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
-  const s = specializations[i];
   const ok = disjoint === s.disjoint && total === s.total;
   const reset = () => {
     setDisjoint(null);
@@ -212,7 +211,7 @@ function SpecializationTrainer() {
           <button
             className={btn}
             onClick={() => {
-              setI((i + 1) % specializations.length);
+              nextSpec();
               reset();
             }}
           >
