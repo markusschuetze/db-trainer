@@ -278,6 +278,25 @@ function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   );
 }
 
+/* ---------- Abschluss der reinen 1NF-Aufgabe ---------- */
+function StepFinishOneNf({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
+  const base = ex.oneNF.fixed ?? ex.relation;
+  return (
+    <Panel title="Schritt 2: Ergebnis">
+      <p className="mb-3 text-sm">
+        Die Relation ist jetzt in 1NF: alle Attribute sind atomar, der Schlüssel ist <strong>{base.pk.join(', ')}</strong>.
+        Abhängigkeiten zwischen den Attributen (partiell, transitiv) sind Thema der Aufgaben zur 2NF und 3NF.
+      </p>
+      <DataTable table={base} caption="Relation in 1NF" />
+      <div className="mt-4 flex flex-wrap gap-3">
+        <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
+          Aufgabe abschließen
+        </a>
+      </div>
+    </Panel>
+  );
+}
+
 export function NfExercisePage({ id }: { id: string }) {
   const ex = nfExercises.find((e) => e.id === id);
   const [step, setStep] = useState(0);
@@ -291,6 +310,9 @@ export function NfExercisePage({ id }: { id: string }) {
       </>
     );
   }
+  // Reine 1NF-Aufgabe: Abhaengigkeiten kommen erst in den Aufgaben zur 2NF und 3NF (wie im Skript).
+  const oneOnly = ex.tags.length === 1 && ex.tags[0] === '1NF';
+  const steps = oneOnly ? 2 : 4;
   const next = () => setStep((s) => s + 1);
   return (
     <>
@@ -298,11 +320,19 @@ export function NfExercisePage({ id }: { id: string }) {
         ← Aufgaben
       </a>
       <h1 className="mt-2 text-2xl font-bold">{ex.title}</h1>
-      <p className="mt-1 text-sm text-muted">Fortschritt: Schritt {Math.min(step + 1, 4)} von 4</p>
+      <p className="mt-1 text-sm text-muted">
+        Fortschritt: Schritt {Math.min(step + 1, steps)} von {steps}
+      </p>
       {step >= 0 && <StepOneNf key="s1" ex={ex} onNext={step === 0 ? next : undefined} />}
-      {step >= 1 && <StepFds key="s2" ex={ex} onNext={step === 1 ? next : undefined} />}
-      {step >= 2 && <StepHighest key="s3" ex={ex} onNext={step === 2 ? next : undefined} />}
-      {step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />}
+      {oneOnly ? (
+        step >= 1 && <StepFinishOneNf key="s2" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />
+      ) : (
+        <>
+          {step >= 1 && <StepFds key="s2" ex={ex} onNext={step === 1 ? next : undefined} />}
+          {step >= 2 && <StepHighest key="s3" ex={ex} onNext={step === 2 ? next : undefined} />}
+          {step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />}
+        </>
+      )}
     </>
   );
 }

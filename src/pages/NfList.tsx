@@ -9,9 +9,8 @@ export function NfList() {
       </a>
       <h1 className="mt-2 text-3xl font-bold">Normalisierung</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Aufgabe 1 bis 3 trainieren je eine Normalform. Aufgabe 4 ist ganzheitlich: Du stellst selbst fest, bis zu welcher
-        Normalform sich die Relation überführen lässt. Pro Aufgabe: 1NF prüfen, Abhängigkeiten einordnen, höchste
-        Normalform bestimmen und das Zielschema ansehen. Die Schreibweise entspricht Skript 05.
+        Aufgabe 1 bis 3 trainieren je eine Normalform. Abhängigkeiten kommen erst ab der 2NF dazu, wie im Skript 05.
+        Aufgabe 4 ist ganzheitlich: Du stellst selbst fest, bis zu welcher Normalform sich die Relation überführen lässt.
       </p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {nfExercises.map((ex, i) => (
