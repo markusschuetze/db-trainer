@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { track } from '../analytics';
 import { CrowLegend, ErDiagram } from '../components/ErDiagram';
 import { CARD_LABEL, CARDS, phrases, relType, type Card } from '../content/erPhrases';
+import { SpecDiagram, SpecLegend } from '../components/SpecDiagram';
 import { specializations } from '../content/specializations';
 import { markDone } from '../progress';
 
@@ -116,11 +117,17 @@ function CardinalityTrainer() {
 
 function SpecializationTrainer() {
   const [i, setI] = useState(0);
+  const [mode, setMode] = useState<'text' | 'diagramm'>('text');
   const [disjoint, setDisjoint] = useState<boolean | null>(null);
   const [total, setTotal] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
   const s = specializations[i];
   const ok = disjoint === s.disjoint && total === s.total;
+  const reset = () => {
+    setDisjoint(null);
+    setTotal(null);
+    setChecked(false);
+  };
 
   const radio = (name: string, value: boolean | null, set: (v: boolean) => void, a: string, b: string) => (
     <fieldset disabled={checked} className="flex flex-wrap gap-4">
@@ -138,10 +145,41 @@ function SpecializationTrainer() {
       <h2 className="text-lg font-bold">
         Spezialisierung {i + 1} von {specializations.length}
       </h2>
-      <p className="mt-3">{s.text}</p>
-      <p className="mt-2 text-sm text-muted">
-        Supertyp <strong>{s.supertype}</strong>, Subtypen: {s.subtypes.join(', ')}
-      </p>
+      <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Aufgabenart">
+        {(
+          [
+            ['text', 'Text lesen'],
+            ['diagramm', 'Diagramm lesen'],
+          ] as const
+        ).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => {
+              setMode(k);
+              reset();
+            }}
+            aria-pressed={mode === k}
+            className={`rounded-full border px-3 py-1 text-sm ${mode === k ? 'border-brand bg-brand text-brand-contrast' : 'border-line bg-surface'}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {mode === 'text' ? (
+        <>
+          <p className="mt-3">{s.text}</p>
+          <p className="mt-2 text-sm text-muted">
+            Supertyp <strong>{s.supertype}</strong>, Subtypen: {s.subtypes.join(', ')}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-sm">
+          Lies am Dreieck ab, um welche Art von Spezialisierung es sich handelt (Legende rechts).
+        </p>
+      )}
+      <div className="mt-3 flex justify-center">
+        <SpecDiagram s={s} reveal={mode === 'diagramm' || checked} />
+      </div>
       <div className="mt-4 space-y-3">
         <div>
           <p className="text-sm font-semibold">Kann eine Instanz zu mehreren Subtypen gehören?</p>
@@ -175,9 +213,7 @@ function SpecializationTrainer() {
             className={btn}
             onClick={() => {
               setI((i + 1) % specializations.length);
-              setDisjoint(null);
-              setTotal(null);
-              setChecked(false);
+              reset();
             }}
           >
             Nächstes Beispiel
@@ -221,10 +257,20 @@ export function ErPage() {
           </div>
           {tab === 'kard' ? <CardinalityTrainer /> : <SpecializationTrainer />}
         </div>
-        <aside hidden={tab !== 'kard'} className="h-fit rounded-card border border-line bg-surface p-5">
-          <h2 className="mb-3 font-bold">Legende Krähenfuß</h2>
-          <CrowLegend />
-          <p className="mt-3 text-xs text-muted">Kreis = Minimum 0, Strich = 1, Krähenfuß = viele (N).</p>
+        <aside className="h-fit rounded-card border border-line bg-surface p-5">
+          {tab === 'kard' ? (
+            <>
+              <h2 className="mb-3 font-bold">Legende Krähenfuß</h2>
+              <CrowLegend />
+              <p className="mt-3 text-xs text-muted">Kreis = Minimum 0, Strich = 1, Krähenfuß = viele (N).</p>
+            </>
+          ) : (
+            <>
+              <h2 className="mb-3 font-bold">Legende Spezialisierung</h2>
+              <SpecLegend />
+              <p className="mt-3 text-xs text-muted">X = disjunkt (XOR), V = vollständig. Ohne Buchstaben: überlappend und partiell.</p>
+            </>
+          )}
         </aside>
       </div>
     </>

@@ -2,14 +2,13 @@ import { useRef, useState } from 'react';
 import { track } from '../analytics';
 import { ErDiagram } from '../components/ErDiagram';
 import { RelationView } from '../components/RelationView';
+import { previewTables, RelPreview, type PkChoice } from '../components/RelPreview';
 import { fkNotNull, relPhrases, relType, toRelations, validMappings, type Mapping } from '../content/erPhrases';
 import { markDone } from '../progress';
 import { relTopic } from '../progressCatalog';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
-
-type PkChoice = 'beide' | 'e1' | 'e2' | 'kuenstlich';
 
 export function RelPage() {
   const [i, setI] = useState(0);
@@ -60,9 +59,12 @@ export function RelPage() {
         <div className="mt-4 flex justify-center">
           <ErDiagram e1={p.e1.name} e2={p.e2.name} verb={p.verb} c12={p.c12} c21={p.c21} />
         </div>
-        <p className="mt-1 text-center text-xs text-muted">
-          {p.e1.name} ({p.e1.key}, {p.e1.attr}) · {p.e2.name} ({p.e2.key}, {p.e2.attr})
-        </p>
+        <h3 className="mt-3 text-center text-sm font-semibold text-muted">
+          {mapping ? 'Deine Tabellen (ändert sich mit deiner Auswahl)' : 'Ausgangslage: eine Tabelle je Entität'}
+        </h3>
+        <div className="mt-2">
+          <RelPreview tables={previewTables(p, mapping, nullable, pk)} />
+        </div>
 
         <fieldset className="mt-5" disabled={checked}>
           <legend className="font-semibold">1. Wie wird die Beziehung „{p.verb}“ abgebildet?</legend>
