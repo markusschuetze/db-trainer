@@ -56,7 +56,7 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: 'pk' | 'fk
 }
 
 /** Live-Vorschau: zeigt die Tabellen und was sich durch die gewaehlte Abbildung aendert. */
-export function RelPreview({ tables }: { tables: Tab[] }) {
+export function RelPreview({ tables, showFk }: { tables: Tab[]; showFk: boolean }) {
   return (
     <div className="flex flex-wrap items-start justify-center gap-4" aria-label="Vorschau der Tabellen" role="group">
       {tables.map((t) => (
@@ -74,7 +74,7 @@ export function RelPreview({ tables }: { tables: Tab[] }) {
                 <td className="border-t border-line px-3 py-1 font-mono">
                   {c.pk ? <u>{c.name}</u> : c.name}
                   {c.pk && <Badge tone="pk">PK</Badge>}
-                  {c.fk && <Badge tone="fk">FK → {c.fk}</Badge>}
+                  {c.fk && showFk && <Badge tone="fk">FK → {c.fk}</Badge>}
                   {c.notNull && <Badge tone="plain">NOT NULL</Badge>}
                   {c.nullOk && <Badge tone="plain">NULL erlaubt</Badge>}
                   {c.unique && <Badge tone="plain">UNIQUE</Badge>}

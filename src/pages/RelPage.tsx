@@ -16,6 +16,7 @@ export function RelPage() {
   const [nullable, setNullable] = useState<boolean | null>(null);
   const [pk, setPk] = useState<PkChoice | null>(null);
   const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
   const started = useRef(Date.now());
   const p = relPhrases[i];
@@ -32,6 +33,7 @@ export function RelPage() {
     setNullable(null);
     setPk(null);
     setChecked(false);
+    setHint(false);
     started.current = Date.now();
   };
 
@@ -63,7 +65,19 @@ export function RelPage() {
           {mapping ? 'Deine Tabellen (ändert sich mit deiner Auswahl)' : 'Ausgangslage: eine Tabelle je Entität'}
         </h3>
         <div className="mt-2">
-          <RelPreview tables={previewTables(p, mapping, nullable, pk)} />
+          <RelPreview tables={previewTables(p, mapping, nullable, pk)} showFk={hint || checked} />
+          {mapping && !hint && !checked && (
+            <p className="mt-2 text-center">
+              <button className="text-sm underline" onClick={() => setHint(true)}>
+                Hinweis: Fremdschlüssel in den Tabellen kennzeichnen
+              </button>
+            </p>
+          )}
+          {(hint || checked) && mapping && (
+            <p className="mt-2 text-center text-xs text-muted">
+              FK = Fremdschlüssel: Spalte, die auf den Primärschlüssel einer anderen Tabelle verweist.
+            </p>
+          )}
         </div>
 
         <fieldset className="mt-5" disabled={checked}>
@@ -148,7 +162,7 @@ export function RelPage() {
                 setChecked(true);
                 setScore((s) => ({ right: s.right + (allOk ? 1 : 0), total: s.total + 1 }));
                 if (allOk) markDone(`rel:${p.id}`);
-                track({ k: 'i', i: `rel:${p.id}`, tp: relTopic(p), ch: '04', ok: allOk ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: 0, src: 'u' });
+                track({ k: 'i', i: `rel:${p.id}`, tp: relTopic(p), ch: '04', ok: allOk ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: hint ? 1 : 0, src: 'u' });
               }}
             >
               Prüfen
