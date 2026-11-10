@@ -117,7 +117,8 @@ function CardinalityTrainer() {
 
 function SpecializationTrainer() {
   const { item: s, pos: i, next: nextSpec } = useMixed(specializations, specMarker);
-  const [mode, setMode] = useState<'text' | 'diagramm'>('text');
+  const [mode, setMode] = useState<'text' | 'diagramm'>(() => (Math.random() < 0.5 ? 'text' : 'diagramm'));
+  const run = useRef(1); // wie oft in Folge dieselbe Fragestellung
   const [disjoint, setDisjoint] = useState<boolean | null>(null);
   const [total, setTotal] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
@@ -143,27 +144,8 @@ function SpecializationTrainer() {
     <section className="rounded-card border border-line bg-surface p-5">
       <h2 className="text-lg font-bold">
         Spezialisierung {i + 1} von {specializations.length}
+        <span className="ml-2 text-sm font-normal text-muted">· {mode === 'text' ? 'Text lesen' : 'Diagramm lesen'}</span>
       </h2>
-      <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Aufgabenart">
-        {(
-          [
-            ['text', 'Text lesen'],
-            ['diagramm', 'Diagramm lesen'],
-          ] as const
-        ).map(([k, label]) => (
-          <button
-            key={k}
-            onClick={() => {
-              setMode(k);
-              reset();
-            }}
-            aria-pressed={mode === k}
-            className={`rounded-full border px-3 py-1 text-sm ${mode === k ? 'border-brand bg-brand text-brand-contrast' : 'border-line bg-surface'}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
       {mode === 'text' ? (
         <>
           <p className="mt-3">{s.text}</p>
@@ -212,6 +194,10 @@ function SpecializationTrainer() {
             className={btn}
             onClick={() => {
               nextSpec();
+              const other = mode === 'text' ? 'diagramm' : 'text';
+              const flip = run.current >= 2 || Math.random() < 0.5;
+              run.current = flip ? 1 : run.current + 1;
+              setMode(flip ? other : mode);
               reset();
             }}
           >
@@ -224,37 +210,21 @@ function SpecializationTrainer() {
 }
 
 export function ErPage({ initialTab = 'kard' }: { initialTab?: 'kard' | 'spez' }) {
-  const [tab, setTab] = useState<'kard' | 'spez'>(initialTab);
+  const tab = initialTab;
   const [specHint, setSpecHint] = useState(false);
   return (
     <>
       <a href="#/" className="inline-block py-2 text-sm underline">
         ← Übersicht
       </a>
-      <h1 className="mt-2 text-3xl font-bold">Modellierung</h1>
+      <h1 className="mt-2 text-3xl font-bold">{tab === 'kard' ? 'Modellierung: Kardinalitäten' : 'Modellierung: Spezialisierung'}</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Kardinalitäten aus Anforderungstexten herauslesen und in Krähenfußnotation darstellen (Skript 02), Spezialisierungen
-        einordnen (Skript 03).
+        {tab === 'kard'
+          ? 'Kardinalitäten aus Anforderungstexten herauslesen und in Krähenfußnotation darstellen (Skript 02).'
+          : 'Spezialisierungen einordnen: disjunkt oder überlappend, vollständig oder partiell (Skript 03).'}
       </p>
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-6">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Aufgabentyp">
-            {(
-              [
-                ['kard', 'Kardinalitäten'],
-                ['spez', 'Spezialisierung'],
-              ] as const
-            ).map(([k, label]) => (
-              <button
-                key={k}
-                onClick={() => setTab(k)}
-                aria-pressed={tab === k}
-                className={`rounded-full border px-4 py-2 text-sm ${tab === k ? 'border-brand bg-brand text-brand-contrast' : 'border-line bg-surface'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
           {tab === 'kard' ? <CardinalityTrainer /> : <SpecializationTrainer />}
         </div>
         <aside className="h-fit rounded-card border border-line bg-surface p-5">
