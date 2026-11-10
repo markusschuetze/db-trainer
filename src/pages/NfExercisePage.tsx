@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { DataTable } from '../components/DataTable';
 import { nfExercises } from '../content/exercises';
-import type { DepKind, FunctionalDependency, NfExercise } from '../content/types';
-import { gradeFds, gradeHighest, gradeOneNf } from '../logic/nfGrading';
+import type { DepKind, NfExercise } from '../content/types';
+import { gradeHighest, gradeOneNf } from '../logic/nfGrading';
 import { markDone } from '../progress';
 
 type Status = 'open' | 'wrong' | 'right' | 'revealed';
@@ -10,8 +10,6 @@ type Status = 'open' | 'wrong' | 'right' | 'revealed';
 const btn =
   'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line px-4 py-2 font-semibold';
-
-const fdText = (fd: FunctionalDependency) => `${fd.lhs.join(', ')} → ${fd.rhs.join(', ')}`;
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -163,45 +161,87 @@ function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
   );
 }
 
-/* ---------- Schritt 2: Abhaengigkeiten ---------- */
-function StepFds({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
-  const [answers, setAnswers] = useState<(DepKind | '')[]>(ex.fds.map(() => ''));
-  const [status, setStatus] = useState<Status>('open');
-  const [result, setResult] = useState<boolean[]>([]);
-  const locked = status === 'right' || status === 'revealed';
+/* ---------- Schritt 2: Abhaengigkeiten selbst erkennen ---------- */
+
+/** Erwartete Abhaengigkeit je Nichtschluessel-Attribut (aus den hinterlegten FDs abgeleitet). */
+export function expectedDependency(ex: NfExercise, attr: string): { lhs: string[]; kind: DepKind; why?: string } {
   const base = ex.oneNF.fixed ?? ex.relation;
+  const fd = ex.fds.find((f) => f.rhs.includes(attr));
+  return fd ? { lhs: fd.lhs, kind: fd.kind, why: fd.why } : { lhs: base.pk, kind: 'voll' };
+}
+
+const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x));
+
+function StepFds({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
+  const base = ex.oneNF.fixed ?? ex.relation;
+  const attrs = base.columns.filter((c) => !base.pk.includes(c));
+  const [ans, setAns] = useState<Record<string, { from: string[]; kind: DepKind | '' }>>(
+    Object.fromEntries(attrs.map((a) => [a, { from: [], kind: '' as const }])),
+  );
+  const [status, setStatus] = useState<Status>('open');
+  const [result, setResult] = useState<Record<string, boolean>>({});
+  const locked = status === 'right' || status === 'revealed';
+
+  const shown = (a: string) => {
+    if (!locked) return ans[a];
+    const e = expectedDependency(ex, a);
+    return { from: e.lhs, kind: e.kind };
+  };
+  const toggle = (a: string, c: string, on: boolean) =>
+    setAns({ ...ans, [a]: { ...ans[a], from: on ? [...ans[a].from, c] : ans[a].from.filter((x) => x !== c) } });
 
   return (
-    <Panel title="Schritt 2: Abhängigkeiten einordnen">
-      <p className="mb-1 text-sm text-muted">
-        Schlüssel: <strong>{base.pk.join(', ')}</strong>. Ordne jede funktionale Abhängigkeit als voll,
-        partiell oder transitiv ein.
+    <Panel title="Schritt 2: Abhängigkeiten erkennen">
+      <p className="mb-3 text-sm text-muted">
+        Welches Attribut hängt wovon ab? Kreuze für jedes Attribut an, von welchen Attributen es funktional abhängt, und
+        ordne die Abhängigkeit als voll, partiell oder transitiv ein.
       </p>
       <DataTable table={base} caption="Relation in 1NF" />
       <ul className="mt-4 space-y-3">
-        {ex.fds.map((fd, i) => {
-          const ok = result[i];
+        {attrs.map((a) => {
+          const v = shown(a);
+          const ok = result[a];
+          const e = expectedDependency(ex, a);
           return (
-            <li key={i} className="rounded-lg border border-line p-3">
-              <label className="flex flex-wrap items-center gap-3">
-                <span className="font-mono text-sm">{fdText(fd)}</span>
-                <select
-                  className="rounded border border-line bg-surface px-2 py-1"
-                  value={locked ? fd.kind : answers[i]}
-                  disabled={locked}
-                  onChange={(e) => setAnswers(answers.map((a, j) => (j === i ? (e.target.value as DepKind) : a)))}
-                  aria-label={`Art der Abhängigkeit ${fdText(fd)}`}
-                >
-                  <option value="">bitte wählen</option>
-                  <option value="voll">voll</option>
-                  <option value="partiell">partiell</option>
-                  <option value="transitiv">transitiv</option>
-                </select>
-                {status === 'wrong' && (
-                  <span className={ok ? 'text-ok' : 'text-bad'}>{ok ? '✓' : '✗'}</span>
-                )}
-              </label>
-              {locked && <p className="mt-2 text-sm text-muted">{fd.why}</p>}
+            <li key={a} className="rounded-lg border border-line p-3">
+              <fieldset disabled={locked}>
+                <legend className="font-mono text-sm font-semibold">
+                  {a} hängt ab von
+                  {status === 'wrong' && <span className={`ml-2 ${ok ? 'text-ok' : 'text-bad'}`}>{ok ? '✓' : '✗'}</span>}
+                </legend>
+                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                  {base.columns
+                    .filter((c) => c !== a)
+                    .map((c) => (
+                      <label key={c} className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={v.from.includes(c)} onChange={(ev) => toggle(a, c, ev.target.checked)} />
+                        <span className="font-mono">{c}</span>
+                      </label>
+                    ))}
+                </div>
+                <label className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                  Art der Abhängigkeit:
+                  <select
+                    className="rounded border border-line bg-surface px-2 py-1"
+                    value={v.kind}
+                    onChange={(ev) => setAns({ ...ans, [a]: { ...ans[a], kind: ev.target.value as DepKind } })}
+                    aria-label={`Art der Abhängigkeit von ${a}`}
+                  >
+                    <option value="">bitte wählen</option>
+                    <option value="voll">voll</option>
+                    <option value="partiell">partiell</option>
+                    <option value="transitiv">transitiv</option>
+                  </select>
+                </label>
+              </fieldset>
+              {locked && (
+                <p className="mt-2 text-sm text-muted">
+                  <span className="font-mono">
+                    {e.lhs.join(', ')} → {a}
+                  </span>
+                  : {e.why ?? 'Das Attribut hängt vom gesamten Schlüssel ab.'}
+                </p>
+              )}
             </li>
           );
         })}
@@ -209,11 +249,16 @@ function StepFds({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
       <Feedback status={status} />
       <Actions
         status={status}
-        canCheck={answers.every(Boolean)}
+        canCheck={attrs.every((a) => ans[a].from.length > 0 && ans[a].kind)}
         onCheck={() => {
-          const r = gradeFds(ex, answers);
+          const r = Object.fromEntries(
+            attrs.map((a) => {
+              const e = expectedDependency(ex, a);
+              return [a, sameSet(ans[a].from, e.lhs) && ans[a].kind === e.kind];
+            }),
+          );
           setResult(r);
-          setStatus(r.every(Boolean) ? 'right' : 'wrong');
+          setStatus(Object.values(r).every(Boolean) ? 'right' : 'wrong');
         }}
         onReveal={() => setStatus('revealed')}
         onNext={onNext}
