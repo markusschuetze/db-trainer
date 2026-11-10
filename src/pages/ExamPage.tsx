@@ -203,8 +203,8 @@ function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: A
             <ErDiagram e1={item.p.e1.name} e2={item.p.e2.name} verb={item.p.verb} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <CardSelect label={`Pro „${item.p.e2.name}“: wie viele „${item.p.e1.name}“?`} value={a.a21} onChange={(c) => set({ ...a, a21: c })} />
-            <CardSelect label={`Pro „${item.p.e1.name}“: wie viele „${item.p.e2.name}“?`} value={a.a12} onChange={(c) => set({ ...a, a12: c })} />
+            <CardSelect label={`Wie viele „${item.p.e1.name}“-Instanzen gehören zu einer „${item.p.e2.name}“-Instanz?`} value={a.a21} onChange={(c) => set({ ...a, a21: c })} />
+            <CardSelect label={`Wie viele „${item.p.e2.name}“-Instanzen gehören zu einer „${item.p.e1.name}“-Instanz?`} value={a.a12} onChange={(c) => set({ ...a, a12: c })} />
           </div>
         </div>
       );
@@ -401,8 +401,8 @@ function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: A
                 const k = relKey(r);
                 return (
                   <div key={k} className="grid gap-2 sm:grid-cols-2">
-                    <CardSelect label={`Pro „${r.e2}“: wie viele „${r.e1}“? (${r.verb})`} value={a.cards?.[k]?.c21} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c21: c } } })} />
-                    <CardSelect label={`Pro „${r.e1}“: wie viele „${r.e2}“?`} value={a.cards?.[k]?.c12} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c12: c } } })} />
+                    <CardSelect label={`Wie viele „${r.e1}“-Instanzen gehören zu einer „${r.e2}“-Instanz? (${r.verb})`} value={a.cards?.[k]?.c21} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c21: c } } })} />
+                    <CardSelect label={`Wie viele „${r.e2}“-Instanzen gehören zu einer „${r.e1}“-Instanz?`} value={a.cards?.[k]?.c12} onChange={(c) => upd({ cards: { ...a.cards, [k]: { ...a.cards?.[k], c12: c } } })} />
                   </div>
                 );
               })}
