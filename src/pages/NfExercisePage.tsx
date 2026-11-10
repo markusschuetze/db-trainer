@@ -38,6 +38,19 @@ function Feedback({ status, children }: { status: Status; children?: ReactNode }
   );
 }
 
+function HintButton({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return open ? (
+    <p className="mb-3 rounded-lg bg-bg p-3 text-sm">
+      <strong>Hinweis:</strong> {text}
+    </p>
+  ) : (
+    <button className="mb-3 text-sm underline" onClick={() => setOpen(true)}>
+      Hinweis anzeigen
+    </button>
+  );
+}
+
 function Actions({
   status,
   onCheck,
@@ -83,7 +96,9 @@ function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
 
   return (
     <Panel title="Schritt 1: Erste Normalform">
-      <p className="mb-3 text-sm text-muted">{ex.scenario}</p>
+      <p className="text-sm text-muted">{ex.scenario}</p>
+      <p className="mb-3 mt-2 font-semibold">Aufgabe: Überführe die Relation, soweit möglich, in die 3. Normalform.</p>
+      {ex.hint && <HintButton text={ex.hint} />}
       <DataTable table={ex.relation} highlight={flagged} caption={ex.title} />
       <fieldset className="mt-4" disabled={locked}>
         <legend className="font-semibold">Befindet sich die Relation in 1NF?</legend>
@@ -240,7 +255,7 @@ function StepHighest({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
 /* ---------- Schritt 4: Zielschema ---------- */
 function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
   return (
-    <Panel title="Schritt 4: Zielschema in 3NF-Richtung">
+    <Panel title="Schritt 4: Zielschema (so weit wie möglich in 3NF)">
       <p className="mb-3 text-sm text-muted">So sieht das normalisierte Schema aus (Notation wie in Skript 05):</p>
       <pre tabIndex={0} className="overflow-x-auto rounded-lg bg-bg p-4 font-mono text-sm leading-7">
         {ex.target.join('\n')}

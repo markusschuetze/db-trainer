@@ -30,6 +30,8 @@ export interface NfExercise {
   topicId: string;
   title: string;
   scenario: string;
+  /** Optionaler Hinweis, wird nur auf Wunsch angezeigt (darf nichts verraten, was die Aufgabe selbst abfragt) */
+  hint?: string;
   /** Ausgangsrelation */
   relation: Table;
   oneNF: {

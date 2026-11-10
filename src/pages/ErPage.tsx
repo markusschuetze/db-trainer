@@ -15,6 +15,7 @@ function CardinalityTrainer() {
   const [a12, setA12] = useState<Card | ''>('');
   const [a21, setA21] = useState<Card | ''>('');
   const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0 });
   const started = useRef(Date.now());
   const ok12 = a12 === p.c12;
@@ -28,6 +29,7 @@ function CardinalityTrainer() {
   };
   const next = () => {
     nextItem();
+    setHint(false);
     setA12('');
     setA21('');
     setChecked(false);
@@ -71,10 +73,16 @@ function CardinalityTrainer() {
         {select(a21, setA21, `Wie viele „${p.e1.name}“-Instanzen gehören zu einer „${p.e2.name}“-Instanz?`, ok21)}
         {select(a12, setA12, `Wie viele „${p.e2.name}“-Instanzen gehören zu einer „${p.e1.name}“-Instanz?`, ok12)}
       </div>
-      <p className="mt-2 text-xs text-muted">
-        Das Symbol erscheint an der Entität, nach deren Anzahl gefragt ist. Gelesen wird von der Mitte zur Entität:
-        erst das Minimum, dann das Maximum.
-      </p>
+      {hint || checked ? (
+        <p className="mt-2 text-xs text-muted">
+          Hinweis: Das Symbol erscheint an der Entität, nach deren Anzahl gefragt ist. Gelesen wird von der Mitte zur
+          Entität: erst das Minimum, dann das Maximum.
+        </p>
+      ) : (
+        <button className="mt-2 text-sm underline" onClick={() => setHint(true)}>
+          Hinweis anzeigen
+        </button>
+      )}
       {checked && (
         <div role="status" className={`mt-4 rounded-lg p-3 text-sm ${ok12 && ok21 ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
           <strong className={ok12 && ok21 ? 'text-ok' : 'text-bad'}>{ok12 && ok21 ? 'Richtig.' : 'Nicht ganz.'}</strong>

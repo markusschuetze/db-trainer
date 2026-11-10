@@ -8,7 +8,8 @@ export const nfExercises: NfExercise[] = [
     topicId: '05-1nf',
     title: 'Fahrradteile und Lieferanten',
     scenario:
-      'Zu Fahrrädern wird gespeichert, welche Lieferanten sie liefern. Prüfe zuerst die 1. Normalform.',
+      'Zu Fahrrädern wird gespeichert, welche Lieferanten sie liefern.',
+    hint: 'Beginne mit der 1. Normalform: Sind alle Werte atomar?',
     relation: {
       columns: ['TNr', 'Bezeichnung', 'Artikel_Typ', 'Preis', 'Umsatz_J', 'Lief_Nr', 'Zeitstempel'],
       pk: ['TNr'],
@@ -75,7 +76,8 @@ export const nfExercises: NfExercise[] = [
     topicId: '05-2nf',
     title: 'Mitarbeitende in Projekten',
     scenario:
-      'Welche Mitarbeitenden arbeiten in welchen Projekten und in welcher Rolle? Die Tabelle ist bereits in 1NF.',
+      'Welche Mitarbeitenden arbeiten in welchen Projekten und in welcher Rolle?',
+    hint: 'Beginne mit der 1. Normalform: Sind alle Werte atomar?',
     relation: {
       columns: ['MitArb_ID', 'Projekt_ID', 'Rolle', 'ProjektName', 'MitArb_Name'],
       pk: ['MitArb_ID', 'Projekt_ID'],
@@ -155,6 +157,84 @@ export const nfExercises: NfExercise[] = [
     targetNote:
       'Das Attribut LNR, über das die Abhängigkeit läuft, wird Primärschlüssel der neuen Relation und bleibt in der Ursprungsrelation als Fremdschlüssel.',
     tags: ['3NF'],
+    source: SRC,
+  },
+  {
+    id: 'kursbuchung',
+    topicId: '05-3nf',
+    title: 'Kursbuchungen',
+    scenario:
+      'Teilnehmende buchen Kurse, die von Dozierenden gehalten werden. Gespeichert werden Teilnehmende, Kurse, Dozierende und die erreichte Note.',
+    hint: 'Gehe die Normalformen der Reihe nach durch: erst atomare Werte, dann Abhängigkeiten vom Schlüssel.',
+    relation: {
+      columns: ['TeilnNr', 'KursNr', 'Teilnehmer', 'KursTitel', 'DozNr', 'DozName', 'Note'],
+      pk: ['TeilnNr', 'KursNr'],
+      rows: [
+        ['101', 'K1', 'Anna Berg', 'Datenbanken', 'D7', 'Lorenz', '1,7'],
+        ['101', 'K2', 'Anna Berg', 'Netzwerke', 'D3', 'Sommer', '2,0'],
+        ['102', 'K1', 'Ben Roth', 'Datenbanken', 'D7', 'Lorenz', '2,3'],
+        ['103', 'K1', 'Clara Voss', 'Datenbanken', 'D7', 'Lorenz', '1,3'],
+        ['103', 'K2', 'Clara Voss', 'Netzwerke', 'D3', 'Sommer', '2,7'],
+      ],
+    },
+    oneNF: {
+      ok: false,
+      issues: [
+        {
+          column: 'Teilnehmer',
+          type: 'strukturiert',
+          why: 'Vor- und Nachname stehen in einem Feld. Ein strukturiertes Attribut wird in je ein Attribut pro Domäne aufgespalten (Vorname, Nachname).',
+        },
+      ],
+      fixNote: 'Teilnehmer ist in Vorname und Nachname aufgeteilt. Der Schlüssel bleibt (TeilnNr, KursNr).',
+      fixed: {
+        columns: ['TeilnNr', 'KursNr', 'Vorname', 'Nachname', 'KursTitel', 'DozNr', 'DozName', 'Note'],
+        pk: ['TeilnNr', 'KursNr'],
+        rows: [
+          ['101', 'K1', 'Anna', 'Berg', 'Datenbanken', 'D7', 'Lorenz', '1,7'],
+          ['101', 'K2', 'Anna', 'Berg', 'Netzwerke', 'D3', 'Sommer', '2,0'],
+          ['102', 'K1', 'Ben', 'Roth', 'Datenbanken', 'D7', 'Lorenz', '2,3'],
+          ['103', 'K1', 'Clara', 'Voss', 'Datenbanken', 'D7', 'Lorenz', '1,3'],
+          ['103', 'K2', 'Clara', 'Voss', 'Netzwerke', 'D3', 'Sommer', '2,7'],
+        ],
+      },
+    },
+    fds: [
+      {
+        lhs: ['TeilnNr'],
+        rhs: ['Vorname', 'Nachname'],
+        kind: 'partiell',
+        why: 'Der Name der teilnehmenden Person hängt nur von TeilnNr ab, einem Teil des Schlüssels (TeilnNr, KursNr).',
+      },
+      {
+        lhs: ['KursNr'],
+        rhs: ['KursTitel', 'DozNr'],
+        kind: 'partiell',
+        why: 'Kurstitel und Dozent gehören zum Kurs und hängen nur von KursNr ab, dem anderen Teil des Schlüssels.',
+      },
+      {
+        lhs: ['DozNr'],
+        rhs: ['DozName'],
+        kind: 'transitiv',
+        why: 'DozName hängt von DozNr ab, einem Nicht-Schlüsselattribut. Damit hängt es nur indirekt vom Kurs ab (transitiv), und der Name würde bei jedem Kurs desselben Dozenten wiederholt.',
+      },
+      {
+        lhs: ['TeilnNr', 'KursNr'],
+        rhs: ['Note'],
+        kind: 'voll',
+        why: 'Die Note gehört zur Kombination aus Teilnehmendem und Kurs. Es werden beide Schlüsselteile benötigt.',
+      },
+    ],
+    highestNF: 1,
+    target: [
+      'Teilnehmer (TeilnNr, Vorname, Nachname)',
+      'Dozent (DozNr, DozName)',
+      'Kurs (KursNr, KursTitel, DozNr <fk>)',
+      'Belegt (TeilnNr <fk>, KursNr <fk>, Note)',
+    ],
+    targetNote:
+      'Erst werden die partiellen Abhängigkeiten ausgelagert (2NF): Teilnehmer und Kurs bekommen eigene Relationen, Belegt behält die Note. Danach wird die transitive Abhängigkeit DozNr → DozName ausgelagert (3NF): Dozent wird eine eigene Relation, in Kurs bleibt DozNr als Fremdschlüssel.',
+    tags: ['1NF', '2NF', '3NF'],
     source: SRC,
   },
 ];
