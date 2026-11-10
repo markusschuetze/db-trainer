@@ -12,10 +12,16 @@ interface Module {
 
 const modules: Module[] = [
   {
-    title: L('Modellierung'),
-    script: L('Skript 02–03'),
-    text: L('Kardinalitäten aus Anforderungen lesen, Krähenfußnotation, Spezialisierungen einordnen.'),
+    title: L('Modellierung: Kardinalitäten'),
+    script: L('Skript 02'),
+    text: L('Kardinalitäten aus Anforderungen lesen und in Krähenfußnotation darstellen.'),
     href: '#/modellierung',
+  },
+  {
+    title: L('Spezialisierung'),
+    script: L('Skript 03'),
+    text: L('Disjunkt oder überlappend, vollständig oder partiell: 32 Aufgaben mit Diagramm.'),
+    href: '#/modellierung/spezialisierung',
   },
   {
     title: L('Relationenmodell'),
@@ -52,6 +58,12 @@ const modules: Module[] = [
     script: L('Übungen'),
     text: L('Arbeiten wie im SQL Developer, aber im Browser: Datenbank bleibt erhalten, Fehlermeldungen, COMMIT/ROLLBACK, ER-Modell auf Knopfdruck.'),
     href: '#/praktikum',
+  },
+  {
+    title: L('Zufallsmodus'),
+    script: L('alle Kapitel'),
+    text: L('Alle Aufgaben und Fragen bunt gemischt, von leicht bis schwer, mit sofortiger Lösung.'),
+    href: '#/zufall',
   },
   {
     title: L('Prüfungsmodus'),

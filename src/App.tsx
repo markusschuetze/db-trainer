@@ -18,6 +18,7 @@ import { SqlExercisePage } from './pages/SqlExercisePage';
 import { TeacherPage } from './pages/TeacherPage';
 import { TextTaskList, TextTaskPage } from './pages/TextTaskPage';
 import { SqlList } from './pages/SqlList';
+import { RandomPage } from './pages/RandomPage';
 
 // Hash-Routing: funktioniert statisch ueberall, auch in iFrame und ILIAS-Lernmodul.
 function useRoute() {
@@ -42,11 +43,13 @@ function route(page?: string, id?: string): ReactNode {
     case 'sql':
       return id === 'spielwiese' ? <Playground /> : id ? <SqlExercisePage key={id} id={id} /> : <SqlList />;
     case 'modellierung':
-      return <ErPage />;
+      return <ErPage key={id ?? 'kard'} initialTab={id === 'spezialisierung' ? 'spez' : 'kard'} />;
     case 'relationen':
       return <RelPage />;
     case 'pruefung':
       return <ExamPage />;
+    case 'zufall':
+      return <RandomPage />;
     case 'textaufgaben':
       return id ? <TextTaskPage key={id} id={id} /> : <TextTaskList />;
     case 'praktikum':

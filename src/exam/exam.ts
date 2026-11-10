@@ -4,13 +4,13 @@
 import type { SqlJsStatic } from 'sql.js';
 import { ddlExercises } from '../content/ddlExercises';
 import type { DdlExercise } from '../content/ddlTypes';
-import { fkNotNull, phrases, relPhrases, validMappings, type Card, type Mapping, type Phrase } from '../content/erPhrases';
+import { fkNotNull, phrases, relPhrases, relType, validMappings, type Card, type Mapping, type Phrase } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
 import { mcQuestions, type Chapter, type McQuestion } from '../content/mcQuestions';
 import { specializations, type Specialization } from '../content/specializations';
 import { textTasks, type TextTask } from '../content/textTasks';
 import { topicById, topicsOf } from '../content/topics';
-import { dmlExercises, dqlExercises } from '../content/sqlExercises';
+import { dmlExercises, dqlExercises, sqlExercises } from '../content/sqlExercises';
 import type { SqlExercise } from '../content/sqlTypes';
 import type { DepKind, NfExercise } from '../content/types';
 import { gradeFds, gradeHighest, gradeOneNf } from '../logic/nfGrading';
@@ -128,6 +128,82 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
     for (const ex of pick(dmlExercises, n(1), r)) items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
   }
   return items;
+}
+
+/* ---------------- Zufallsmodus: alle Aufgaben, alle Schwierigkeitsgrade ---------------- */
+
+export type Level = 1 | 2 | 3;
+export const LEVEL_NAME: Record<Level, string> = { 1: 'Leicht', 2: 'Mittel', 3: 'Schwer' };
+
+/** Alle Aufgaben und Fragen als Pruefungsaufgaben (gleiche Pruefer wie in der Probeklausur). */
+export function buildPool(): ExamItem[] {
+  const items: ExamItem[] = [];
+  for (const q of mcQuestions) items.push({ kind: 'mc', id: `mc:${q.id}`, chapter: q.chapter, points: q.multi ? 2 : 1, q });
+  for (const p of phrases) items.push({ kind: 'er', id: `er:${p.id}`, chapter: '02', points: 2, p });
+  for (const s of specializations) items.push({ kind: 'spez', id: `spez:${s.id}`, chapter: '03', points: 2, s });
+  for (const p of relPhrases) items.push({ kind: 'rel', id: `rel:${p.id}`, chapter: '04', points: 2, p });
+  for (const ex of nfExercises) items.push({ kind: 'nf', id: `nf:${ex.id}`, chapter: '05', points: 3 + ex.fds.length, ex });
+  for (const t of textTasks) {
+    const ch = topicById(t.topicId)?.chapter;
+    if (ch) items.push({ kind: 'tt', id: `tt:${t.id}`, chapter: ch, points: 2 + t.relationships.length + 1 + (t.specializations?.length ? 1 : 0), t });
+  }
+  for (const ex of ddlExercises) items.push({ kind: 'ddl', id: `ddl:${ex.id}`, chapter: '06', points: 6, ex });
+  for (const ex of sqlExercises) items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
+  return items;
+}
+
+/** Schwierigkeit: Stufen der Programmieraufgaben, sonst eine nachvollziehbare Faustregel. */
+export function difficultyOf(item: ExamItem): Level {
+  switch (item.kind) {
+    case 'mc': {
+      const base = item.q.multi ? 2 : 1;
+      return (['04', '05', '06', 'SQL'].includes(item.chapter) ? Math.min(3, base + 1) : base) as Level;
+    }
+    case 'er':
+      return item.p.recursive || relType(item.p) === 'M:N' ? 2 : 1;
+    case 'spez':
+      return item.s.disjoint && item.s.total ? 1 : 2;
+    case 'rel': {
+      const t = relType(item.p);
+      return t === '1:N' ? 1 : t === 'M:N' ? 2 : 3;
+    }
+    case 'nf':
+      return item.ex.fds.length <= 2 ? 2 : 3;
+    case 'tt':
+      return item.t.relationships.length <= 2 && !item.t.specializations?.length ? 2 : 3;
+    case 'ddl':
+    case 'sql':
+      return item.ex.level;
+  }
+}
+
+export interface RandomOptions {
+  levels: Level[];
+  /** SQL- und DDL-Aufgaben (mit Editor) einbeziehen */
+  programming: boolean;
+}
+
+/**
+ * Naechste Zufallsaufgabe: zuerst eine Aufgabenart gleichverteilt (damit Wissensfragen nicht
+ * die vielen anderen Arten verdraengen), dann ein Schwierigkeitsgrad gleichverteilt, dann eine
+ * Aufgabe, die nicht zu den zuletzt gezeigten gehoert. Nie zweimal dieselbe Art hintereinander,
+ * solange es eine andere gibt.
+ */
+export function pickRandom(pool: ExamItem[], opts: RandomOptions, history: string[], rnd: () => number = Math.random): ExamItem | null {
+  const ok = pool.filter((i) => opts.levels.includes(difficultyOf(i)) && (opts.programming || (i.kind !== 'sql' && i.kind !== 'ddl')));
+  if (!ok.length) return null;
+  const kinds = [...new Set(ok.map((i) => i.kind))];
+  const lastKind = pool.find((i) => i.id === history[history.length - 1])?.kind;
+  const kindChoices = kinds.length > 1 ? kinds.filter((k) => k !== lastKind) : kinds;
+  const kind = kindChoices[Math.floor(rnd() * kindChoices.length)];
+  const ofKind = ok.filter((i) => i.kind === kind);
+  const levels = [...new Set(ofKind.map(difficultyOf))];
+  const level = levels[Math.floor(rnd() * levels.length)];
+  const ofLevel = ofKind.filter((i) => difficultyOf(i) === level);
+  const recent = new Set(history.slice(-Math.floor(ok.length / 2)));
+  const fresh = ofLevel.filter((i) => !recent.has(i.id));
+  const from = fresh.length ? fresh : ofLevel;
+  return from[Math.floor(rnd() * from.length)];
 }
 
 /* ---------------- Bewertung ---------------- */

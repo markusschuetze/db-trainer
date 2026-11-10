@@ -223,8 +223,9 @@ function SpecializationTrainer() {
   );
 }
 
-export function ErPage() {
-  const [tab, setTab] = useState<'kard' | 'spez'>('kard');
+export function ErPage({ initialTab = 'kard' }: { initialTab?: 'kard' | 'spez' }) {
+  const [tab, setTab] = useState<'kard' | 'spez'>(initialTab);
+  const [specHint, setSpecHint] = useState(false);
   return (
     <>
       <a href="#/" className="inline-block py-2 text-sm underline">
@@ -265,9 +266,24 @@ export function ErPage() {
             </>
           ) : (
             <>
-              <h2 className="mb-3 font-bold">Legende Spezialisierung</h2>
-              <SpecLegend />
-              <p className="mt-3 text-xs text-muted">X = disjunkt (XOR), V = vollständig. Ohne Buchstaben: überlappend und partiell.</p>
+              <h2 className="mb-3 font-bold">Hinweis</h2>
+              {specHint ? (
+                <>
+                  <h3 className="mb-3 text-sm font-semibold">Legende Spezialisierung</h3>
+                  <SpecLegend />
+                  <p className="mt-3 text-xs text-muted">X = disjunkt (XOR), V = vollständig. Ohne Buchstaben: überlappend und partiell.</p>
+                  <button className="mt-3 text-sm underline" onClick={() => setSpecHint(false)}>
+                    Hinweis ausblenden
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted">Die Legende zum Dreieck verrät, wofür X, V und XV stehen.</p>
+                  <button className={`${btnGhost} mt-3`} onClick={() => setSpecHint(true)}>
+                    Legende anzeigen
+                  </button>
+                </>
+              )}
             </>
           )}
         </aside>

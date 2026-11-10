@@ -190,7 +190,7 @@ function SqlInput({
   );
 }
 
-function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: Answer; set: (a: Answer) => void; allowRun: boolean }) {
+export function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: Answer; set: (a: Answer) => void; allowRun: boolean }) {
   switch (item.kind) {
     case 'mc':
       return <McInput item={item} value={answer as number[]} onChange={set} />;
@@ -454,7 +454,7 @@ function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: A
   }
 }
 
-const itemTitle = (item: ExamItem) =>
+export const itemTitle = (item: ExamItem) =>
   ({
     mc: 'Wissensfrage',
     er: 'Kardinalitäten bestimmen',
@@ -468,7 +468,7 @@ const itemTitle = (item: ExamItem) =>
 
 /* ======================= Loesung ======================= */
 
-function Solution({ item }: { item: ExamItem }) {
+export function Solution({ item }: { item: ExamItem }) {
   switch (item.kind) {
     case 'mc':
       return (
