@@ -10,7 +10,6 @@ const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibo
 
 function CardinalityTrainer() {
   const [i, setI] = useState(0);
-  const [step, setStep] = useState<0 | 1>(0); // 0: erste Frage, 1: zweite Frage
   const [a12, setA12] = useState<Card | ''>('');
   const [a21, setA21] = useState<Card | ''>('');
   const [checked, setChecked] = useState(false);
@@ -19,33 +18,26 @@ function CardinalityTrainer() {
   const p = phrases[i];
   const ok12 = a12 === p.c12;
   const ok21 = a21 === p.c21;
-  const last = step === 1;
-  const okNow = step === 0 ? ok21 : ok12;
 
   const check = () => {
     setChecked(true);
-    if (!last) return;
     setScore((s) => ({ right: s.right + (ok12 && ok21 ? 1 : 0), total: s.total + 1 }));
     if (ok12 && ok21) markDone(`er:${p.id}`);
     track({ k: 'i', i: `er:${p.id}`, tp: '02-kraehenfuss', ch: '02', ok: ok12 && ok21 ? 1 : 0, s: Math.min(3600, Math.round((Date.now() - started.current) / 1000)), a: 1, h: 0, src: 'u' });
   };
-  const reset = () => {
-    setStep(0);
+  const next = () => {
+    setI((i + 1) % phrases.length);
     setA12('');
     setA21('');
     setChecked(false);
     started.current = Date.now();
   };
-  const next = () => {
-    setI((i + 1) % phrases.length);
-    reset();
-  };
 
-  const select = (value: Card | '', set: (c: Card | '') => void, label: string) => (
+  const select = (value: Card | '', set: (c: Card | '') => void, label: string, ok: boolean) => (
     <label className="block">
       <span className="text-sm font-semibold">{label}</span>
       <select
-        className={`mt-1 block w-full max-w-md rounded-lg border bg-surface px-3 py-2 ${checked ? (okNow ? 'border-ok' : 'border-bad') : 'border-line'}`}
+        className={`mt-1 block w-full rounded-lg border bg-surface px-3 py-2 ${checked ? (ok ? 'border-ok' : 'border-bad') : 'border-line'}`}
         value={value}
         disabled={checked}
         onChange={(e) => set(e.target.value as Card)}
@@ -60,13 +52,11 @@ function CardinalityTrainer() {
     </label>
   );
 
-  const done = checked && last;
-
   return (
     <section className="rounded-card border border-line bg-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold">
-          Phrase {i + 1} von {phrases.length} · Frage {step + 1} von 2
+          Phrase {i + 1} von {phrases.length}
         </h2>
         <span className="text-sm text-muted">
           {score.right} von {score.total} richtig
@@ -74,39 +64,25 @@ function CardinalityTrainer() {
       </div>
       <p className="mt-3 text-lg">{p.text}</p>
       <div className="mt-4 flex justify-center">
-        <ErDiagram
-          e1={p.e1.name}
-          e2={p.e2.name}
-          verb={p.verb}
-          c12={step === 1 || checked ? a12 || undefined : undefined}
-          c21={a21 || undefined}
-          laterRight={step === 0}
-        />
+        <ErDiagram e1={p.e1.name} e2={p.e2.name} verb={p.verb} c12={a12 || undefined} c21={a21 || undefined} />
       </div>
-      <div className="mt-4">
-        {step === 0
-          ? select(a21, setA21, `Eine Instanz von „${p.e2.name}“ ist verbunden mit wie vielen „${p.e1.name}“-Instanzen?`)
-          : select(a12, setA12, `Eine Instanz von „${p.e1.name}“ ist verbunden mit wie vielen „${p.e2.name}“-Instanzen?`)}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {select(a21, setA21, `Eine Instanz von „${p.e2.name}“ ist verbunden mit wie vielen „${p.e1.name}“-Instanzen?`, ok21)}
+        {select(a12, setA12, `Eine Instanz von „${p.e1.name}“ ist verbunden mit wie vielen „${p.e2.name}“-Instanzen?`, ok12)}
       </div>
       <p className="mt-2 text-xs text-muted">
         Das Symbol erscheint an der Entität, nach deren Anzahl gefragt ist. Gelesen wird von der Mitte zur Entität:
         erst das Minimum, dann das Maximum.
       </p>
-      {checked && !last && (
-        <p role="status" className={`mt-4 rounded-lg p-3 text-sm ${okNow ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
-          <strong className={okNow ? 'text-ok' : 'text-bad'}>{okNow ? 'Richtig.' : 'Nicht ganz.'}</strong>{' '}
-          {p.e2.name} → {p.e1.plural}: {CARD_LABEL[p.c21]}
-        </p>
-      )}
-      {done && (
+      {checked && (
         <div role="status" className={`mt-4 rounded-lg p-3 text-sm ${ok12 && ok21 ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
-          <strong className={ok12 ? 'text-ok' : 'text-bad'}>{ok12 ? 'Richtig.' : 'Nicht ganz.'}</strong>
+          <strong className={ok12 && ok21 ? 'text-ok' : 'text-bad'}>{ok12 && ok21 ? 'Richtig.' : 'Nicht ganz.'}</strong>
           <ul className="mt-1 list-disc pl-5">
             <li>
               {p.e1.name} → {p.e2.plural}: {CARD_LABEL[p.c12]}
             </li>
             <li>
-              {p.e2.name} → {p.e1.plural}: {CARD_LABEL[p.c21]} {ok21 ? '(Frage 1 richtig)' : '(Frage 1 falsch)'}
+              {p.e2.name} → {p.e1.plural}: {CARD_LABEL[p.c21]}
             </li>
             <li>
               Beziehungstyp: <strong>{relType(p)}</strong>
@@ -120,18 +96,8 @@ function CardinalityTrainer() {
       )}
       <div className="mt-4 flex gap-3">
         {!checked ? (
-          <button className={btn} disabled={!(step === 0 ? a21 : a12)} onClick={check}>
+          <button className={btn} disabled={!a12 || !a21} onClick={check}>
             Prüfen
-          </button>
-        ) : !last ? (
-          <button
-            className={btn}
-            onClick={() => {
-              setStep(1);
-              setChecked(false);
-            }}
-          >
-            Weiter zu Frage 2
           </button>
         ) : (
           <button className={btn} onClick={next}>
@@ -150,18 +116,14 @@ function CardinalityTrainer() {
 
 function SpecializationTrainer() {
   const [i, setI] = useState(0);
-  const [step, setStep] = useState<0 | 1>(0); // 0: disjunkt/überlappend, 1: vollständig/partiell
   const [disjoint, setDisjoint] = useState<boolean | null>(null);
   const [total, setTotal] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
   const s = specializations[i];
-  const okDis = disjoint === s.disjoint;
-  const okTot = total === s.total;
-  const last = step === 1;
-  const okNow = step === 0 ? okDis : okTot;
+  const ok = disjoint === s.disjoint && total === s.total;
 
   const radio = (name: string, value: boolean | null, set: (v: boolean) => void, a: string, b: string) => (
-    <fieldset disabled={checked} className="mt-1 flex flex-wrap gap-4">
+    <fieldset disabled={checked} className="flex flex-wrap gap-4">
       {[true, false].map((v) => (
         <label key={String(v)} className="flex items-center gap-2">
           <input type="radio" name={name} checked={value === v} onChange={() => set(v)} />
@@ -171,73 +133,51 @@ function SpecializationTrainer() {
     </fieldset>
   );
 
-  const reset = () => {
-    setStep(0);
-    setDisjoint(null);
-    setTotal(null);
-    setChecked(false);
-  };
-
   return (
     <section className="rounded-card border border-line bg-surface p-5">
       <h2 className="text-lg font-bold">
-        Spezialisierung {i + 1} von {specializations.length} · Frage {step + 1} von 2
+        Spezialisierung {i + 1} von {specializations.length}
       </h2>
       <p className="mt-3">{s.text}</p>
       <p className="mt-2 text-sm text-muted">
         Supertyp <strong>{s.supertype}</strong>, Subtypen: {s.subtypes.join(', ')}
       </p>
-      <div className="mt-4">
-        {step === 0 ? (
-          <>
-            <p className="text-sm font-semibold">Kann eine Instanz zu mehreren Subtypen gehören?</p>
-            {radio('dis', disjoint, setDisjoint, 'Nein: disjunkt (XOR)', 'Ja: überlappend (OR)')}
-          </>
-        ) : (
-          <>
-            <p className="text-sm font-semibold">Gehört jede Instanz zu mindestens einem Subtyp?</p>
-            {radio('tot', total, setTotal, 'Ja: vollständig', 'Nein: partiell')}
-          </>
-        )}
+      <div className="mt-4 space-y-3">
+        <div>
+          <p className="text-sm font-semibold">Kann eine Instanz zu mehreren Subtypen gehören?</p>
+          {radio('dis', disjoint, setDisjoint, 'Nein: disjunkt (XOR)', 'Ja: überlappend (OR)')}
+        </div>
+        <div>
+          <p className="text-sm font-semibold">Gehört jede Instanz zu mindestens einem Subtyp?</p>
+          {radio('tot', total, setTotal, 'Ja: vollständig', 'Nein: partiell')}
+        </div>
       </div>
       {checked && (
-        <div role="status" className={`mt-4 rounded-lg p-3 text-sm ${okNow ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
-          <strong className={okNow ? 'text-ok' : 'text-bad'}>{okNow ? 'Richtig.' : 'Nicht ganz.'}</strong>{' '}
-          {step === 0
-            ? `${s.disjoint ? 'Disjunkt' : 'Überlappend'}.`
-            : `${s.disjoint ? 'Disjunkt' : 'Überlappend'} und ${s.total ? 'vollständig' : 'partiell'}. ${s.why}`}
+        <div role="status" className={`mt-4 rounded-lg p-3 text-sm ${ok ? 'bg-ok-bg' : 'bg-bad-bg'}`}>
+          <strong className={ok ? 'text-ok' : 'text-bad'}>{ok ? 'Richtig.' : 'Nicht ganz.'}</strong>{' '}
+          {s.disjoint ? 'Disjunkt' : 'Überlappend'} und {s.total ? 'vollständig' : 'partiell'}. {s.why}
         </div>
       )}
       <div className="mt-4">
         {!checked ? (
           <button
             className={btn}
-            disabled={(step === 0 ? disjoint : total) === null}
+            disabled={disjoint === null || total === null}
             onClick={() => {
               setChecked(true);
-              if (last) {
-                if (okDis && okTot) markDone(`spez:${s.id}`);
-              }
+              if (disjoint === s.disjoint && total === s.total) markDone(`spez:${s.id}`);
             }}
           >
             Prüfen
-          </button>
-        ) : !last ? (
-          <button
-            className={btn}
-            onClick={() => {
-              setStep(1);
-              setChecked(false);
-            }}
-          >
-            Weiter zu Frage 2
           </button>
         ) : (
           <button
             className={btn}
             onClick={() => {
               setI((i + 1) % specializations.length);
-              reset();
+              setDisjoint(null);
+              setTotal(null);
+              setChecked(false);
             }}
           >
             Nächstes Beispiel

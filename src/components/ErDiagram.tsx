@@ -12,14 +12,8 @@ const H = 130;
 const BOX_W = 170;
 const Y = 65;
 
-function EndSymbol({ x, dir, card, y = Y, later }: { x: number; dir: 1 | -1; card?: Card; y?: number; later?: boolean }) {
+function EndSymbol({ x, dir, card, y = Y }: { x: number; dir: 1 | -1; card?: Card; y?: number }) {
   // x = Rand der Entitaet, dir zeigt von der Entitaet weg in Richtung Mitte
-  if (!card && later)
-    return (
-      <text x={x + dir * 8} y={y - 10} textAnchor={dir === 1 ? 'start' : 'end'} className="fill-muted" fontSize="12" fontStyle="italic">
-        folgt in Frage 2
-      </text>
-    );
   if (!card)
     return (
       <text x={x + dir * 22} y={y - 10} textAnchor="middle" className="fill-muted" fontSize="14">
@@ -52,7 +46,6 @@ export function ErDiagram({
   c12,
   c21,
   label,
-  laterRight,
 }: {
   e1: string;
   e2: string;
@@ -62,8 +55,6 @@ export function ErDiagram({
   /** Symbol an E1 */
   c21?: Card;
   label?: string;
-  /** Symbol an E2 wird erst in einer spaeteren Frage abgefragt */
-  laterRight?: boolean;
 }) {
   const left = 10 + BOX_W;
   const right = W - 10 - BOX_W;
@@ -79,7 +70,7 @@ export function ErDiagram({
         <rect x={right} y={Y - 28} width={BOX_W} height={56} rx={6} className="fill-surface" />
         <line x1={left} x2={right} y1={Y} y2={Y} />
         <EndSymbol x={left} dir={1} card={c21} />
-        <EndSymbol x={right} dir={-1} card={c12} later={laterRight} />
+        <EndSymbol x={right} dir={-1} card={c12} />
       </g>
       <g className="fill-ink" fontSize="16" textAnchor="middle">
         <text x={10 + BOX_W / 2} y={Y + 5}>
