@@ -11,7 +11,7 @@ import { Home } from './pages/Home';
 import { LearnPage } from './pages/LearnPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { NfExercisePage } from './pages/NfExercisePage';
-import { NfList } from './pages/NfList';
+import { NfTrainerPage, NF_AREA_SLUG } from './pages/NfTrainerPage';
 import { Playground } from './pages/Playground';
 import { PraktikumPage } from './pages/PraktikumPage';
 import { SqlExercisePage } from './pages/SqlExercisePage';
@@ -37,7 +37,11 @@ function useRoute() {
 function route(page?: string, id?: string): ReactNode {
   switch (page) {
     case 'normalisierung':
-      return id ? <NfExercisePage key={id} id={id} /> : <NfList />;
+      return id && !NF_AREA_SLUG[id] ? (
+        <NfExercisePage key={id} id={id} />
+      ) : (
+        <NfTrainerPage key={id ?? '1nf'} initialArea={NF_AREA_SLUG[id ?? '1nf']} />
+      );
     case 'ddl':
       return id ? <DdlExercisePage key={id} id={id} /> : <DdlList />;
     case 'sql':

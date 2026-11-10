@@ -111,6 +111,25 @@ function Actions({
   );
 }
 
+/** Abschluss einer Aufgabe: im Trainer-Ablauf direkt zur nächsten Aufgabe, sonst zurück zur Übersicht. */
+function Finish({ doneNow, onTask }: { doneNow: () => void; onTask?: () => void }) {
+  return onTask ? (
+    <button
+      className={btn}
+      onClick={() => {
+        doneNow();
+        onTask();
+      }}
+    >
+      Nächste Aufgabe
+    </button>
+  ) : (
+    <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
+      Aufgabe abschließen
+    </a>
+  );
+}
+
 /* ---------- Schritt 1: 1NF ---------- */
 function StepOneNf({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
   const [says, setSays] = useState<boolean | null>(null);
@@ -333,7 +352,7 @@ function StepHighest({ ex, onNext }: { ex: NfExercise; onNext?: () => void }) {
 }
 
 /* ---------- Schritt 4: Zielschema ---------- */
-function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
+function StepTarget({ ex, doneNow, onTask }: { ex: NfExercise; doneNow: () => void; onTask?: () => void }) {
   return (
     <Panel title={ex.tags.length >= 3 ? 'Schritt 4: Zielschema (so weit wie möglich, höchstens 3NF)' : 'Schritt 4: Zielschema'}>
       <p className="mb-3 text-sm text-muted">So sieht das normalisierte Schema aus (Notation wie in Skript 05):</p>
@@ -342,13 +361,7 @@ function StepTarget({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
       </pre>
       {ex.targetNote && <p className="mt-3 text-sm">{ex.targetNote}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
-        <a
-          href="#/normalisierung"
-          className={`${btn} no-underline`}
-          onClick={doneNow}
-        >
-          Aufgabe abschließen
-        </a>
+        <Finish doneNow={doneNow} onTask={onTask} />
       </div>
     </Panel>
   );
@@ -379,6 +392,7 @@ function StepBuild({
   last,
   onNext,
   doneNow,
+  onTask,
 }: {
   ex: NfExercise;
   stage: Relation[];
@@ -387,6 +401,7 @@ function StepBuild({
   last: boolean;
   onNext?: () => void;
   doneNow: () => void;
+  onTask?: () => void;
 }) {
   const base = ex.oneNF.fixed ?? ex.relation;
   const hint = ex.stages!.find((s) => s.relations === stage)?.hint;
@@ -525,18 +540,14 @@ function StepBuild({
             Weiter
           </button>
         )}
-        {locked && last && (
-          <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
-            Aufgabe abschließen
-          </a>
-        )}
+        {locked && last && <Finish doneNow={doneNow} onTask={onTask} />}
       </div>
     </Panel>
   );
 }
 
 /* ---------- Abschluss der reinen 1NF-Aufgabe ---------- */
-function StepFinishOneNf({ ex, doneNow }: { ex: NfExercise; doneNow: () => void }) {
+function StepFinishOneNf({ ex, doneNow, onTask }: { ex: NfExercise; doneNow: () => void; onTask?: () => void }) {
   const base = ex.oneNF.fixed ?? ex.relation;
   return (
     <Panel title="Schritt 2: Ergebnis">
@@ -546,15 +557,13 @@ function StepFinishOneNf({ ex, doneNow }: { ex: NfExercise; doneNow: () => void 
       </p>
       <TableWithGlossary ex={ex} table={base} caption="Relation in 1NF" />
       <div className="mt-4 flex flex-wrap gap-3">
-        <a href="#/normalisierung" className={`${btn} no-underline`} onClick={doneNow}>
-          Aufgabe abschließen
-        </a>
+        <Finish doneNow={doneNow} onTask={onTask} />
       </div>
     </Panel>
   );
 }
 
-export function NfExercisePage({ id }: { id: string }) {
+export function NfExercisePage({ id, onTask, header }: { id: string; onTask?: () => void; header?: ReactNode }) {
   const ex = nfExercises.find((e) => e.id === id);
   const [step, setStep] = useState(0);
   if (!ex) {
@@ -574,16 +583,18 @@ export function NfExercisePage({ id }: { id: string }) {
   const next = () => setStep((s) => s + 1);
   return (
     <>
-      <a href="#/normalisierung" className="inline-block py-2 text-sm underline">
-        ← Aufgaben
-      </a>
+      {header ?? (
+        <a href="#/normalisierung" className="inline-block py-2 text-sm underline">
+          ← Alle Aufgaben
+        </a>
+      )}
       <h1 className="mt-2 text-2xl font-bold">{ex.title}</h1>
       <p className="mt-1 text-sm text-muted">
         Fortschritt: Schritt {Math.min(step + 1, steps)} von {steps}
       </p>
       {step >= 0 && <StepOneNf key="s1" ex={ex} onNext={step === 0 ? next : undefined} />}
       {oneOnly ? (
-        step >= 1 && <StepFinishOneNf key="s2" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />
+        step >= 1 && <StepFinishOneNf key="s2" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} onTask={onTask} />
       ) : (
         <>
           {step >= 1 && <StepFds key="s2" ex={ex} onNext={step === 1 ? next : undefined} />}
@@ -601,10 +612,11 @@ export function NfExercisePage({ id }: { id: string }) {
                       last={k === stages.length - 1}
                       onNext={step === 3 + k ? next : undefined}
                       doneNow={() => markDone(`nf:${ex.id}`)}
+                      onTask={onTask}
                     />
                   ),
               )
-            : step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} />}
+            : step >= 3 && <StepTarget key="s4" ex={ex} doneNow={() => markDone(`nf:${ex.id}`)} onTask={onTask} />}
         </>
       )}
     </>
