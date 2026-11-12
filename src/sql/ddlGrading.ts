@@ -1,6 +1,6 @@
 import type { Database, SqlJsStatic } from 'sql.js';
 import type { Check, DdlExercise, TypeFamily } from '../content/ddlTypes';
-import { createDatabase, findTable, runScript, userTables, type StatementResult } from './oracle';
+import { createDatabase, deferredViolations, findTable, runScript, splitStatements, userTables, type StatementResult } from './oracle';
 
 export interface CheckResult {
   label: string;
@@ -92,6 +92,8 @@ function describeCheck(c: Check): string {
       return 'Alle Tabellen sind gelöscht';
     case 'behavior':
       return 'Verhalten';
+    case 'rerun':
+      return 'Das Skript lässt sich mehrfach hintereinander ausführen';
   }
 }
 
@@ -104,6 +106,8 @@ export function runCheck(db: Database, c: Check): CheckResult {
   switch (c.kind) {
     case 'table':
       return res(!!tbl(c.table), 'Die Tabelle fehlt oder hat einen anderen Namen.');
+    case 'rerun':
+      return res(true); // wird in runExercise mit dem Skript geprueft
     case 'noTables':
       return res(schema.length === 0, `Es existieren noch Tabellen: ${schema.map((t) => t.name).join(', ')}.`);
     case 'column': {
@@ -164,7 +168,10 @@ export function runCheck(db: Database, c: Check): CheckResult {
           const expect = s.expect ?? 'ok';
           let failed = false;
           try {
-            db.exec(s.sql);
+            // COMMIT: aufgeschobene (DEFERRED) Bedingungen werden erst jetzt geprueft
+            if (/^\s*COMMIT\s*;?\s*$/i.test(s.sql)) {
+              if (deferredViolations(db).length) throw new Error('deferred check failed');
+            } else db.exec(s.sql);
           } catch (e) {
             // Fehlende Tabelle/Spalte ist keine "richtige" Ablehnung durch einen Constraint
             if (/no such table|no such column|has no column/i.test(String(e)))
@@ -217,7 +224,26 @@ export function runExercise(SQL: SqlJsStatic, ex: DdlExercise, userScript: strin
   try {
     if (ex.setup) runScript(db, ex.setup);
     const results = runScript(db, userScript);
-    const checks = [...ex.checks.map((c) => runCheck(db, c)), ...(ex.checks.some((c) => c.kind === 'noTables') ? [] : [oracleTypesCheck(db)])];
+    // Mehrfach ausfuehrbar: zweiter Lauf, dabei darf kein CREATE/ALTER scheitern (DROP-Befehle raeumen auf)
+    let rerun: CheckResult | undefined;
+    if (ex.checks.some((c) => c.kind === 'rerun')) {
+      const second = runScript(db, userScript);
+      const bad = second.filter((r) => !r.ok && /^\s*(CREATE|ALTER|INSERT)\b/i.test(r.sql));
+      const hasDrop = splitStatements(userScript).some((s) => /^\s*DROP\s+TABLE\b/i.test(s));
+      rerun = {
+        label: 'Das Skript lässt sich mehrfach hintereinander ausführen',
+        ok: bad.length === 0 && hasDrop,
+        hint: !hasDrop
+          ? 'Es fehlen DROP TABLE-Befehle am Anfang des Skripts.'
+          : bad.length
+            ? `Beim zweiten Lauf scheitert: ${bad[0].sql.slice(0, 60)} (${bad[0].ora ?? bad[0].message}). Prüfe die Reihenfolge der DROP-Befehle und CASCADE CONSTRAINTS.`
+            : undefined,
+      };
+    }
+    const checks = [
+      ...ex.checks.map((c) => (c.kind === 'rerun' ? rerun! : runCheck(db, c))),
+      ...(ex.checks.some((c) => c.kind === 'noTables') ? [] : [oracleTypesCheck(db)]),
+    ];
     return { results, checks, schema: describeSchema(db), passed: checks.every((c) => c.ok) };
   } finally {
     db.close();

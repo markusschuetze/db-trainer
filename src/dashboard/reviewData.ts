@@ -1,5 +1,7 @@
 // Alle Inhalte als flache Liste fuer die fachliche Durchsicht (Dozentenmodus).
 import { ddlExercises } from '../content/ddlExercises';
+import { dmlErrorTasks, ERROR_CAUSE } from '../content/dmlErrors';
+import { provokeTasks } from '../content/dmlProvoke';
 import { phrases, relType } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
 import { CHAPTER_NAME, mcQuestions } from '../content/mcQuestions';
@@ -68,6 +70,18 @@ export function reviewRows(): ReviewRow[] {
       kind: 'Textaufgabe', chapter: ch(t.topicId), topic: tp(t.topicId), id: `tt:${t.id}`, level: LEVEL[t.level], text: `${t.title}\n${t.text}`,
       answer: `Entitäten: ${t.entities.map((e) => `${e.name} (Schlüssel: ${e.key || 'künstlich'}; Attribute: ${e.attrs.join(', ') || '–'})`).join('; ')}\nBeziehungen: ${t.relationships.map((r) => `${r.e1} ${r.verb} ${r.e2} [${r.e1}→${r.e2} ${CARD[r.c12]}, ${r.e2}→${r.e1} ${CARD[r.c21]}${r.attrs?.length ? `, Attribute: ${r.attrs.join(', ')}` : ''}]`).join('; ')}`,
       explanation: t.relationships.map((r) => r.why).join('\n'), source: t.source,
+    });
+  for (const t of dmlErrorTasks)
+    rows.push({
+      kind: 'DML-Fehler erkennen', chapter: ch('sql-dml'), topic: tp('sql-dml'), id: `dmlerr:${t.id}`,
+      text: `${t.title}\n${t.statements.map((s, i) => `${i + 1}  ${s}`).join('\n')}`,
+      answer: t.errors.length ? t.errors.map((e) => `Zeile ${e.line}: ${e.causes.map((c) => ERROR_CAUSE[c]).join(' / ')}`).join('\n') : 'kein Fehler',
+      explanation: `${t.errors.map((e) => `Zeile ${e.line}: ${e.why}`).join('\n')}\n${t.why}`.trim(), source: 'Übung 6, Aufgabe 4',
+    });
+  for (const t of provokeTasks)
+    rows.push({
+      kind: 'Constraint prüfen', chapter: ch('sql-dml'), topic: tp('sql-dml'), id: `prov:${t.id}`, level: LEVEL[t.level],
+      text: `${t.title}\n${t.task}`, answer: t.solution, explanation: t.hints.join('\n'), source: 'Übung 6, Aufgabe 3',
     });
   const order = (c: string) => {
     const i = CHAPTERS.findIndex((x) => CHAPTER_NAME[x] === c);

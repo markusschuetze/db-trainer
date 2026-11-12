@@ -231,10 +231,53 @@ function query(db: Database, sql: string, params: (string | number)[] = []): Row
 export function userTables(db: Database): string[] {
   return query(
     db,
-    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> 'DUAL' ORDER BY rowid",
+    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> 'DUAL' AND name NOT LIKE '\\_\\_%' ESCAPE '\\' ORDER BY rowid",
   ).map(
     (r) => String(r.name),
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Verzoegert geprueft (DEFERRABLE INITIALLY DEFERRED)                  */
+/* ------------------------------------------------------------------ */
+
+const DEFERRED = '__deferred_checks';
+
+/** Aufgeschobene CHECK-Bedingungen, die aktuell verletzt sind. Oracle prueft sie erst beim COMMIT. */
+export function deferredViolations(db: Database): { name: string; table: string; n: number }[] {
+  if (!query(db, `SELECT name FROM sqlite_master WHERE type='table' AND name='${DEFERRED}'`).length) return [];
+  const out: { name: string; table: string; n: number }[] = [];
+  for (const r of query(db, `SELECT name, tbl, cond FROM "${DEFERRED}"`)) {
+    try {
+      const n = Number(query(db, `SELECT COUNT(*) AS n FROM "${String(r.tbl)}" WHERE NOT (${String(r.cond)})`)[0]?.n ?? 0);
+      if (n > 0) out.push({ name: String(r.name), table: String(r.tbl), n });
+    } catch {
+      /* Tabelle oder Spalte existiert nicht mehr: nichts zu pruefen */
+    }
+  }
+  return out;
+}
+
+/** Fehlermeldung wie Oracle bei einem COMMIT, den eine aufgeschobene Bedingung ablehnt. */
+export function deferredCommitError(v: { name: string; table: string }[]): OracleError {
+  return new OracleError(
+    `Commit nicht möglich: Die aufgeschobene Bedingung ${v.map((x) => x.name).join(', ')} ist verletzt (ORA-02290). Die Transaktion wurde zurückgerollt.`,
+    'ORA-02091',
+  );
+}
+
+function registerDeferred(db: Database, name: string, table: string, cond: string) {
+  db.exec(`CREATE TABLE IF NOT EXISTS "${DEFERRED}" (name TEXT, tbl TEXT, cond TEXT)`);
+  // Beim Anlegen werden vorhandene Zeilen sofort geprueft (wie in Oracle)
+  const n = Number(query(db, `SELECT COUNT(*) AS n FROM "${table}" WHERE NOT (${cond})`)[0]?.n ?? 0);
+  if (n > 0) throw new OracleError(`Constraint ${name} kann nicht aktiviert werden: ${n} vorhandene Zeile(n) verletzen die Bedingung.`, 'ORA-02293');
+  db.prepare(`INSERT INTO "${DEFERRED}" VALUES (?, ?, ?)`).run([name, table, cond]);
+}
+
+function forgetDeferred(db: Database, where: { name?: string; table?: string }) {
+  if (!query(db, `SELECT name FROM sqlite_master WHERE type='table' AND name='${DEFERRED}'`).length) return;
+  if (where.name) db.prepare(`DELETE FROM "${DEFERRED}" WHERE lower(name) = lower(?)`).run([where.name]);
+  if (where.table) db.prepare(`DELETE FROM "${DEFERRED}" WHERE lower(tbl) = lower(?)`).run([where.table]);
 }
 
 export function findTable(db: Database, name: string): string | undefined {
@@ -406,6 +449,7 @@ function runDrop(db: Database, stmt: string): string {
   } finally {
     db.exec('PRAGMA foreign_keys=ON');
   }
+  forgetDeferred(db, { table });
   return `Tabelle ${table} gelöscht.`;
 }
 
@@ -418,7 +462,15 @@ function runAlter(db: Database, stmt: string): string {
 
   let c: RegExpMatchArray | null;
   if ((c = rest.match(re('^ADD\\s+(CONSTRAINT\\s+.*|PRIMARY\\s+KEY.*|UNIQUE.*|FOREIGN\\s+KEY.*|CHECK.*)$', 'ius')))) {
-    const clause = c[1].trim();
+    let clause = c[1].trim();
+    // DEFERRABLE-Zusatz: INITIALLY DEFERRED wird erst beim COMMIT geprueft, alle anderen Varianten sofort
+    const dm = clause.match(re(`^(?:CONSTRAINT\\s+"?(${ID})"?\\s+)?CHECK\\s*\\((.*)\\)\\s+(NOT\\s+)?DEFERRABLE(?:\\s+INITIALLY\\s+(DEFERRED|IMMEDIATE))?\\s*$`, 'ius'));
+    if (dm && !dm[3] && /^DEFERRED$/i.test(dm[4] ?? '')) {
+      const cname = dm[1] ?? `SYS_C${String(Math.floor(Math.random() * 900000) + 100000)}`;
+      registerDeferred(db, cname, table, dm[2]);
+      return `Tabelle ${table} geändert (Constraint ${cname} hinzugefügt, wird erst beim COMMIT geprüft).`;
+    }
+    if (dm) clause = `${dm[1] ? `CONSTRAINT ${dm[1]} ` : ''}CHECK (${dm[2]})`;
     if (/^(CONSTRAINT\s+\S+\s+)?PRIMARY\s+KEY/i.test(clause) && pkColumns(db, table).length)
       throw new OracleError('Eine Tabelle kann nur einen PRIMARY KEY haben.', 'ORA-02260');
     const name = clause.match(re(`^CONSTRAINT\\s+"?(${ID})"?`))?.[1];
@@ -429,6 +481,11 @@ function runAlter(db: Database, stmt: string): string {
   }
   if ((c = rest.match(re(`^DROP\\s+CONSTRAINT\\s+"?(${ID})"?$`)))) {
     const name = c[1];
+    if (query(db, `SELECT name FROM sqlite_master WHERE type='table' AND name='${DEFERRED}'`).length &&
+        query(db, `SELECT name FROM "${DEFERRED}" WHERE lower(name)=lower(?)`, [name]).length) {
+      forgetDeferred(db, { name });
+      return `Tabelle ${table} geändert (Constraint ${name} entfernt).`;
+    }
     if (!re(`CONSTRAINT\\s+"?${name}"?\\b`).test(tableSql(db, table)))
       throw new OracleError(`Constraint ${name} existiert nicht.`, 'ORA-02443');
     rebuild(db, table, (items) =>
@@ -525,7 +582,11 @@ export function executeStatement(db: Database, raw: string): StatementResult {
     kw = stmt.match(/^\s*(\w+)/)?.[1]?.toUpperCase();
     checkOracleStatement(stmt, kw);
     let message: string;
-    if (kw === 'CREATE' && /^CREATE\s+TABLE/i.test(stmt)) message = runCreateTable(db, stmt);
+    if (kw === 'COMMIT') {
+      const v = deferredViolations(db);
+      if (v.length) throw deferredCommitError(v);
+      message = 'Commit abgeschlossen.';
+    } else if (kw === 'CREATE' && /^CREATE\s+TABLE/i.test(stmt)) message = runCreateTable(db, stmt);
     else if (kw === 'DROP' && /^DROP\s+TABLE/i.test(stmt)) message = runDrop(db, stmt);
     else if (kw === 'ALTER') message = runAlter(db, stmt);
     else if (kw === 'TRUNCATE') {

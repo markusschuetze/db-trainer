@@ -1,3 +1,4 @@
+import { DataTable } from '../components/DataTable';
 import { EditorExercise } from '../components/EditorExercise';
 import { ScenarioBrowser } from '../components/ScenarioBrowser';
 import { ResultTable } from '../components/SqlOutput';
@@ -75,7 +76,22 @@ export function SqlExercisePage({ id }: { id: string }) {
       nextHref={next && `#/sql/${next.id}`}
       tracking={{ id: `sql:${ex.id}`, topicId: ex.topicId, chapter: topicById(ex.topicId)?.chapter ?? 'SQL', level: ex.level }}
       freshNote="Jeder Lauf startet mit dem ursprünglichen Datenbestand, Änderungen bleiben nicht erhalten."
-      aside={<ScenarioBrowser SQL={SQL} scenario={ex.scenario} />}
+      aside={
+        <>
+          {ex.given && (
+            <div className="space-y-3 rounded-card border border-line bg-surface p-5">
+              <h2 className="font-bold">Diese Datensätze sollen eingefügt werden</h2>
+              {ex.given.map((g) => (
+                <div key={g.name}>
+                  <p className="mb-1 font-mono text-sm font-bold">{g.name}</p>
+                  <DataTable table={{ columns: g.columns, rows: g.rows, pk: [] }} caption={g.name} />
+                </div>
+              ))}
+            </div>
+          )}
+          <ScenarioBrowser SQL={SQL} scenario={ex.scenario} />
+        </>
+      }
       run={(code, grade) => {
         const r = runSqlExercise(SQL!, ex, code);
         return { ...r, details: grade ? <Comparison run={r} /> : undefined };

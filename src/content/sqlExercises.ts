@@ -1,4 +1,5 @@
 import { gastroExercises } from './scenarios/gastroExercises';
+import { marktplatzExercises } from './scenarios/marktplatzExercises';
 import { moreGastro, moreHochschule, moreProjekte } from './scenarios/moreExercises';
 import { projekteExercises } from './scenarios/projekteExercises';
 import type { SqlExercise } from './sqlTypes';
@@ -277,7 +278,7 @@ export const dmlExercises: SqlExercise[] = [
   },
 ];
 
-for (const e of [...gastroExercises, ...projekteExercises, ...moreHochschule, ...moreGastro, ...moreProjekte]) (e.kind === 'dql' ? dqlExercises : dmlExercises).push(e);
+for (const e of [...gastroExercises, ...projekteExercises, ...marktplatzExercises, ...moreHochschule, ...moreGastro, ...moreProjekte]) (e.kind === 'dql' ? dqlExercises : dmlExercises).push(e);
 
 /** Zusaetzliche Aufgaben als einzelne Dateien in content/aufgaben/sql/*.json (z. B. aus dem Aufgaben-Editor) */
 const fileExercises = Object.values(

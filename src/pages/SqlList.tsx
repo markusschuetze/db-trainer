@@ -5,6 +5,8 @@ import { topicById, topicsOf } from '../content/topics';
 import { useProgress } from '../progress';
 
 type Filter = { scenario: string; level: 0 | 1 | 2 | 3; kind: '' | 'dql' | 'dml'; topic: string };
+// Hier gibt es nur DML-Aufgaben. Abfragen (DQL) folgen in einem eigenen Bereich.
+const DML_ONLY = sqlExercises.filter((e) => e.kind === 'dml');
 const KEY = 'dbt:sql-filter';
 
 function loadFilter(): Filter {
@@ -60,11 +62,10 @@ export function SqlList() {
 
   const list = useMemo(
     () =>
-      sqlExercises.filter(
+      DML_ONLY.filter(
         (e) =>
           (!f.scenario || (e.scenario ?? 'hochschule') === f.scenario) &&
           (!f.level || e.level === f.level) &&
-          (!f.kind || e.kind === f.kind) &&
           (!f.topic || e.topicId === f.topic),
       ),
     [f],
@@ -80,20 +81,20 @@ export function SqlList() {
 
   return (
     <>
-      <a href="#/" className="inline-block py-2 text-sm underline">
-        ← Übersicht
+      <a href="#/dml" className="inline-block py-2 text-sm underline">
+        ← SQL-DML
       </a>
-      <h1 className="mt-2 text-3xl font-bold">SQL-DML und DQL</h1>
+      <h1 className="mt-2 text-3xl font-bold">Daten ändern (INSERT, UPDATE, DELETE)</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Drei Fall-Datenbanken nach Beispielen aus der Vorlesung, jeweils mit Aufgaben in drei Schwierigkeitsgraden. Bewertet
-        wird das Ergebnis, nicht die Schreibweise, auf den sichtbaren und auf verdeckten Daten.
+        Fall-Datenbanken nach Beispielen aus der Vorlesung, jeweils mit Aufgaben in drei Schwierigkeitsgraden. Bewertet wird das
+        Ergebnis, nicht die Schreibweise, auf den sichtbaren und auf verdeckten Daten.
       </p>
 
       <section className="mt-6 space-y-3 rounded-card border border-line bg-surface p-5">
         <Chips
           label="Datenbank"
           value={f.scenario}
-          options={[['', 'Alle'], ...scenarios.map((s) => [s.id, s.name] as [string, string])]}
+          options={[['', 'Alle'], ...scenarios.filter((s) => DML_ONLY.some((e) => (e.scenario ?? 'hochschule') === s.id)).map((s) => [s.id, s.name] as [string, string])]}
           onChange={(v) => update({ scenario: v })}
         />
         <Chips
@@ -106,16 +107,6 @@ export function SqlList() {
             [3, LEVEL_NAME[3]],
           ]}
           onChange={(v) => update({ level: v })}
-        />
-        <Chips
-          label="Art"
-          value={f.kind}
-          options={[
-            ['', 'Alle'],
-            ['dql', 'Abfragen (SELECT)'],
-            ['dml', 'Änderungen (INSERT, UPDATE, DELETE)'],
-          ]}
-          onChange={(v) => update({ kind: v })}
         />
         <Chips
           label="Thema"
@@ -135,7 +126,7 @@ export function SqlList() {
             {list.length} Aufgaben, davon {list.length - open.length} gelöst
           </span>
           <a href="#/sql/spielwiese" className="ml-auto text-sm underline">
-            Spielwiese: freie Abfragen →
+            Spielwiese: freie Abfragen und Änderungen →
           </a>
         </div>
       </section>
@@ -155,7 +146,7 @@ export function SqlList() {
                   className="flex h-full flex-col rounded-card border border-line bg-surface p-4 no-underline hover:border-brand"
                 >
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    {LEVEL_NAME[ex.level]} · {ex.kind === 'dql' ? 'Abfrage' : 'Änderung'}
+                    {LEVEL_NAME[ex.level]} · Änderung
                     {d.done.includes(`sql:${ex.id}`) && <span className="ml-2 text-ok">✓ gelöst</span>}
                   </span>
                   <span className="mt-1 font-bold">{ex.title}</span>

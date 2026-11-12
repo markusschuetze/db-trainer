@@ -19,6 +19,9 @@ import { TeacherPage } from './pages/TeacherPage';
 import { TextTaskList, TextTaskPage } from './pages/TextTaskPage';
 import { SqlList } from './pages/SqlList';
 import { RandomPage } from './pages/RandomPage';
+import { DmlErrorPage } from './pages/DmlErrorPage';
+import { DmlOverview } from './pages/DmlOverview';
+import { ProvokePage } from './pages/ProvokePage';
 
 // Hash-Routing: funktioniert statisch ueberall, auch in iFrame und ILIAS-Lernmodul.
 function useRoute() {
@@ -34,7 +37,7 @@ function useRoute() {
   return hash.replace(/^#/, '').split('/').filter(Boolean);
 }
 
-function route(page?: string, id?: string): ReactNode {
+function route(page?: string, id?: string, id2?: string): ReactNode {
   switch (page) {
     case 'normalisierung':
       if (!id) return <NfOverview />;
@@ -49,6 +52,10 @@ function route(page?: string, id?: string): ReactNode {
       return <RelPage />;
     case 'pruefung':
       return <ExamPage />;
+    case 'dml':
+      if (id === 'fehler') return <DmlErrorPage />;
+      if (id === 'constraints') return <ProvokePage id={id2} key={id2 ?? 'start'} />;
+      return <DmlOverview />;
     case 'zufall':
       return <RandomPage />;
     case 'textaufgaben':
@@ -71,7 +78,8 @@ function route(page?: string, id?: string): ReactNode {
 const PAGE_TITLE: Record<string, string> = {
   normalisierung: 'Normalisierung',
   ddl: 'SQL-DDL',
-  sql: 'SQL-Abfragen und -Änderungen',
+  sql: 'SQL-DML: Daten ändern',
+  dml: 'SQL-DML',
   modellierung: 'Modellierung',
   relationen: 'Relationenmodell',
   pruefung: 'Prüfungsmodus',
@@ -84,7 +92,7 @@ const PAGE_TITLE: Record<string, string> = {
 };
 
 export function App() {
-  const [page, id] = useRoute();
+  const [page, id, id2] = useRoute();
   // Barrierefreiheit: Seitentitel je Seite (WCAG 2.4.2) und Fokus auf den Inhalt nach Seitenwechsel (2.4.3)
   useEffect(() => {
     const base = config.title || config.appName;
@@ -96,5 +104,5 @@ export function App() {
       if (id !== undefined || page) main.focus({ preventScroll: true });
     }
   }, [page, id]);
-  return <Layout>{route(page, id)}</Layout>;
+  return <Layout>{route(page, id, id2)}</Layout>;
 }

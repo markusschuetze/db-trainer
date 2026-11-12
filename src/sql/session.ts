@@ -7,7 +7,7 @@
 
 import type { Database, SqlJsStatic } from 'sql.js';
 import { describeSchema, type TableInfo } from './ddlGrading';
-import { createDatabase, executeStatement, restoreDatabase, runScript, splitStatements, userTables, type StatementResult } from './oracle';
+import { createDatabase, deferredCommitError, deferredViolations, executeStatement, restoreDatabase, runScript, splitStatements, userTables, type StatementResult } from './oracle';
 
 const DDL = /^\s*(CREATE|ALTER|DROP|TRUNCATE)\b/i;
 const MAX_LOG = 500;
@@ -34,6 +34,15 @@ export class Session {
   private exec(stmt: string): StatementResult {
     const kw = stmt.trim().match(/^(\w+)/)?.[1]?.toUpperCase();
     if (kw === 'COMMIT') {
+      const v = deferredViolations(this.db);
+      if (v.length) {
+        // Oracle: der Commit scheitert, die ganze Transaktion wird zurueckgerollt
+        this.db.close();
+        this.db = restoreDatabase(this.SQL, this.snapshot);
+        this.pending = 0;
+        const e = deferredCommitError(v);
+        return { sql: stmt, ok: false, message: e.message, ora: e.ora };
+      }
       this.snapshot = this.db.export();
       this.pending = 0;
       return { sql: stmt, ok: true, message: 'Commit abgeschlossen.' };

@@ -37,7 +37,8 @@ describe('Musterloesungen', () => {
 
 describe('Szenarien', () => {
   it('jedes Szenario hat je Stufe (Leicht, Mittel, Schwer) mindestens zwei Aufgaben', () => {
-    for (const sc of scenarios)
+    // marktplatz-leer ist nur die leere Variante fuer eine Einfuege-Aufgabe
+    for (const sc of scenarios.filter((s) => s.id !== 'marktplatz-leer'))
       for (const level of [1, 2, 3])
         expect(
           sqlExercises.filter((e) => (e.scenario ?? 'hochschule') === sc.id && e.level === level).length,

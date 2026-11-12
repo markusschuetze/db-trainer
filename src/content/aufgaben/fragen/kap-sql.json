@@ -769,5 +769,85 @@
    1
   ],
   "explanation": "Kinddatensätze müssen vor dem Elterndatensatz entfernt werden, es sei denn der Fremdschlüssel hat ON DELETE CASCADE."
+ },
+ {
+  "id": "dml-deferred-wann",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Wann wird ein Constraint geprüft, der DEFERRABLE INITIALLY DEFERRED angelegt wurde?",
+  "options": [
+   "Erst beim COMMIT der Transaktion",
+   "Sofort bei jeder einzelnen INSERT-Anweisung",
+   "Nur einmal beim Anlegen des Constraints",
+   "Bei jedem SELECT auf die Tabelle"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Ein aufgeschobener Constraint wird erst beim Beenden der Transaktion geprüft. INITIALLY IMMEDIATE prüft dagegen sofort nach jeder Anweisung."
+ },
+ {
+  "id": "dml-deferred-fehler",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Beim COMMIT ist ein aufgeschobener CHECK-Constraint verletzt. Was passiert?",
+  "options": [
+   "Die gesamte Transaktion wird zurückgerollt",
+   "Nur die fehlerhafte Zeile wird entfernt",
+   "Der COMMIT gelingt und die Zeile wird markiert",
+   "Die Datenbank bricht die Verbindung ab"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Der COMMIT scheitert (ORA-02091), und Oracle rollt die ganze Transaktion zurück, nicht nur die verletzende Zeile."
+ },
+ {
+  "id": "dml-deferred-standard",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Ein Constraint wird ohne weitere Angabe angelegt. Wie wird er geprüft?",
+  "options": [
+   "Sofort nach jeder Anweisung (NOT DEFERRABLE)",
+   "Erst beim COMMIT (INITIALLY DEFERRED)",
+   "Wahlweise sofort oder beim COMMIT, je nach Sitzung",
+   "Gar nicht, solange keine Transaktion offen ist"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Ohne DEFERRABLE ist ein Constraint nicht aufschiebbar und wird sofort geprüft."
+ },
+ {
+  "id": "dml-rollback-wirkung",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "Auf INSERT INTO Nutzerin (…) folgt ROLLBACK. Danach wird eine Kundin mit derselben ID eingefügt. Was passiert?",
+  "options": [
+   "Fehler ORA-02291: die Elternzeile fehlt",
+   "Es gelingt, weil Nutzerin gerollt wurde",
+   "Fehler ORA-00001: die ID gibt es doppelt",
+   "Es gelingt, die Nutzerin wird automatisch neu angelegt"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "ROLLBACK verwirft alles seit dem letzten COMMIT, auch die Elternzeile. Der Fremdschlüssel findet sie dann nicht mehr."
+ },
+ {
+  "id": "dml-fehler-folge",
+  "topicId": "sql-dml",
+  "chapter": "SQL",
+  "question": "In einem Skript scheitert das INSERT in die Elterntabelle Hersteller. Was geschieht mit dem folgenden INSERT in Artikel, das auf diese Herstellerin verweist?",
+  "options": [
+   "Es scheitert ebenfalls mit ORA-02291",
+   "Es gelingt, weil das Skript unabhängig läuft",
+   "Es gelingt, die Herstellerin wird nachgeholt",
+   "Das Skript hält schon beim ersten Fehler an"
+  ],
+  "correct": [
+   0
+  ],
+  "explanation": "Die Herstellerin existiert nicht, also fehlt die Elternzeile. SQL Developer führt das Skript trotz des ersten Fehlers weiter aus."
  }
 ]

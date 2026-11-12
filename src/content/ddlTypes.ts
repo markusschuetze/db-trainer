@@ -21,9 +21,11 @@ export type Check = { hint?: string; label?: string } & (
   | { kind: 'default'; table: string; column: string; value: string }
   | { kind: 'constraintName'; name: string }
   | { kind: 'noTables' }
+  /** Das Skript laesst sich ein zweites Mal ausfuehren (DROP-Befehle am Anfang): kein CREATE/ALTER scheitert */
+  | { kind: 'rerun' }
   | {
       kind: 'behavior';
-      /** Schritte laufen in einer Transaktion, die danach zurueckgerollt wird */
+      /** Schritte laufen in einer Transaktion, die danach zurueckgerollt wird. Der Schritt COMMIT prueft verzoegerte Bedingungen. */
       steps: { sql: string; expect?: 'ok' | 'error' }[];
       /** Optional: Ergebnis einer Abfrage nach den Schritten */
       expectValue?: { sql: string; equals: string };

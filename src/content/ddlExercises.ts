@@ -1,6 +1,7 @@
-import type { DdlExercise } from './ddlTypes';
+import type { Check, DdlExercise } from './ddlTypes';
 
 const SRC = 'Nach Skript 06 SQL-DDL und Übung 05 (Schaible/Bertelsmeier, TH Köln)';
+const SRC_TIERHEIM = 'Übung 6 (DDL), Aufgabe 1: Tierheim, Skript 06 SQL-DDL (Schaible/Schewe/Stratmann, TH Köln)';
 
 const KURS_STUDENT_ANMELDEN_PLAIN = `
 CREATE TABLE Kurs (
@@ -17,6 +18,81 @@ CREATE TABLE Anmelden (
   Anmeldedatum DATE NOT NULL,
   CONSTRAINT pk_anmelden PRIMARY KEY (Kurs_ID, Matrikelnummer)
 );`;
+
+const TIERHEIM_TABELLEN = `
+CREATE TABLE Tier (
+  TierID       NUMBER PRIMARY KEY,
+  Name         VARCHAR2(50) NOT NULL,
+  Geburtsdatum DATE
+);
+CREATE TABLE Adoptant (
+  AdoptantID       NUMBER PRIMARY KEY,
+  Vorname          VARCHAR2(30) NOT NULL,
+  Nachname         VARCHAR2(30) NOT NULL,
+  Lieblingstierart VARCHAR2(50),
+  Alter_Jahre      NUMBER NOT NULL
+);
+CREATE TABLE Mitarbeiter (
+  MitarbeiterID   NUMBER PRIMARY KEY,
+  Vorname         VARCHAR2(30) NOT NULL,
+  Nachname        VARCHAR2(30) NOT NULL,
+  Email           VARCHAR2(50) NOT NULL,
+  Gehalt          NUMBER NOT NULL,
+  Geschlecht      CHAR(1) NOT NULL,
+  Aufgabenbereich VARCHAR2(50)
+);
+CREATE TABLE Adoptiert (
+  AdoptantID    NUMBER NOT NULL,
+  TierID        NUMBER NOT NULL,
+  MitarbeiterID NUMBER NOT NULL,
+  Datum         DATE NOT NULL,
+  CONSTRAINT pk_adoptiert PRIMARY KEY (AdoptantID, TierID)
+);`;
+const TIERHEIM_FKS = `
+ALTER TABLE Adoptiert ADD CONSTRAINT fk_adoptiert_adoptant FOREIGN KEY (AdoptantID) REFERENCES Adoptant (AdoptantID);
+ALTER TABLE Adoptiert ADD CONSTRAINT fk_adoptiert_tier FOREIGN KEY (TierID) REFERENCES Tier (TierID);
+ALTER TABLE Adoptiert ADD CONSTRAINT fk_adoptiert_mitarbeiter FOREIGN KEY (MitarbeiterID) REFERENCES Mitarbeiter (MitarbeiterID);`;
+const TIERHEIM = `${TIERHEIM_TABELLEN}${TIERHEIM_FKS}`;
+
+const TIERHEIM_MODELL = `Das Relationenmodell des Tierheims (P = Primärschlüssel, F = Fremdschlüssel, * = NOT NULL):
+
+Tier (P* TierID NUMBER, * Name VARCHAR2(50), Geburtsdatum DATE)
+Adoptant (P* AdoptantID NUMBER, * Vorname VARCHAR2(30), * Nachname VARCHAR2(30), Lieblingstierart VARCHAR2(50), * Alter_Jahre NUMBER)
+Mitarbeiter (P* MitarbeiterID NUMBER, * Vorname VARCHAR2(30), * Nachname VARCHAR2(30), * Email VARCHAR2(50), * Gehalt NUMBER, * Geschlecht CHAR(1), Aufgabenbereich VARCHAR2(50))
+Adoptiert (PF* AdoptantID, PF* TierID, F* MitarbeiterID, * Datum DATE)
+
+Adoptiert verweist auf Adoptant, Tier und Mitarbeiter. Hinweis: Das Attribut „Alter“ heißt hier Alter_Jahre, weil ALTER in Oracle ein reserviertes Wort ist.`;
+
+const TIERHEIM_STRUKTUR: Check[] = [
+  { kind: 'table', table: 'Tier' },
+  { kind: 'table', table: 'Adoptant' },
+  { kind: 'table', table: 'Mitarbeiter' },
+  { kind: 'table', table: 'Adoptiert' },
+  { kind: 'column', table: 'Tier', column: 'Geburtsdatum', family: 'date' },
+  { kind: 'column', table: 'Adoptant', column: 'Alter_Jahre', family: 'number' },
+  { kind: 'column', table: 'Mitarbeiter', column: 'Gehalt', family: 'number' },
+  { kind: 'column', table: 'Mitarbeiter', column: 'Geschlecht', family: 'text' },
+  { kind: 'column', table: 'Adoptiert', column: 'Datum', family: 'date' },
+  { kind: 'pk', table: 'Tier', columns: ['TierID'] },
+  { kind: 'pk', table: 'Adoptant', columns: ['AdoptantID'] },
+  { kind: 'pk', table: 'Mitarbeiter', columns: ['MitarbeiterID'] },
+  { kind: 'pk', table: 'Adoptiert', columns: ['AdoptantID', 'TierID'] },
+  { kind: 'notnull', table: 'Tier', column: 'Name' },
+  { kind: 'notnull', table: 'Adoptant', column: 'Vorname' },
+  { kind: 'notnull', table: 'Adoptant', column: 'Alter_Jahre' },
+  { kind: 'notnull', table: 'Mitarbeiter', column: 'Email' },
+  { kind: 'notnull', table: 'Mitarbeiter', column: 'Gehalt' },
+  { kind: 'notnull', table: 'Adoptiert', column: 'MitarbeiterID' },
+  { kind: 'notnull', table: 'Adoptiert', column: 'Datum' },
+  { kind: 'fk', table: 'Adoptiert', columns: ['AdoptantID'], refTable: 'Adoptant' },
+  { kind: 'fk', table: 'Adoptiert', columns: ['TierID'], refTable: 'Tier' },
+  { kind: 'fk', table: 'Adoptiert', columns: ['MitarbeiterID'], refTable: 'Mitarbeiter' },
+];
+
+const MA_INSERT = (id: number, mail: string, gehalt: number, bereich: string | null) =>
+  `INSERT INTO Mitarbeiter (MitarbeiterID, Vorname, Nachname, Email, Gehalt, Geschlecht, Aufgabenbereich) VALUES (${id}, 'A', 'B', '${mail}', ${gehalt}, 'w', ${bereich === null ? 'NULL' : `'${bereich}'`})`;
+const AD_INSERT = (id: number, tierart: string, alter: number) =>
+  `INSERT INTO Adoptant (AdoptantID, Vorname, Nachname, Lieblingstierart, Alter_Jahre) VALUES (${id}, 'A', 'B', '${tierart}', ${alter})`;
 
 export const ddlExercises: DdlExercise[] = [
   {
@@ -423,5 +499,192 @@ DROP TABLE Kurs;
 DROP TABLE Student;`,
     checks: [{ kind: 'noTables' }],
     source: SRC,
+  },
+  {
+    id: 'tierheim-tabellen',
+    topicId: '06-create',
+    title: 'Tierheim: Tabellen erstellen',
+    level: 2,
+    topic: 'CREATE TABLE und ALTER TABLE für Fremdschlüssel',
+    task: `${TIERHEIM_MODELL}
+
+Schreibe die passenden CREATE TABLE-Befehle. Lege die Fremdschlüssel mit ALTER TABLE an.
+
+Probiere ruhig auch, den Fremdschlüssel gleich in CREATE TABLE zu schreiben, wenn die Elterntabelle noch fehlt, und lies die Fehlermeldung.`,
+    starter: '-- 1. CREATE TABLE für alle vier Tabellen\n-- 2. ALTER TABLE für die Fremdschlüssel\n',
+    hints: [
+      'Ein Fremdschlüssel kann nur auf eine Tabelle verweisen, die es schon gibt. Erst Tier, Adoptant und Mitarbeiter, dann Adoptiert.',
+      'Adoptiert hat einen zusammengesetzten Primärschlüssel: CONSTRAINT pk_adoptiert PRIMARY KEY (AdoptantID, TierID).',
+      'ALTER TABLE Adoptiert ADD CONSTRAINT fk_name FOREIGN KEY (Spalte) REFERENCES Eltern (Schlüssel);',
+    ],
+    solution: TIERHEIM.trim(),
+    checks: [
+      ...TIERHEIM_STRUKTUR,
+      {
+        kind: 'behavior',
+        label: 'Adoptiert verlangt vorhandene Zeilen in Adoptant, Tier und Mitarbeiter',
+        steps: [
+          { sql: "INSERT INTO Adoptiert (AdoptantID, TierID, MitarbeiterID, Datum) VALUES (1, 1, 1, '2026-11-01')", expect: 'error' },
+          { sql: "INSERT INTO Tier (TierID, Name) VALUES (1, 'Bello')" },
+          { sql: AD_INSERT(1, 'Hund', 30) },
+          { sql: MA_INSERT(1, 'ab.cd@Tierheim.de', 40000, 'Pflege') },
+          { sql: "INSERT INTO Adoptiert (AdoptantID, TierID, MitarbeiterID, Datum) VALUES (1, 1, 1, '2026-11-01')" },
+        ],
+      },
+    ],
+    source: SRC_TIERHEIM,
+  },
+  {
+    id: 'tierheim-drop',
+    topicId: '06-alter-drop',
+    title: 'Tierheim: Skript mehrfach ausführbar',
+    level: 2,
+    topic: 'DROP TABLE am Anfang, Reihenfolge, CASCADE CONSTRAINTS',
+    task: `Das folgende Skript legt das Tierheim an, lässt sich aber nur einmal ausführen: Beim zweiten Mal gibt es Fehler, weil die Tabellen schon existieren.
+
+Ergänze am Anfang geeignete DROP TABLE-Befehle, damit das Skript mehrfach hintereinander ausgeführt werden kann.
+
+Beim ersten Lauf melden die DROP-Befehle, dass die Tabellen noch nicht existieren (ORA-00942). Das ist in Ordnung.`,
+    starter: `-- DROP TABLE-Befehle hier ergänzen
+
+${TIERHEIM.trim()}
+`,
+    hints: [
+      'Eine Tabelle, auf die noch ein Fremdschlüssel verweist, lässt sich nicht löschen (ORA-02449).',
+      'Entweder in umgekehrter Reihenfolge löschen (erst Adoptiert) oder DROP TABLE … CASCADE CONSTRAINTS verwenden.',
+    ],
+    solution: `DROP TABLE Adoptiert CASCADE CONSTRAINTS;
+DROP TABLE Tier CASCADE CONSTRAINTS;
+DROP TABLE Adoptant CASCADE CONSTRAINTS;
+DROP TABLE Mitarbeiter CASCADE CONSTRAINTS;
+${TIERHEIM}`,
+    checks: [
+      { kind: 'table', table: 'Tier' },
+      { kind: 'table', table: 'Adoptant' },
+      { kind: 'table', table: 'Mitarbeiter' },
+      { kind: 'table', table: 'Adoptiert' },
+      { kind: 'fk', table: 'Adoptiert', columns: ['TierID'], refTable: 'Tier' },
+      { kind: 'rerun' },
+    ],
+    source: SRC_TIERHEIM,
+  },
+  {
+    id: 'tierheim-check-sofort',
+    topicId: '06-constraints',
+    title: 'Tierheim: Bedingungen sofort prüfen',
+    level: 2,
+    topic: 'CHECK mit Vergleich und LIKE, INITIALLY IMMEDIATE',
+    task: `Die Tabellen des Tierheims existieren. Ergänze mit ALTER TABLE zwei Bedingungen, die sofort geprüft werden:
+
+1. Das Alter eines Adoptanten muss 18 Jahre oder älter sein.
+2. Die E-Mail eines Mitarbeiters besteht aus 2 Zeichen, gefolgt von einem Punkt, gefolgt von einer beliebigen Anzahl von Zeichen, gefolgt von „@Tierheim.de“ (zum Beispiel ab.mueller@Tierheim.de).`,
+    setup: TIERHEIM,
+    starter: '-- zwei ALTER TABLE-Anweisungen\n',
+    hints: [
+      'ALTER TABLE <tabelle> ADD CONSTRAINT <name> CHECK (<bedingung>);',
+      "Bei LIKE steht _ für genau ein Zeichen und % für beliebig viele: Email LIKE '__.%@Tierheim.de'.",
+      "Alternativ geht REGEXP_LIKE(Email, '^.{2}[.].*@Tierheim[.]de$').",
+    ],
+    solution: `ALTER TABLE Adoptant ADD CONSTRAINT c_alter CHECK (Alter_Jahre >= 18);
+ALTER TABLE Mitarbeiter ADD CONSTRAINT c_email CHECK (Email LIKE '__.%@Tierheim.de');`,
+    checks: [
+      {
+        kind: 'behavior',
+        label: 'Adoptanten unter 18 werden abgelehnt, ab 18 sind sie erlaubt',
+        steps: [{ sql: AD_INSERT(1, 'Hund', 17), expect: 'error' }, { sql: AD_INSERT(1, 'Hund', 18) }],
+      },
+      {
+        kind: 'behavior',
+        label: 'E-Mail: genau 2 Zeichen vor dem Punkt, Endung @Tierheim.de',
+        steps: [
+          { sql: MA_INSERT(1, 'abc.xyz@Tierheim.de', 40000, null), expect: 'error' },
+          { sql: MA_INSERT(1, 'ab@Tierheim.de', 40000, null), expect: 'error' },
+          { sql: MA_INSERT(1, 'ab.xyz@gmail.com', 40000, null), expect: 'error' },
+          { sql: MA_INSERT(1, 'ab.xyz@Tierheim.de', 40000, null) },
+        ],
+      },
+    ],
+    source: SRC_TIERHEIM,
+  },
+  {
+    id: 'tierheim-check-verspaetet',
+    topicId: '06-constraints',
+    title: 'Tierheim: Bedingungen verspätet prüfen',
+    level: 3,
+    topic: 'CHECK, DEFERRABLE INITIALLY DEFERRED, COMMIT',
+    task: `Die Tabellen des Tierheims existieren. Ergänze mit ALTER TABLE drei Bedingungen, die verspätet geprüft werden, also erst beim COMMIT (DEFERRABLE INITIALLY DEFERRED):
+
+1. Es gibt nur zwei Aufgabenbereiche: Tiervermittlung und Pflege.
+2. In der Tiervermittlung beträgt das Gehalt mindestens 30.000 €, in der Pflege mindestens 35.000 €.
+3. Die Lieblingstierart eines Adoptanten darf nicht „Krokodil“ oder „Zebra“ sein.
+
+Dein Skript wird so geprüft: Ein Einfügen, das die Bedingung verletzt, wird zuerst angenommen und erst beim COMMIT abgelehnt.`,
+    setup: TIERHEIM,
+    starter: '-- drei ALTER TABLE-Anweisungen mit DEFERRABLE INITIALLY DEFERRED\n',
+    hints: [
+      'ALTER TABLE <tabelle> ADD CONSTRAINT <name> CHECK (<bedingung>) DEFERRABLE INITIALLY DEFERRED;',
+      "Gehalt: (Aufgabenbereich = 'Tiervermittlung' AND Gehalt >= 30000) OR (Aufgabenbereich = 'Pflege' AND Gehalt >= 35000)",
+      'Der Unterschied zu INITIALLY IMMEDIATE: Dort scheitert schon die INSERT-Anweisung, hier erst das COMMIT.',
+    ],
+    solution: `ALTER TABLE Mitarbeiter ADD CONSTRAINT c_bereich
+  CHECK (Aufgabenbereich IN ('Tiervermittlung', 'Pflege')) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE Mitarbeiter ADD CONSTRAINT c_gehalt
+  CHECK ((Aufgabenbereich = 'Tiervermittlung' AND Gehalt >= 30000)
+      OR (Aufgabenbereich = 'Pflege' AND Gehalt >= 35000)) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE Adoptant ADD CONSTRAINT c_tierart
+  CHECK (Lieblingstierart NOT IN ('Krokodil', 'Zebra')) DEFERRABLE INITIALLY DEFERRED;`,
+    checks: [
+      {
+        kind: 'behavior',
+        label: 'Aufgabenbereich: ungültiger Bereich wird erst beim COMMIT abgelehnt',
+        hint: 'Das Einfügen sollte noch klappen und erst das COMMIT scheitern. Ist die Bedingung DEFERRABLE INITIALLY DEFERRED?',
+        steps: [
+          { sql: MA_INSERT(1, 'ab.cd@Tierheim.de', 40000, 'Verwaltung') },
+          { sql: 'COMMIT', expect: 'error' },
+        ],
+      },
+      {
+        kind: 'behavior',
+        label: 'Gehalt: Tiervermittlung mindestens 30.000, Pflege mindestens 35.000',
+        hint: 'Prüfe beide Bereiche. Das Einfügen klappt, das COMMIT lehnt ein zu niedriges Gehalt ab.',
+        steps: [
+          { sql: MA_INSERT(1, 'ab.cd@Tierheim.de', 25000, 'Tiervermittlung') },
+          { sql: 'COMMIT', expect: 'error' },
+        ],
+      },
+      {
+        kind: 'behavior',
+        label: 'Gehalt in der Pflege: 34.000 ist zu wenig',
+        steps: [
+          { sql: MA_INSERT(1, 'ab.cd@Tierheim.de', 34000, 'Pflege') },
+          { sql: 'COMMIT', expect: 'error' },
+        ],
+      },
+      {
+        kind: 'behavior',
+        label: 'Gültige Mitarbeitende werden beim COMMIT bestätigt',
+        steps: [
+          { sql: MA_INSERT(1, 'ab.cd@Tierheim.de', 30000, 'Tiervermittlung') },
+          { sql: MA_INSERT(2, 'ef.gh@Tierheim.de', 35000, 'Pflege') },
+          { sql: 'COMMIT' },
+        ],
+      },
+      {
+        kind: 'behavior',
+        label: 'Lieblingstierart: Krokodil wird erst beim COMMIT abgelehnt',
+        steps: [{ sql: AD_INSERT(1, 'Krokodil', 30) }, { sql: 'COMMIT', expect: 'error' }],
+      },
+      {
+        kind: 'behavior',
+        label: 'Lieblingstierart: Zebra wird abgelehnt, Hund ist erlaubt',
+        steps: [{ sql: AD_INSERT(1, 'Zebra', 30) }, { sql: 'COMMIT', expect: 'error' }],
+      },
+      {
+        kind: 'behavior',
+        label: 'Eine erlaubte Tierart wird bestätigt',
+        steps: [{ sql: AD_INSERT(1, 'Hund', 30) }, { sql: 'COMMIT' }],
+      },
+    ],
+    source: SRC_TIERHEIM,
   },
 ];

@@ -60,6 +60,17 @@ export function registerOracleFunctions(db: Database) {
   db.create_function('RPAD', (s: unknown, n: unknown, c: unknown) =>
     s == null ? null : (String(s).padEnd(Number(n), c == null ? ' ' : String(c)).slice(0, Number(n)) as never),
   );
+  const regexpLike = (s: unknown, p: unknown, f?: unknown) => {
+    if (s == null || p == null) return null as never;
+    try {
+      return (new RegExp(String(p), /i/.test(String(f ?? '')) ? 'i' : '').test(String(s)) ? 1 : 0) as never;
+    } catch {
+      return 0 as never;
+    }
+  };
+  // SQLite unterscheidet Funktionen nach der Anzahl der Argumente: REGEXP_LIKE(text, muster [, flags])
+  db.create_function('REGEXP_LIKE', (s: unknown, p: unknown) => regexpLike(s, p));
+  db.create_function('REGEXP_LIKE', (s: unknown, p: unknown, f: unknown) => regexpLike(s, p, f));
   // Oracle: LIKE unterscheidet Gross-/Kleinschreibung, SQLite standardmaessig nicht
   db.exec('PRAGMA case_sensitive_like=ON');
   // DUAL wie in Oracle
@@ -115,7 +126,11 @@ export function rewriteQuery(stmt: string): string {
       .replace(/\bMINUS\b/gi, 'EXCEPT')
       .replace(/\bFETCH\s+(?:FIRST|NEXT)\s+(\d+)\s+ROWS?\s+ONLY\b/gi, 'LIMIT $1')
       .replace(/\bOFFSET\s+(\d+)\s+ROWS?\b/gi, 'OFFSET $1'),
-  ).replace(/\bDATE\s+('\d{4}-\d{2}-\d{2}')/gi, '$1');
+  )
+    .replace(/\bDATE\s+('\d{4}-\d{2}-\d{2}')/gi, '$1')
+    // Oracle erlaubt einen Alias ohne AS auch bei UPDATE und DELETE: UPDATE Hersteller h SET ...
+    .replace(/^(\s*UPDATE\s+[\p{L}_][\p{L}\p{N}_$#]*)\s+(?!SET\b)([\p{L}_][\p{L}\p{N}_$#]*)\s+SET\b/iu, '$1 AS $2 SET')
+    .replace(/^(\s*DELETE\s+FROM\s+[\p{L}_][\p{L}\p{N}_$#]*)\s+(?!WHERE\b)([\p{L}_][\p{L}\p{N}_$#]*)(\s+WHERE\b)/iu, '$1 AS $2$3');
 }
 
 /* ---------------- GROUP BY wie Oracle ---------------- */

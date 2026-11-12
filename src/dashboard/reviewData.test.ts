@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ddlExercises } from '../content/ddlExercises';
+import { dmlErrorTasks } from '../content/dmlErrors';
+import { provokeTasks } from '../content/dmlProvoke';
 import { phrases } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
 import { mcQuestions } from '../content/mcQuestions';
@@ -11,7 +13,7 @@ import { reviewCsv, reviewRows } from './reviewData';
 describe('Durchsicht-Export', () => {
   const rows = reviewRows();
   it('enthaelt jeden Inhalt genau einmal', () => {
-    const expected = mcQuestions.length + sqlExercises.length + ddlExercises.length + nfExercises.length + phrases.length + specializations.length + textTasks.length;
+    const expected = mcQuestions.length + sqlExercises.length + ddlExercises.length + nfExercises.length + phrases.length + specializations.length + textTasks.length + dmlErrorTasks.length + provokeTasks.length;
     expect(rows).toHaveLength(expected);
     expect(new Set(rows.map((r) => r.id)).size).toBe(rows.length);
   });

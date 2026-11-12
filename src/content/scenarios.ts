@@ -6,6 +6,7 @@
 
 import { DATA_A, DATA_B, HOCHSCHULE_SCHEMA, HOCHSCHULE_TABLES } from './hochschule';
 import { GASTRO_A, GASTRO_B, GASTRO_RELATIONS, GASTRO_SCHEMA } from './scenarios/gastro';
+import { MARKTPLATZ_A, MARKTPLATZ_B, MARKTPLATZ_RELATIONS, MARKTPLATZ_SCHEMA, MARKTPLATZ_TABLES } from './scenarios/marktplatz';
 import { PROJEKTE_A, PROJEKTE_B, PROJEKTE_RELATIONS, PROJEKTE_SCHEMA } from './scenarios/projekte';
 
 export interface Scenario {
@@ -62,6 +63,28 @@ export const scenarios: Scenario[] = [
     dataB: PROJEKTE_B,
     tables: ['Abteilung', 'Mitarbeiter', 'Projekt', 'Arbeitet_in'],
     relations: PROJEKTE_RELATIONS,
+  },
+  {
+    id: 'marktplatz',
+    name: 'Marktplatz',
+    description: 'Nutzerinnen als Kundinnen oder Herstellerinnen, Artikel aus Komponenten und Käufe, mit den Constraints aus Übung 5.',
+    origin: 'Übung 5 (Nutzer/Artikel/Komponente) und Übung 6 (DML)',
+    schema: MARKTPLATZ_SCHEMA,
+    dataA: MARKTPLATZ_A,
+    dataB: MARKTPLATZ_B,
+    tables: MARKTPLATZ_TABLES,
+    relations: MARKTPLATZ_RELATIONS,
+  },
+  {
+    id: 'marktplatz-leer',
+    name: 'Marktplatz (leer)',
+    description: 'Dieselben Tabellen wie im Marktplatz, aber ohne Daten: zum Einfügen eigener Datensätze.',
+    origin: 'Übung 6 Aufgabe 2a',
+    schema: MARKTPLATZ_SCHEMA,
+    dataA: '',
+    dataB: '',
+    tables: MARKTPLATZ_TABLES,
+    relations: MARKTPLATZ_RELATIONS,
   },
 ];
 

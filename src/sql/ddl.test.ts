@@ -5,6 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { ddlExercises } from '../content/ddlExercises';
 import { runExercise } from './ddlGrading';
 import { createDatabase, runScript, splitStatements } from './oracle';
+import { Session } from './session';
 
 let SQL: SqlJsStatic;
 beforeAll(async () => {
@@ -16,7 +17,10 @@ describe('Musterloesungen bestehen alle Pruefungen', () => {
   for (const ex of ddlExercises) {
     it(ex.id, () => {
       const run = runExercise(SQL, ex, ex.solution);
-      const failedStmt = run.results.filter((r) => !r.ok).map((r) => `${r.sql} -> ${r.message}`);
+      // DROP TABLE am Skriptanfang meldet beim ersten Lauf ORA-00942 (Tabelle existiert noch nicht): erwartet
+      const failedStmt = run.results
+        .filter((r) => !r.ok && !(r.ora === 'ORA-00942' && /^\s*DROP\s+TABLE/i.test(r.sql)))
+        .map((r) => `${r.sql} -> ${r.message}`);
       expect(failedStmt).toEqual([]);
       expect(run.checks.filter((c) => !c.ok)).toEqual([]);
     });
@@ -89,5 +93,73 @@ describe('Oracle-Verhalten', () => {
       INSERT INTO t (a) VALUES (2);`);
     expect(res[2].ora).toBe('ORA-00001');
     expect(res[3].ora).toBe('ORA-01400');
+  });
+});
+
+describe('Verzögerte Bedingungen (DEFERRABLE INITIALLY DEFERRED)', () => {
+  const run = (script: string) => {
+    const db = createDatabase(SQL);
+    return { db, res: runScript(db, script) };
+  };
+  const setup = `
+    CREATE TABLE m (id NUMBER PRIMARY KEY, g NUMBER);
+    ALTER TABLE m ADD CONSTRAINT c_g CHECK (g >= 10) DEFERRABLE INITIALLY DEFERRED;`;
+  it('INSERT klappt, erst COMMIT lehnt ab und rollt zurück', () => {
+    const s = new Session(SQL, setup);
+    const r = s.run('INSERT INTO m VALUES (1, 5); COMMIT; SELECT COUNT(*) FROM m;');
+    expect(r[0].ok).toBe(true);
+    expect(r[1].ok).toBe(false);
+    expect(r[1].ora).toBe('ORA-02091');
+    expect(r[2].rows).toEqual([[0]]);
+    s.close();
+  });
+  it('gültige Zeilen werden bestätigt', () => {
+    const s = new Session(SQL, setup);
+    const r = s.run('INSERT INTO m VALUES (1, 15); COMMIT; ROLLBACK; SELECT COUNT(*) FROM m;');
+    expect(r.slice(0, 2).every((x) => x.ok)).toBe(true);
+    expect(r[3].rows).toEqual([[1]]);
+    s.close();
+  });
+  it('INITIALLY IMMEDIATE prüft sofort, eine Verletzung beim Anlegen wird gemeldet', () => {
+    const { res } = run(`
+      CREATE TABLE m (id NUMBER PRIMARY KEY, g NUMBER);
+      ALTER TABLE m ADD CONSTRAINT c_g CHECK (g >= 10) DEFERRABLE INITIALLY IMMEDIATE;
+      INSERT INTO m VALUES (1, 5);
+      INSERT INTO m VALUES (2, 5);
+      ALTER TABLE m ADD CONSTRAINT c_h CHECK (g >= 10) DEFERRABLE INITIALLY DEFERRED;`);
+    expect(res[2].ok).toBe(false);
+    expect(res[2].ora).toBe('ORA-02290');
+  });
+  it('REGEXP_LIKE', () => {
+    const { res } = run(`CREATE TABLE r (e VARCHAR2(20)); INSERT INTO r VALUES ('ab.x@T.de'); SELECT COUNT(*) FROM r WHERE REGEXP_LIKE(e, '^.{2}[.].*@T[.]de$');`);
+    expect(res[2].rows).toEqual([[1]]);
+  });
+});
+
+describe('Tierheim-Aufgaben: falsche Lösungen fallen auf', () => {
+  const ex = (id: string) => ddlExercises.find((e) => e.id === id)!;
+  it('sofort geprüfte Bedingung statt verspäteter wird erkannt', () => {
+    const immediate = ex('tierheim-check-verspaetet').solution.replace(/ DEFERRABLE INITIALLY DEFERRED/g, '');
+    const run = runExercise(SQL, ex('tierheim-check-verspaetet'), immediate);
+    expect(run.passed).toBe(false);
+    expect(run.checks.some((c) => !c.ok && /sollte noch klappen|COMMIT/.test(c.hint ?? ''))).toBe(true);
+  });
+  it('Gehaltsgrenzen müssen stimmen', () => {
+    const wrong = ex('tierheim-check-verspaetet').solution.replace('Gehalt >= 35000', 'Gehalt >= 30000');
+    expect(runExercise(SQL, ex('tierheim-check-verspaetet'), wrong).passed).toBe(false);
+  });
+  it('REGEXP_LIKE statt LIKE ist ebenfalls richtig', () => {
+    const alt = `ALTER TABLE Adoptant ADD CONSTRAINT a1 CHECK (Alter_Jahre >= 18);
+ALTER TABLE Mitarbeiter ADD CONSTRAINT a2 CHECK (REGEXP_LIKE(Email, '^.{2}[.].*@Tierheim[.]de$'));`;
+    expect(runExercise(SQL, ex('tierheim-check-sofort'), alt).passed).toBe(true);
+  });
+  it('Skript ohne DROP oder mit falscher Reihenfolge ist nicht mehrfach ausführbar', () => {
+    const e = ex('tierheim-drop');
+    const sol = e.solution;
+    const withoutDrop = sol.split('\n').filter((l) => !/^DROP/.test(l)).join('\n');
+    expect(runExercise(SQL, e, withoutDrop).passed).toBe(false);
+    const wrongOrder = sol.replace(/ CASCADE CONSTRAINTS/g, '');
+    const parentFirst = wrongOrder.replace('DROP TABLE Adoptiert;\n', '').replace('DROP TABLE Mitarbeiter;', 'DROP TABLE Mitarbeiter;\nDROP TABLE Adoptiert;');
+    expect(runExercise(SQL, e, parentFirst).passed).toBe(false);
   });
 });

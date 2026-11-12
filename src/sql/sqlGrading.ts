@@ -3,6 +3,7 @@ import { scenarioById } from '../content/scenarios';
 import type { SqlExercise } from '../content/sqlTypes';
 import type { CheckResult } from './ddlGrading';
 import { createDatabase, executeStatement, runScript, splitStatements, type StatementResult } from './oracle';
+import { Session } from './session';
 
 export interface ResultSet {
   columns: string[];
@@ -160,14 +161,29 @@ function runSelectAll(SQL: SqlJsStatic, scenario: string | undefined, stmts: str
 
 /* ---------------- DML ---------------- */
 
+/** Skript wie in einer Oracle-Sitzung ausfuehren: COMMIT und ROLLBACK wirken wirklich. */
 function finalState(SQL: SqlJsStatic, scenario: string | undefined, data: Dataset, script: string) {
-  const db = scenarioDb(SQL, scenario, data);
+  const sc = scenarioById(scenario);
+  if (!/\b(COMMIT|ROLLBACK)\b/i.test(script)) {
+    // schneller Weg: ohne Transaktionssteuerung genuegt eine einfache Ausfuehrung
+    const db = scenarioDb(SQL, scenario, data);
+    try {
+      const results = runScript(db, script);
+      const tables = Object.fromEntries(sc.tables.map((t) => [t, tableContent(db, t)]));
+      const pending = results.filter((r) => r.ok && /^\s*(INSERT|UPDATE|DELETE|MERGE)\b/i.test(r.sql)).length;
+      return { results, tables, pending };
+    } finally {
+      db.close();
+    }
+  }
+  scenarioDb(SQL, scenario, data).close(); // prueft die Fall-Datenbank
+  const session = new Session(SQL, sc.schema + (data === 'A' ? sc.dataA : sc.dataB));
   try {
-    const results = runScript(db, script);
-    const tables = Object.fromEntries(scenarioById(scenario).tables.map((t) => [t, tableContent(db, t)]));
-    return { results, tables };
+    const results = session.run(script);
+    const tables = Object.fromEntries(sc.tables.map((t) => [t, tableContent(session.db, t)]));
+    return { results, tables, pending: session.pending };
   } finally {
-    db.close();
+    session.close();
   }
 }
 
@@ -192,6 +208,15 @@ function gradeDml(SQL: SqlJsStatic, ex: SqlExercise, script: string): SqlRun {
       label: `Tabelle ${t} hat den erwarteten Inhalt`,
       ok: !d,
       hint: d ? `${d.missing.length} erwartete Zeile(n) fehlen, ${d.extra.length} Zeile(n) weichen ab oder sind zu viel.` : undefined,
+    });
+  }
+  // Aufgaben mit COMMIT in der Musterloesung verlangen, die Transaktion zu beenden (wie in der Uebung)
+  if (/\bCOMMIT\b/i.test(ex.solution) && user.results.length) {
+    const ended = user.pending === 0;
+    checks.push({
+      label: 'Transaktion mit COMMIT beendet',
+      ok: ended,
+      hint: ended ? undefined : 'Es gibt noch nicht bestätigte Änderungen. Beende die Transaktion mit COMMIT;',
     });
   }
   const others = diffs.filter((d) => !target.includes(d.table));

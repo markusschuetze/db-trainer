@@ -8,6 +8,8 @@ interface Module {
   script: string;
   text: string;
   href?: string;
+  /** Kommt später: Kachel ohne Link mit Hinweis */
+  soon?: boolean;
 }
 
 const modules: Module[] = [
@@ -42,10 +44,16 @@ const modules: Module[] = [
     href: '#/ddl',
   },
   {
-    title: L('SQL-DML und DQL'),
+    title: L('SQL-DML'),
+    script: L('Übung 6'),
+    text: L('INSERT, UPDATE, DELETE, Fehler in Skripten erkennen und Constraints prüfen auf der Marktplatz-Datenbank.'),
+    href: '#/dml',
+  },
+  {
+    title: L('SQL-DQL'),
     script: L('Folgekapitel'),
-    text: L('Drei Fall-Datenbanken (Hochschule, Gastro, Projekte) in den Stufen Leicht, Mittel, Schwer. Mit Schema-Diagramm und Spielwiese.'),
-    href: '#/sql',
+    text: L('Abfragen mit SELECT, Joins, Gruppierung und Unterabfragen.'),
+    soon: true,
   },
   {
     title: L('Textaufgaben'),
@@ -117,7 +125,7 @@ export function Home() {
               </a>
             ) : (
               <span className="mt-4 inline-block self-start rounded-lg border border-line px-3 py-1 text-sm text-muted">
-                {t('in Arbeit')}
+                {m.soon ? t('Coming soon') : t('in Arbeit')}
               </span>
             )}
           </li>

@@ -17,7 +17,8 @@ export interface Derived {
 function schemaOf(SQL: SqlJsStatic, script: string) {
   const db = createDatabase(SQL);
   const errors = runScript(db, script)
-    .filter((r) => !r.ok)
+    // DROP TABLE am Skriptanfang meldet beim ersten Lauf ORA-00942: kein Fehler der Musterloesung
+    .filter((r) => !r.ok && !(r.ora === 'ORA-00942' && /^\s*DROP\s+TABLE/i.test(r.sql)))
     .map((r) => `${r.message}${r.ora ? ` (${r.ora})` : ''} bei: ${r.sql.split('\n')[0].slice(0, 60)}`);
   const schema = describeSchema(db);
   const named = userTables(db).flatMap((t) => {

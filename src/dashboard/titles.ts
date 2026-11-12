@@ -1,5 +1,7 @@
 // Klartext-Namen fuer Aufgaben-IDs im Dashboard.
 import { ddlExercises } from '../content/ddlExercises';
+import { dmlErrorTasks } from '../content/dmlErrors';
+import { provokeTasks } from '../content/dmlProvoke';
 import { phrases, relPhrases } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
 import { CHAPTER_NAME, mcQuestions } from '../content/mcQuestions';
@@ -30,6 +32,10 @@ export function itemTitle(id: string): string {
       return cut(specializations.find((s) => s.id === key)?.supertype ?? id);
     case 'tt':
       return textTasks.find((t) => t.id === key)?.title ?? id;
+    case 'dmlerr':
+      return `DML-Fehler: ${dmlErrorTasks.find((t) => t.id === key)?.title ?? id}`;
+    case 'prov':
+      return provokeTasks.find((t) => t.id === key)?.title ?? id;
     default:
       return id;
   }
@@ -44,6 +50,8 @@ export const KIND_LABEL: Record<string, string> = {
   rel: 'Relationenmodell',
   spez: 'Spezialisierung',
   tt: 'Textaufgabe',
+  dmlerr: 'DML-Fehler erkennen',
+  prov: 'Constraints prüfen',
 };
 export const kindOf = (id: string) => KIND_LABEL[id.slice(0, id.indexOf(':'))] ?? 'Aufgabe';
 

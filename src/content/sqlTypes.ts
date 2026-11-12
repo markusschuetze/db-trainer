@@ -20,5 +20,7 @@ export interface SqlExercise {
   /** DQL: Reihenfolge der Zeilen ist Teil der Aufgabe (ORDER BY) */
   ordered?: boolean;
   starter?: string;
+  /** Datensaetze, die in der Aufgabe vorgegeben werden (z. B. zum Einfuegen), als Tabellen */
+  given?: { name: string; columns: string[]; rows: string[][] }[];
   source: string;
 }
