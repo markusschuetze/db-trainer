@@ -1,6 +1,7 @@
 // Welche Uebungen und Wissensfragen gehoeren zu welchem Kapitel und Thema?
 import { ddlExercises } from './content/ddlExercises';
 import { dmlErrorTasks } from './content/dmlErrors';
+import { predictTasks } from './content/dmlPredict';
 import { provokeTasks } from './content/dmlProvoke';
 import { phrases, relPhrases, relType, type Phrase } from './content/erPhrases';
 import { nfExercises } from './content/exercises';
@@ -32,6 +33,7 @@ const buildCatalog = () => [
   ...sqlExercises.map((e) => ({ id: `sql:${e.id}`, topicId: e.topicId, kind: 'uebung' as const })),
   ...textTasks.map((t) => ({ id: `tt:${t.id}`, topicId: t.topicId, kind: 'uebung' as const })),
   ...dmlErrorTasks.map((t) => ({ id: `dmlerr:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
+  ...predictTasks.map((t) => ({ id: `dmlpred:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
   ...provokeTasks.map((t) => ({ id: `prov:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
 ];
 

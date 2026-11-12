@@ -20,6 +20,7 @@ import { TextTaskList, TextTaskPage } from './pages/TextTaskPage';
 import { SqlList } from './pages/SqlList';
 import { RandomPage } from './pages/RandomPage';
 import { DmlErrorPage } from './pages/DmlErrorPage';
+import { DmlMixPage } from './pages/DmlMixPage';
 import { DmlOverview } from './pages/DmlOverview';
 import { ProvokePage } from './pages/ProvokePage';
 
@@ -54,6 +55,7 @@ function route(page?: string, id?: string, id2?: string): ReactNode {
       return <ExamPage />;
     case 'dml':
       if (id === 'fehler') return <DmlErrorPage />;
+      if (id === 'gemischt') return <DmlMixPage />;
       if (id === 'constraints') return <ProvokePage id={id2} key={id2 ?? 'start'} />;
       return <DmlOverview />;
     case 'zufall':

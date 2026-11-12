@@ -1,10 +1,17 @@
 import { dmlErrorTasks } from '../content/dmlErrors';
+import { predictTasks } from '../content/dmlPredict';
+import { mcQuestions } from '../content/mcQuestions';
 import { provokeTasks } from '../content/dmlProvoke';
 import { sqlExercises } from '../content/sqlExercises';
 import { isDone } from '../progress';
 
 export function DmlOverview() {
   const dml = sqlExercises.filter((e) => e.kind === 'dml');
+  const mix = [
+    ...mcQuestions.filter((q) => q.topicId === 'sql-dml').map((q) => `mc:${q.id}`),
+    ...dmlErrorTasks.map((t) => `dmlerr:${t.id}`),
+    ...predictTasks.map((t) => `dmlpred:${t.id}`),
+  ];
   const tiles = [
     {
       title: 'Daten ändern',
@@ -26,6 +33,13 @@ export function DmlOverview() {
       href: '#/dml/constraints',
       done: provokeTasks.filter((t) => isDone(`prov:${t.id}`)).length,
       total: provokeTasks.length,
+    },
+    {
+      title: 'Gemischt: Wissen, Fehler, Vorhersage',
+      text: 'Aufgaben ohne eigenen SQL-Code, bunt gemischt: Wissensfragen zu DML, Fehler in Skripten finden und das Ergebnis eines Skripts vorhersagen.',
+      href: '#/dml/gemischt',
+      done: mix.filter((id) => isDone(id)).length,
+      total: mix.length,
     },
   ];
   return (

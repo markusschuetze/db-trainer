@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import initSqlJs, { type SqlJsStatic } from 'sql.js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { dmlErrorTasks } from '../content/dmlErrors';
+import { predictTasks } from '../content/dmlPredict';
 import { provokeTasks } from '../content/dmlProvoke';
 import { scenarioById } from '../content/scenarios';
 import { Session } from './session';
@@ -50,5 +51,23 @@ describe('Constraints prüfen: Musterlösung löst das Erwartete aus', () => {
   it('mindestens 8 Aufgaben, Ids eindeutig', () => {
     expect(provokeTasks.length).toBeGreaterThanOrEqual(8);
     expect(new Set(provokeTasks.map((t) => t.id)).size).toBe(provokeTasks.length);
+  });
+});
+
+describe('Vorhersage-Aufgaben: richtige Antwort stimmt mit der Datenbank überein', () => {
+  for (const t of predictTasks)
+    it(t.id, () => {
+      const s = session('marktplatz');
+      s.run(t.script.join('\n'));
+      const q = s.run(t.query)[0];
+      s.close();
+      expect(q.ok, q.message).toBe(true);
+      const v = q.rows?.[0]?.[0];
+      expect(String(v ?? 'NULL')).toBe(t.answer);
+      expect(t.options).toContain(t.answer);
+      expect(new Set(t.options).size).toBe(t.options.length);
+    });
+  it('mindestens 8 Aufgaben', () => {
+    expect(predictTasks.length).toBeGreaterThanOrEqual(8);
   });
 });

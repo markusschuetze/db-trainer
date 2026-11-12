@@ -1,6 +1,7 @@
 // Alle Inhalte als flache Liste fuer die fachliche Durchsicht (Dozentenmodus).
 import { ddlExercises } from '../content/ddlExercises';
 import { dmlErrorTasks, ERROR_CAUSE } from '../content/dmlErrors';
+import { predictTasks } from '../content/dmlPredict';
 import { provokeTasks } from '../content/dmlProvoke';
 import { phrases, relType } from '../content/erPhrases';
 import { nfExercises } from '../content/exercises';
@@ -77,6 +78,11 @@ export function reviewRows(): ReviewRow[] {
       text: `${t.title}\n${t.statements.map((s, i) => `${i + 1}  ${s}`).join('\n')}`,
       answer: t.errors.length ? t.errors.map((e) => `Zeile ${e.line}: ${e.causes.map((c) => ERROR_CAUSE[c]).join(' / ')}`).join('\n') : 'kein Fehler',
       explanation: `${t.errors.map((e) => `Zeile ${e.line}: ${e.why}`).join('\n')}\n${t.why}`.trim(), source: 'Übung 6, Aufgabe 4',
+    });
+  for (const t of predictTasks)
+    rows.push({
+      kind: 'DML-Ergebnis vorhersagen', chapter: ch('sql-dml'), topic: tp('sql-dml'), id: `dmlpred:${t.id}`,
+      text: `${t.title}\n${t.script.join('\n')}\n${t.question}\nOptionen: ${t.options.join(' | ')}`, answer: t.answer, explanation: t.why, source: 'Übung 6, Aufgabe 4 (angelehnt)',
     });
   for (const t of provokeTasks)
     rows.push({

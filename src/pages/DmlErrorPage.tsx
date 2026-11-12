@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { track } from '../analytics';
-import { dmlErrorTasks, ERROR_CAUSE, type ErrorCode } from '../content/dmlErrors';
+import { dmlErrorTasks, ERROR_CAUSE, type DmlErrorTask, type ErrorCode } from '../content/dmlErrors';
 import { MARKTPLATZ_RELATIONS } from '../content/scenarios/marktplatz';
 import { isDone, markDone } from '../progress';
 
@@ -14,7 +14,7 @@ const CONSTRAINTS = [
   'Alle Fremdschlüssel wie im Schema angegeben',
 ];
 
-const shuffle = <T,>(a: T[]): T[] => {
+export const shuffle = <T,>(a: T[]): T[] => {
   const c = [...a];
   for (let i = c.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -23,20 +23,13 @@ const shuffle = <T,>(a: T[]): T[] => {
   return c;
 };
 
-export function DmlErrorPage() {
-  const [round, setRound] = useState(0);
-  const [pos, setPos] = useState(0);
-  const order = useMemo(() => {
-    const undone = dmlErrorTasks.filter((t) => !isDone(`dmlerr:${t.id}`));
-    const done = dmlErrorTasks.filter((t) => isDone(`dmlerr:${t.id}`));
-    return [...shuffle(undone), ...shuffle(done)];
-  }, [round]); // eslint-disable-line react-hooks/exhaustive-deps
-  const task = order[pos];
+/** Eine Aufgabe "Fehler erkennen" mit eigenem Zustand; onNext wird nach dem Prüfen oder Überspringen aufgerufen. */
+export function DmlErrorCard({ task, onNext }: { task: DmlErrorTask; onNext: () => void }) {
   const [lines, setLines] = useState<number[]>([]);
   const [none, setNone] = useState(false);
   const [cause, setCause] = useState<Record<number, ErrorCode | ''>>({});
   const [checked, setChecked] = useState(false);
-  const [started, setStarted] = useState(Date.now());
+  const [started] = useState(Date.now());
 
   const expected = task.errors.map((e) => e.line);
   const linesOk = none ? expected.length === 0 : expected.length === lines.length && expected.every((l) => lines.includes(l));
@@ -44,18 +37,6 @@ export function DmlErrorPage() {
   const allOk = linesOk && (none || causesOk);
   const canCheck = none || (lines.length > 0 && lines.every((l) => cause[l]));
 
-  const next = () => {
-    if (pos + 1 < order.length) setPos(pos + 1);
-    else {
-      setRound(round + 1);
-      setPos(0);
-    }
-    setLines([]);
-    setNone(false);
-    setCause({});
-    setChecked(false);
-    setStarted(Date.now());
-  };
   const check = () => {
     setChecked(true);
     if (allOk) markDone(`dmlerr:${task.id}`);
@@ -63,21 +44,7 @@ export function DmlErrorPage() {
   };
 
   return (
-    <>
-      <a href="#/dml" className="inline-block py-2 text-sm underline">
-        ← SQL-DML
-      </a>
-      <h1 className="mt-2 text-3xl font-bold">DML-Fehler erkennen</h1>
-      <p className="mt-2 max-w-2xl text-muted">
-        Bestimme für jedes Skript, ob und wo ein Fehler entsteht. Die Skripte sind voneinander unabhängig, alle Tabellen sind zu
-        Beginn leer. Wie in SQL Developer läuft ein Skript nach einem Fehler weiter, mit COMMIT und ROLLBACK wie in Oracle.
-      </p>
-      <p className="mt-2 text-sm font-semibold" aria-live="polite">
-        Aufgabe {pos + 1} von {order.length} · {dmlErrorTasks.filter((t) => isDone(`dmlerr:${t.id}`)).length} erledigt
-      </p>
-
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <section className="min-w-0 rounded-card border border-line bg-surface p-5">
+    <section className="min-w-0 rounded-card border border-line bg-surface p-5">
           <h2 className="text-lg font-bold">{task.title}</h2>
           <ol className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 font-mono text-sm" aria-label="Skript mit Zeilennummern">
             {task.statements.map((s, i) => (
@@ -166,19 +133,24 @@ export function DmlErrorPage() {
                 Prüfen
               </button>
             ) : (
-              <button className={btn} onClick={next}>
+              <button className={btn} onClick={onNext}>
                 Nächste Aufgabe
               </button>
             )}
             {!checked && (
-              <button className="rounded-lg border border-line bg-surface px-4 py-2 font-semibold" onClick={next}>
+              <button className="rounded-lg border border-line bg-surface px-4 py-2 font-semibold" onClick={onNext}>
                 Überspringen
               </button>
             )}
           </div>
-        </section>
+    </section>
+  );
+}
 
-        <aside className="h-fit min-w-0 rounded-card border border-line bg-surface p-5 text-sm">
+/** Schema und Bedingungen des Marktplatzes als Nachschlagehilfe */
+export function MarktplatzAside() {
+  return (
+    <aside className="h-fit min-w-0 rounded-card border border-line bg-surface p-5 text-sm">
           <h2 className="font-bold">Schema (Marktplatz)</h2>
           <ul className="mt-2 space-y-1 font-mono text-xs">
             {MARKTPLATZ_RELATIONS.map((r) => (
@@ -191,7 +163,44 @@ export function DmlErrorPage() {
               <li key={c}>{c}</li>
             ))}
           </ul>
-        </aside>
+    </aside>
+  );
+}
+
+export function DmlErrorPage() {
+  const [round, setRound] = useState(0);
+  const [pos, setPos] = useState(0);
+  const order = useMemo(() => {
+    const undone = dmlErrorTasks.filter((t) => !isDone(`dmlerr:${t.id}`));
+    const done = dmlErrorTasks.filter((t) => isDone(`dmlerr:${t.id}`));
+    return [...shuffle(undone), ...shuffle(done)];
+  }, [round]); // eslint-disable-line react-hooks/exhaustive-deps
+  const task = order[pos];
+  const next = () => {
+    if (pos + 1 < order.length) setPos(pos + 1);
+    else {
+      setRound(round + 1);
+      setPos(0);
+    }
+  };
+
+  return (
+    <>
+      <a href="#/dml" className="inline-block py-2 text-sm underline">
+        ← SQL-DML
+      </a>
+      <h1 className="mt-2 text-3xl font-bold">DML-Fehler erkennen</h1>
+      <p className="mt-2 max-w-2xl text-muted">
+        Bestimme für jedes Skript, ob und wo ein Fehler entsteht. Die Skripte sind voneinander unabhängig, alle Tabellen sind zu
+        Beginn leer. Wie in SQL Developer läuft ein Skript nach einem Fehler weiter, mit COMMIT und ROLLBACK wie in Oracle.
+      </p>
+      <p className="mt-2 text-sm font-semibold" aria-live="polite">
+        Aufgabe {pos + 1} von {order.length} · {dmlErrorTasks.filter((t) => isDone(`dmlerr:${t.id}`)).length} erledigt
+      </p>
+
+      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <DmlErrorCard key={`${task.id}-${round}`} task={task} onNext={next} />
+        <MarktplatzAside />
       </div>
     </>
   );
