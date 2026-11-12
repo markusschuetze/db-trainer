@@ -61,7 +61,7 @@ export function StatementOutput({ results }: { results: StatementResult[] }) {
   );
 }
 
-export function CheckList({ checks, passed, nextHref }: { checks: CheckResult[]; passed: boolean; nextHref?: string }) {
+export function CheckList({ checks, passed, nextHref, onNext }: { checks: CheckResult[]; passed: boolean; nextHref?: string; onNext?: () => void }) {
   return (
     <div role="status" className={`rounded-card border p-4 ${passed ? 'border-ok bg-ok-bg' : 'border-bad bg-bad-bg'}`}>
       <p className={`font-bold ${passed ? 'text-ok' : 'text-bad'}`}>
@@ -79,7 +79,15 @@ export function CheckList({ checks, passed, nextHref }: { checks: CheckResult[];
           </li>
         ))}
       </ul>
-      {passed && nextHref && (
+      {passed && onNext && (
+        <button
+          onClick={onNext}
+          className="mt-4 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast"
+        >
+          {t('Nächste Aufgabe')}
+        </button>
+      )}
+      {passed && nextHref && !onNext && (
         <a
           href={nextHref}
           className="mt-4 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast no-underline"

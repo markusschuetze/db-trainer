@@ -48,7 +48,7 @@ function Comparison({ run }: { run: SqlRun }) {
   return null;
 }
 
-export function SqlExercisePage({ id }: { id: string }) {
+export function SqlExercisePage({ id, onNext }: { id: string; onNext?: () => void }) {
   const ex = sqlExercises.find((e) => e.id === id);
   const { SQL, error } = useSql();
   if (!ex)
@@ -74,6 +74,7 @@ export function SqlExercisePage({ id }: { id: string }) {
       ready={!!SQL}
       loadError={error}
       nextHref={next && `#/sql/${next.id}`}
+      onNext={onNext}
       tracking={{ id: `sql:${ex.id}`, topicId: ex.topicId, chapter: topicById(ex.topicId)?.chapter ?? 'SQL', level: ex.level }}
       freshNote="Jeder Lauf startet mit dem ursprünglichen Datenbestand, Änderungen bleiben nicht erhalten."
       aside={

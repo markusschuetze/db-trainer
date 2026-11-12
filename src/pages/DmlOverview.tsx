@@ -11,6 +11,7 @@ export function DmlOverview() {
     ...mcQuestions.filter((q) => q.topicId === 'sql-dml').map((q) => `mc:${q.id}`),
     ...dmlErrorTasks.map((t) => `dmlerr:${t.id}`),
     ...predictTasks.map((t) => `dmlpred:${t.id}`),
+    ...dml.map((e) => `sql:${e.id}`),
   ];
   const tiles = [
     {
@@ -35,8 +36,8 @@ export function DmlOverview() {
       total: provokeTasks.length,
     },
     {
-      title: 'Gemischt: Wissen, Fehler, Vorhersage',
-      text: 'Aufgaben ohne eigenen SQL-Code, bunt gemischt: Wissensfragen zu DML, Fehler in Skripten finden und das Ergebnis eines Skripts vorhersagen.',
+      title: 'Gemischt',
+      text: 'Alles bunt gemischt: Wissensfragen, Fehler in Skripten finden, Ergebnisse vorhersagen und eigenen SQL-Code schreiben.',
       href: '#/dml/gemischt',
       done: mix.filter((id) => isDone(id)).length,
       total: mix.length,

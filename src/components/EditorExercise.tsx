@@ -35,6 +35,7 @@ export function EditorExercise({
   freshNote,
   run,
   nextHref,
+  onNext,
   tracking,
 }: {
   progressId: string;
@@ -52,6 +53,8 @@ export function EditorExercise({
   freshNote: string;
   run: (code: string, grade: boolean) => EditorRun;
   nextHref?: string;
+  /** eingebettet (z. B. im Mix): kein Zurueck-Link, statt Link ein Button zur naechsten Aufgabe; ueberspringen moeglich */
+  onNext?: () => void;
   /** Messung fuer die anonyme Lernstatistik */
   tracking?: { id: string; topicId: string; chapter: string; level: number };
 }) {
@@ -93,9 +96,11 @@ export function EditorExercise({
 
   return (
     <>
-      <a href={backHref} className="inline-block py-2 text-sm underline">
-        ← {backLabel}
-      </a>
+      {!onNext && (
+        <a href={backHref} className="inline-block py-2 text-sm underline">
+          ← {backLabel}
+        </a>
+      )}
       <h1 className="mt-2 text-2xl font-bold">{title}</h1>
       <p className="mt-1 text-sm text-muted">{topic}</p>
 
@@ -136,6 +141,11 @@ export function EditorExercise({
                 {t('Musterlösung zeigen')}
               </button>
             )}
+            {onNext && (
+              <button className={btnGhost} onClick={onNext}>
+                Überspringen
+              </button>
+            )}
             <button
               className="ml-auto text-sm text-muted underline"
               onClick={() => {
@@ -150,7 +160,7 @@ export function EditorExercise({
           {loadError && <p className="text-sm text-bad">Datenbank konnte nicht geladen werden: {loadError}</p>}
           <p className="text-xs text-muted">{freshNote} Fehler stoppen das Skript nicht, wie in SQL Developer.</p>
 
-          {graded && out && <CheckList checks={out.checks} passed={out.passed} nextHref={nextHref} />}
+          {graded && out && <CheckList checks={out.checks} passed={out.passed} nextHref={nextHref} onNext={onNext} />}
 
           {showSolution && (
             <div className="rounded-card border border-line bg-surface p-4">

@@ -8,6 +8,8 @@ import { mixedOrder } from '../logic/order';
 import { isDone, markDone, recordItem } from '../progress';
 import { DmlErrorCard, MarktplatzAside } from './DmlErrorPage';
 import { ItemInput, Solution } from './ExamPage';
+import { sqlExercises } from '../content/sqlExercises';
+import { SqlExercisePage } from './SqlExercisePage';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
@@ -15,14 +17,16 @@ const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibo
 type Item =
   | { kind: 'mc'; id: string; q: McQuestion }
   | { kind: 'err'; id: string; t: (typeof dmlErrorTasks)[number] }
-  | { kind: 'pred'; id: string; t: PredictTask };
+  | { kind: 'pred'; id: string; t: PredictTask }
+  | { kind: 'sql'; id: string; exId: string };
 
-const KIND_NAME = { mc: 'Wissensfrage', err: 'Fehler erkennen', pred: 'Ergebnis vorhersagen' } as const;
+const KIND_NAME = { mc: 'Wissensfrage', err: 'Fehler erkennen', pred: 'Ergebnis vorhersagen', sql: 'Eigener SQL-Code' } as const;
 
 const pool = (): Item[] => [
   ...mcQuestions.filter((q) => q.topicId === 'sql-dml').map((q) => ({ kind: 'mc' as const, id: `mc:${q.id}`, q })),
   ...dmlErrorTasks.map((t) => ({ kind: 'err' as const, id: `dmlerr:${t.id}`, t })),
   ...predictTasks.map((t) => ({ kind: 'pred' as const, id: `dmlpred:${t.id}`, t })),
+  ...sqlExercises.filter((e) => e.kind === 'dml').map((e) => ({ kind: 'sql' as const, id: `sql:${e.id}`, exId: e.id })),
 ];
 
 function McCard({ item, onNext }: { item: Extract<Item, { kind: 'mc' }>; onNext: () => void }) {
@@ -160,10 +164,10 @@ export function DmlMixPage() {
       <a href="#/dml" className="inline-block py-2 text-sm underline">
         ← SQL-DML
       </a>
-      <h1 className="mt-2 text-3xl font-bold">Gemischt: Wissen, Fehler und Vorhersage</h1>
+      <h1 className="mt-2 text-3xl font-bold">Gemischt: Wissen, Fehler, Vorhersage und eigener Code</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Aufgaben ohne eigenen SQL-Code, bunt gemischt: Wissensfragen zu DML, Fehler in Skripten finden und vorhersagen, was nach
-        einem Skript in der Tabelle steht.
+        Alles bunt gemischt: Wissensfragen zu DML, Fehler in Skripten finden, vorhersagen, was nach einem Skript in der Tabelle
+        steht, und eigene INSERT-, UPDATE- und DELETE-Befehle schreiben.
       </p>
       <p className="mt-2 text-sm font-semibold" aria-live="polite">
         Aufgabe {pos + 1} von {order.length} · {KIND_NAME[item.kind]} · {doneCount} erledigt
@@ -175,6 +179,11 @@ export function DmlMixPage() {
             <DmlErrorCard key={key} task={item.t} onNext={next} />
             <MarktplatzAside />
           </>
+        )}
+        {item.kind === 'sql' && (
+          <div className="min-w-0 lg:col-span-2">
+            <SqlExercisePage key={key} id={item.exId} onNext={next} />
+          </div>
         )}
         {item.kind === 'pred' && (
           <>
