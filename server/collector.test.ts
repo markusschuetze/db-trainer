@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // @ts-expect-error reines JS-Modul
-import { createCollector, validate } from './collector.mjs';
+import { createCollector, validate, validateFeedback } from './collector.mjs';
 
 let base = '';
 let server: ReturnType<typeof createCollector>;
@@ -47,5 +47,24 @@ describe('Sammelserver', () => {
   });
   it('ohne Token startet der Server nicht', () => {
     expect(() => createCollector({ token: '', file })).toThrow();
+  });
+  it('nimmt Feedback an, speichert nur bekannte Felder und liefert es nur mit Token', async () => {
+    const fb = { ratings: { nutzen: 5, bedienung: 4 }, area: 'SQL-DML', problem: 'Button fehlt', wish: '', liked: 'Mix', device: 'Smartphone', version: '0.9.0' };
+    const res = await fetch(`${base}/feedback`, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ ...fb, name: 'Max', ip: '1.2.3.4' }) });
+    expect(res.status).toBe(200);
+    expect((await fetch(`${base}/feedback`)).status).toBe(401);
+    const got = await (await fetch(`${base}/feedback`, { headers: { Authorization: 'Bearer geheim1234' } })).json();
+    expect(got.feedback).toHaveLength(1);
+    expect(got.feedback[0].problem).toBe('Button fehlt');
+    expect(JSON.stringify(got)).not.toContain('Max');
+  });
+  it('Feedback: leere oder ungueltige Boegen werden abgelehnt', async () => {
+    expect(validateFeedback({ ratings: {}, problem: '' })).toBeNull();
+    expect(validateFeedback({ ratings: { nutzen: 9 } })).toBeNull();
+    expect(validateFeedback({ ratings: { x: 3 } })).toBeNull();
+    expect(validateFeedback({ problem: 'a'.repeat(5000) })).toBeNull();
+    expect(validateFeedback({ problem: 'ok' })).not.toBeNull();
+    const res = await fetch(`${base}/feedback`, { method: 'POST', body: '{"ratings":{}}' });
+    expect(res.status).toBe(400);
   });
 });

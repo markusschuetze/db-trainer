@@ -106,6 +106,18 @@ zufällige Gerätekennung. Nicht gesendet werden Namen, Login, Eingaben (SQL, Te
 erscheinen erst ab `analyticsMinGroup` Lernenden (Standard 5). Die Gerätekennung ist keiner Person zugeordnet, gilt
 aber rechtlich als pseudonym: Vor dem Einsatz mit dem Datenschutz der Hochschule abstimmen.
 
+### Feedback speichern
+
+Derselbe Sammelserver nimmt auch den Feedbackbogen (`#/feedback`) an. Ist `analyticsUrl` gesetzt, erscheint dort der
+Knopf „Direkt absenden“. Gespeichert werden Bewertungen und Freitext, ohne Namen, Kennung oder IP-Adresse, in
+`FEEDBACK_FILE` (Standard `./feedback.jsonl`). Abrufen:
+
+```bash
+curl -H "Authorization: Bearer dein-passwort" https://dein-server/feedback
+```
+
+Der Server braucht eine dauerhafte Festplatte (bei manchen kostenlosen Hostern wird sie bei jedem Neustart geleert).
+
 ## 5. Hinweise
 
 - **Logos sind Marken.** Sie gehören nicht in das öffentliche Repository, sondern nur in das

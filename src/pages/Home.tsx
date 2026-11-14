@@ -79,6 +79,12 @@ const modules: Module[] = [
     text: L('Probeklausur mit Zeitlimit, ohne Hilfen, mit Auswertung nach Kapiteln.'),
     href: '#/pruefung',
   },
+  {
+    title: L('Feedback'),
+    script: L('Mitmachen'),
+    text: L('Was läuft gut, was fehlt, wo hakt es? Dein Feedback entscheidet, was als Nächstes besser wird.'),
+    href: '#/feedback',
+  },
 ];
 
 export function Home() {

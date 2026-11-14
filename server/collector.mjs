@@ -2,10 +2,12 @@
 // Sammelserver fuer die anonyme Lernstatistik des DB-Trainers.
 // Eine Datei, keine Abhaengigkeiten (Node.js 18+).
 //
-//   TOKEN=geheimes-passwort DATA_FILE=./events.jsonl PORT=8787 node server/collector.mjs
+//   TOKEN=geheimes-passwort DATA_FILE=./events.jsonl FEEDBACK_FILE=./feedback.jsonl PORT=8787 node server/collector.mjs
 //
 // POST /events   nimmt Ereignisse der Lernenden an (ohne Anmeldung)
 // GET  /events   liefert alle Ereignisse an das Dashboard (nur mit "Authorization: Bearer <TOKEN>")
+// POST /feedback  nimmt einen Feedbackbogen an (ohne Anmeldung, frei formulierter Text, keine Kennung)
+// GET  /feedback  liefert alle Feedbackboegen (nur mit Token)
 // GET  /health   Lebenszeichen
 //
 // Datenschutz: Es werden nur die geprueften Felder gespeichert (siehe validate), keine
@@ -52,13 +54,35 @@ export function validate(e) {
   return null;
 }
 
+const RATING_KEYS = ['verstaendlich', 'rueckmeldung', 'bedienung', 'nutzen'];
+const text = (v, max) => (typeof v === 'string' && v.length <= max ? v.trim() : null);
+
+/** Prueft einen Feedbackbogen; speichert nur bekannte Felder. Der Zeitpunkt kommt vom Server, es gibt keine Kennung. */
+export function validateFeedback(f) {
+  if (!f || typeof f !== 'object') return null;
+  const ratings = {};
+  for (const [k, v] of Object.entries(f.ratings ?? {})) {
+    if (!RATING_KEYS.includes(k) || !Number.isInteger(v) || v < 1 || v > 5) return null;
+    ratings[k] = v;
+  }
+  const area = text(f.area ?? '', 60);
+  const problem = text(f.problem ?? '', 4000);
+  const wish = text(f.wish ?? '', 4000);
+  const liked = text(f.liked ?? '', 4000);
+  const device = text(f.device ?? '', 30);
+  const version = text(f.version ?? '', 20);
+  if ([area, problem, wish, liked, device, version].includes(null)) return null;
+  if (!Object.keys(ratings).length && !problem && !wish && !liked) return null;
+  return { t: Math.floor(Date.now() / 1000), ratings, area, problem, wish, liked, device, version };
+}
+
 const safeEqual = (a, b) => {
   const x = Buffer.from(a);
   const y = Buffer.from(b);
   return x.length === y.length && timingSafeEqual(x, y);
 };
 
-export function createCollector({ token, file, allowOrigin = '*' }) {
+export function createCollector({ token, file, feedbackFile = file.replace(/(\.jsonl)?$/, '.feedback.jsonl'), allowOrigin = '*' }) {
   if (!token || token.length < 8) throw new Error('TOKEN fehlt oder ist zu kurz (mindestens 8 Zeichen).');
   const hits = new Map(); // IP -> Anzahl, nur im Arbeitsspeicher, wird stuendlich geleert
   const reset = setInterval(() => hits.clear(), 3600_000);
@@ -95,6 +119,49 @@ export function createCollector({ token, file, allowOrigin = '*' }) {
         }
       }
       return send(200, { events });
+    }
+
+    if (url.pathname === '/feedback' && req.method === 'GET') {
+      const auth = req.headers.authorization ?? '';
+      if (!auth.startsWith('Bearer ') || !safeEqual(auth.slice(7), token)) return send(401, { error: 'unauthorized' });
+      const lines = existsSync(feedbackFile) ? readFileSync(feedbackFile, 'utf8').split('\n').filter(Boolean) : [];
+      const feedback = [];
+      for (const l of lines) {
+        try {
+          feedback.push(JSON.parse(l));
+        } catch {
+          /* defekte Zeile ueberspringen */
+        }
+      }
+      return send(200, { feedback });
+    }
+
+    if (url.pathname === '/feedback' && req.method === 'POST') {
+      const ip = req.socket.remoteAddress ?? '';
+      const n = (hits.get(ip) ?? 0) + 1;
+      hits.set(ip, n);
+      if (n > 600) return send(429, { error: 'zu viele Anfragen' });
+      let size = 0;
+      const chunks = [];
+      req.on('data', (c) => {
+        size += c.length;
+        if (size > 32 * 1024) {
+          send(413, { error: 'zu gross' });
+          req.destroy();
+        } else chunks.push(c);
+      });
+      req.on('end', () => {
+        if (res.writableEnded) return;
+        try {
+          const f = validateFeedback(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+          if (!f) return send(400, { error: 'ungueltig' });
+          appendFileSync(feedbackFile, JSON.stringify(f) + '\n');
+          send(200, { ok: true });
+        } catch {
+          send(400, { error: 'ungueltig' });
+        }
+      });
+      return;
     }
 
     if (url.pathname === '/events' && req.method === 'POST') {
@@ -137,7 +204,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const server = createCollector({
     token: process.env.TOKEN ?? '',
     file: process.env.DATA_FILE ?? './events.jsonl',
+    feedbackFile: process.env.FEEDBACK_FILE ?? './feedback.jsonl',
     allowOrigin: process.env.ALLOW_ORIGIN ?? '*',
   });
-  server.listen(port, () => console.log(`DB-Trainer-Sammelserver läuft auf Port ${port}. Daten: ${process.env.DATA_FILE ?? './events.jsonl'}`));
+  // Standard: nur lokal erreichbar, HTTPS macht der Reverse-Proxy davor (HOST=0.0.0.0 zum Aendern)
+  server.listen(port, process.env.HOST ?? '127.0.0.1', () => console.log(`DB-Trainer-Sammelserver läuft auf Port ${port}. Daten: ${process.env.DATA_FILE ?? './events.jsonl'}`));
 }

@@ -5,6 +5,8 @@ import { AuthorPage } from './pages/AuthorPage';
 import { DdlExercisePage } from './pages/DdlExercisePage';
 import { DdlList } from './pages/DdlList';
 import { ErPage } from './pages/ErPage';
+import { FeedbackPage } from './pages/FeedbackPage';
+import { SharePage } from './pages/SharePage';
 import { ExamPage } from './pages/ExamPage';
 import { RelPage } from './pages/RelPage';
 import { Home } from './pages/Home';
@@ -68,6 +70,10 @@ function route(page?: string, id?: string, id2?: string): ReactNode {
       return <TeacherPage tab={id} />;
     case 'autor':
       return <AuthorPage />;
+    case 'feedback':
+      return <FeedbackPage />;
+    case 'teilen':
+      return <SharePage />;
     case 'fortschritt':
       return <ProgressPage />;
     case 'lernen':
@@ -91,6 +97,8 @@ const PAGE_TITLE: Record<string, string> = {
   textaufgaben: 'Textaufgaben',
   dozent: 'Dozentenmodus',
   autor: 'Aufgabe hinzufügen',
+  feedback: 'Feedback',
+  teilen: 'QR-Code zum Teilen',
 };
 
 export function App() {

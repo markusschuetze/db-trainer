@@ -6,5 +6,6 @@
   "favicon": "brand/favicon.png",
   "header": "hell",
   "theme": "th-koeln",
-  "themeSwitcher": false
+  "themeSwitcher": false,
+  "analyticsUrl": "https://dbtrainer.76-13-152-72.sslip.io"
 }

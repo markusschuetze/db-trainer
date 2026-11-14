@@ -54,6 +54,10 @@ export interface AppConfig {
   branch: string;
   /** Adresse des Sammelservers fuer die anonyme Lernstatistik (leer = keine Statistik) */
   analyticsUrl: string;
+  /** Eigener Feedbackbogen (z. B. ILIAS-Umfrage, MS Forms); leer = eingebauter Bogen mit GitHub-Meldung */
+  feedbackUrl: string;
+  /** E-Mail-Adresse fuer Feedback (zeigt zusaetzlich den Knopf "Per E-Mail"); leer = ausgeblendet */
+  feedbackEmail: string;
   /** Auswertungen erst ab so vielen verschiedenen Lernenden zeigen (Datenschutz) */
   analyticsMinGroup: number;
   /** Pruefungsreife: so viele vollstaendige Probeklausuren in Folge bestanden ... */
@@ -78,6 +82,8 @@ export const defaults: AppConfig = {
   font: '',
   fontUrl: '',
   footerLinks: [
+    { label: 'Feedback', href: '#/feedback' },
+    { label: 'QR-Code', href: '#/teilen' },
     { label: 'Dozentenmodus', href: '#/dozent' },
     { label: 'Quellcode (MIT)', href: 'https://github.com/markusschuetze/db-trainer' },
   ],
@@ -85,6 +91,8 @@ export const defaults: AppConfig = {
   repo: 'markusschuetze/db-trainer',
   branch: 'main',
   analyticsUrl: '',
+  feedbackUrl: '',
+  feedbackEmail: '',
   analyticsMinGroup: 5,
   readyStreak: 3,
   readySureShare: 0.8,
