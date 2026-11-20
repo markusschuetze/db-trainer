@@ -493,8 +493,20 @@ function runAlter(db: Database, stmt: string): string {
     );
     return `Tabelle ${table} geändert (Constraint ${name} entfernt).`;
   }
-  if ((c = rest.match(re('^ADD\\s+(?:COLUMN\\s+)?\\(?(.*?)\\)?$', 'ius'))) && !/^MODIFY/i.test(rest)) {
-    db.exec(`ALTER TABLE "${table}" ADD COLUMN ${c[1]}`);
+  if ((c = rest.match(re('^ADD\\s+(?:COLUMN\\s+)?(.*)$', 'ius'))) && !/^MODIFY/i.test(rest)) {
+    // ADD (spalte typ) mit umschliessenden Klammern: nur entfernen, wenn sie zusammengehoeren (nicht bei VARCHAR2(20))
+    let colDef = c[1].trim();
+    if (colDef.startsWith('(') && colDef.endsWith(')')) {
+      let depth = 0;
+      let wraps = true;
+      for (let i = 0; i < colDef.length - 1; i++) {
+        if (colDef[i] === '(') depth++;
+        else if (colDef[i] === ')') depth--;
+        if (depth === 0) wraps = false;
+      }
+      if (wraps) colDef = colDef.slice(1, -1).trim();
+    }
+    db.exec(`ALTER TABLE "${table}" ADD COLUMN ${colDef}`);
     installGuards(db, table);
     return `Tabelle ${table} geändert (Spalte hinzugefügt).`;
   }
@@ -547,7 +559,15 @@ function runCreateTable(db: Database, stmt: string): string {
 
 /** Datentyp-Waechter (Zahl, Textlaenge) fuer eine Tabelle neu anlegen. */
 function installGuards(db: Database, table: string) {
-  const cols = query(db, `PRAGMA table_info("${table}")`).map((c) => ({ name: String(c.name), type: String(c.type) }));
+  const info = query(db, `PRAGMA table_info("${table}")`);
+  // Identity-Spalten (AUTOINCREMENT) duerfen NULL bekommen und erzeugen die Nummer selbst
+  const auto = /\bAUTOINCREMENT\b/i.test(tableSql(db, table));
+  const pks = info.filter((c) => Number(c.pk) > 0);
+  const cols = info.map((c) => ({
+    name: String(c.name),
+    type: String(c.type),
+    rowidPk: !auto && pks.length === 1 && Number(c.pk) > 0 && /^INTEGER$/i.test(String(c.type).trim()),
+  }));
   try {
     db.exec(`DROP TRIGGER IF EXISTS "__guard_${table}_i"; DROP TRIGGER IF EXISTS "__guard_${table}_u";`);
     const sql = guardTriggers(table, cols);

@@ -156,6 +156,8 @@ export function singleRowSubqueries(stmt: string): string[] {
 interface Col {
   name: string;
   type: string;
+  /** einzige Primaerschluessel-Spalte vom Typ INTEGER (in SQLite ein Rowid-Alias, der NULL selbst vergeben wuerde) */
+  rowidPk?: boolean;
 }
 
 const NUMERIC = /^(NUMBER|INTEGER|INT|SMALLINT|FLOAT|DECIMAL|NUMERIC|REAL)\b/i;
@@ -163,8 +165,12 @@ const NUMERIC = /^(NUMBER|INTEGER|INT|SMALLINT|FLOAT|DECIMAL|NUMERIC|REAL)\b/i;
 /** SQL fuer die Trigger einer Tabelle (leer, wenn nichts zu pruefen ist). */
 export function guardTriggers(table: string, cols: Col[]): string {
   const conds: string[] = [];
+  const pkNull: string[] = [];
   for (const c of cols) {
     const q = `NEW."${c.name}"`;
+    // Oracle: ein Primaerschluessel ist immer NOT NULL, SQLite vergibt bei INTEGER PRIMARY KEY stillschweigend eine Nummer.
+    // Im BEFORE-Trigger steht dann -1 (explizites NULL oder weggelassene Spalte); ein echter Wert -1 wird dabei mit abgelehnt.
+    if (c.rowidPk) pkNull.push(`SELECT RAISE(ABORT, 'NOT NULL constraint failed: ${table}.${c.name}') WHERE ${q} IS NULL OR ${q} = -1`);
     if (NUMERIC.test(c.type.trim()))
       conds.push(
         `SELECT RAISE(ABORT, 'ORA-01722') WHERE ${q} IS NOT NULL AND typeof(${q}) = 'text' AND (${q} GLOB '*[A-DF-Za-df-z]*' OR trim(${q}) = '')`,
@@ -175,8 +181,9 @@ export function guardTriggers(table: string, cols: Col[]): string {
         `SELECT RAISE(ABORT, 'ORA-12899:${c.name}:${len[1]}') WHERE ${q} IS NOT NULL AND length(CAST(${q} AS TEXT)) > ${len[1]}`,
       );
   }
-  if (!conds.length) return '';
+  if (!conds.length && !pkNull.length) return '';
   const body = conds.map((x) => `${x};`).join(' ');
+  const bodyInsert = [...pkNull, ...conds].map((x) => `${x};`).join(' ');
   const base = `"__guard_${table}`;
-  return `CREATE TRIGGER ${base}_i" BEFORE INSERT ON "${table}" BEGIN ${body} END; CREATE TRIGGER ${base}_u" BEFORE UPDATE ON "${table}" BEGIN ${body} END;`;
+  return `CREATE TRIGGER ${base}_i" BEFORE INSERT ON "${table}" BEGIN ${bodyInsert} END; CREATE TRIGGER ${base}_u" BEFORE UPDATE ON "${table}" BEGIN ${body} END;`;
 }

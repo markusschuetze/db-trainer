@@ -16,6 +16,7 @@ import type { DepKind, NfExercise } from '../content/types';
 import { gradeFds, gradeHighest, gradeOneNf } from '../logic/nfGrading';
 import { correctKey, gradeCardinalities, gradeEntities, gradeRelationships, type CardAnswers } from '../logic/textTaskLogic';
 import { runExercise } from '../sql/ddlGrading';
+import { buildMct, type MctItem } from './mct';
 import { runSqlExercise } from '../sql/sqlGrading';
 
 export type ExamItem =
@@ -26,7 +27,8 @@ export type ExamItem =
   | { kind: 'nf'; id: string; chapter: Chapter; points: number; ex: NfExercise }
   | { kind: 'ddl'; id: string; chapter: Chapter; points: number; ex: DdlExercise }
   | { kind: 'sql'; id: string; chapter: Chapter; points: number; ex: SqlExercise }
-  | { kind: 'tt'; id: string; chapter: Chapter; points: number; t: TextTask };
+  | { kind: 'tt'; id: string; chapter: Chapter; points: number; t: TextTask }
+  | MctItem;
 
 export interface NfAnswer {
   says1NF?: boolean;
@@ -47,10 +49,13 @@ export type Answer =
   | { a12?: Card; a21?: Card } // er
   | { disjoint?: boolean; total?: boolean } // spez
   | { mapping?: Mapping; nullable?: boolean; pk?: string } // rel
+  | { tf: (boolean | null)[] } // richtig/falsch-Tabelle (MCT)
   | NfAnswer
   | string; // ddl/sql
 
 export interface ExamConfig {
+  /** 'mct': 7 Auswahlfragen wie im ILIAS-Test, eine Frage pro Seite */
+  format?: 'mct';
   chapters: Chapter[];
   minutes: number;
   allowRun: boolean;
@@ -89,6 +94,7 @@ function pick<T>(list: T[], n: number, r: () => number): T[] {
 
 export function buildExam(cfg: ExamConfig): ExamItem[] {
   const r = rng(cfg.seed);
+  if (cfg.format === 'mct') return buildMct(r);
   const f = (cfg.minutes || 60) / 60; // 0 = ohne Zeitlimit, Umfang wie bei 60 Minuten
   const n = (base: number) => Math.max(1, Math.round(base * f));
   const has = (c: Chapter) => cfg.chapters.includes(c);
@@ -174,6 +180,9 @@ export function difficultyOf(item: ExamItem): Level {
     case 'ddl':
     case 'sql':
       return item.ex.level;
+    case 'pick':
+    case 'tf':
+      return 2;
   }
 }
 
@@ -256,6 +265,15 @@ export function gradeItem(item: ExamItem, answer: Answer | undefined, SQL: SqlJs
       pts += half(t.entities.filter((e) => a.keys?.[e.name] === correctKey(t, e.name)).length / t.entities.length);
       if (t.specializations?.length && t.specializations.every((s, i) => a.spec?.[i]?.disjoint === s.disjoint && a.spec?.[i]?.total === s.total)) pts += 1;
       return { max, points: pts };
+    }
+    case 'pick': {
+      const a = answer as number[] | undefined;
+      return { max, points: a?.[0] === item.d.correct ? max : 0 };
+    }
+    case 'tf': {
+      const a = (answer as { tf?: (boolean | null)[] } | undefined)?.tf ?? [];
+      const right = item.d.statements.filter((st, i) => a[i] === st.truth).length;
+      return { max, points: half((max * right) / item.d.statements.length) };
     }
     case 'ddl': {
       if (!SQL || !answer || !String(answer).trim()) return { max, points: 0 };

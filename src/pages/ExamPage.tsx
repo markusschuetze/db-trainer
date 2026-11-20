@@ -30,6 +30,7 @@ import { runExercise } from '../sql/ddlGrading';
 import type { StatementResult } from '../sql/oracle';
 import { runSqlExercise } from '../sql/sqlGrading';
 import { useSql } from '../useSql';
+import { MctSolution, PickInput, TfInput } from './MctItems';
 
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
@@ -38,12 +39,35 @@ const allChapters = () => Object.keys(CHAPTER_NAME) as Chapter[];
 /* ======================= Start ======================= */
 
 function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
+  const [format, setFormat] = useState<'klausur' | 'mct'>('klausur');
   const [chapters, setChapters] = useState<Chapter[]>(allChapters);
   const [minutes, setMinutes] = useState(60);
   const [allowRun, setAllowRun] = useState(false);
+  const mct = format === 'mct';
   return (
     <section className="rounded-card border border-line bg-surface p-5">
       <h2 className="text-lg font-bold">Probeklausur zusammenstellen</h2>
+      <fieldset className="mt-4">
+        <legend className="font-semibold">Format</legend>
+        <label className="mt-2 flex items-start gap-2">
+          <input type="radio" className="mt-1" name="fmt" checked={!mct} onChange={() => (setFormat('klausur'), setMinutes(60))} />
+          <span>
+            Probeklausur
+            <span className="block text-sm text-muted">Alle Aufgabentypen, auch Programmieren, alle Aufgaben auf einer Seite.</span>
+          </span>
+        </label>
+        <label className="mt-2 flex items-start gap-2">
+          <input type="radio" className="mt-1" name="fmt" checked={mct} onChange={() => (setFormat('mct'), setMinutes(15))} />
+          <span>
+            MCT wie im ILIAS-Test
+            <span className="block text-sm text-muted">
+              7 Auswahlfragen, eine Frage pro Seite, mit Zurück und Weiter: ER-Modell wählen, Primärschlüssel und 3NF beurteilen,
+              Relationenmodell, Teiltransformationen und DDL-Code lesen. 29 Punkte, kein eigener Code.
+            </span>
+          </span>
+        </label>
+      </fieldset>
+      {!mct && (
       <fieldset className="mt-4">
         <legend className="font-semibold">Kapitel</legend>
         <div className="mt-2 grid gap-1 sm:grid-cols-2">
@@ -60,6 +84,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           ))}
         </div>
       </fieldset>
+      )}
       <label className="mt-4 block">
         <span className="font-semibold">Bearbeitungszeit</span>
         <select
@@ -67,12 +92,16 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           value={minutes}
           onChange={(e) => setMinutes(Number(e.target.value))}
         >
-          <option value={30}>30 Minuten (kurz)</option>
-          <option value={60}>60 Minuten</option>
-          <option value={90}>90 Minuten (lang)</option>
+          {mct && <option value={10}>10 Minuten (knapp)</option>}
+          {mct && <option value={15}>15 Minuten (wie im Test)</option>}
+          {mct && <option value={20}>20 Minuten (mit Reserve)</option>}
+          {!mct && <option value={30}>30 Minuten (kurz)</option>}
+          {!mct && <option value={60}>60 Minuten</option>}
+          {!mct && <option value={90}>90 Minuten (lang)</option>}
           <option value={0}>Ohne Zeitlimit (zählt nicht für die Prüfungsreife)</option>
         </select>
       </label>
+      {!mct && (
       <label className="mt-4 flex items-start gap-2">
         <input type="checkbox" className="mt-1" checked={allowRun} onChange={(e) => setAllowRun(e.target.checked)} />
         <span>
@@ -80,18 +109,20 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           <span className="block text-sm text-muted">Aus: wie eine Papierklausur. An: wie eine Rechnerklausur.</span>
         </span>
       </label>
+      )}
       <p className="mt-4 text-sm text-muted">
         Während der Klausur gibt es keine Rückmeldung. Die Antworten werden lokal in deinem Browser zwischengespeichert,
         ein Neuladen der Seite ist also unkritisch. Die Notenangabe am Ende ist nur eine Orientierung.
       </p>
       <button
         className={`${btn} mt-4`}
-        disabled={chapters.length === 0}
+        disabled={!mct && chapters.length === 0}
         onClick={() =>
           onStart({
-            chapters,
+            ...(mct ? { format: 'mct' as const } : {}),
+            chapters: mct ? (['02', '04', '05', '06'] as Chapter[]) : chapters,
             minutes,
-            allowRun,
+            allowRun: mct ? false : allowRun,
             seed: Math.floor(Math.random() * 2 ** 31),
             startedAt: Date.now(),
             answers: {},
@@ -192,6 +223,10 @@ function SqlInput({
 
 export function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; answer?: Answer; set: (a: Answer) => void; allowRun: boolean }) {
   switch (item.kind) {
+    case 'pick':
+      return <PickInput item={item} value={answer as number[] | undefined} onChange={set} />;
+    case 'tf':
+      return <TfInput item={item} value={(answer as { tf?: (boolean | null)[] } | undefined)?.tf} onChange={set} />;
     case 'mc':
       return <McInput item={item} value={answer as number[]} onChange={set} />;
     case 'er': {
@@ -200,7 +235,7 @@ export function ItemInput({ item, answer, set, allowRun }: { item: ExamItem; ans
         <div className="space-y-3">
           <p>{item.p.text}</p>
           <div className="flex justify-center">
-            <ErDiagram e1={item.p.e1.name} e2={item.p.e2.name} verb={item.p.verb} />
+            <ErDiagram e1={item.p.e1.name} e2={item.p.e2.name} verb={item.p.verb} c12={a.a12} c21={a.a21} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <CardSelect label={`Wie viele „${item.p.e1.name}“-Instanzen gehören zu einer „${item.p.e2.name}“-Instanz?`} value={a.a21} onChange={(c) => set({ ...a, a21: c })} />
@@ -464,12 +499,17 @@ export const itemTitle = (item: ExamItem) =>
     ddl: `SQL-DDL: ${'ex' in item ? item.ex.title : ''}`,
     sql: `SQL: ${'ex' in item ? item.ex.title : ''}`,
     tt: 'Schema aus Text erkennen',
+    pick: item.kind === 'pick' && item.chapter === '04' ? 'Relationenmodell wählen' : 'ER-Modell wählen',
+    tf: 'Aussagen beurteilen',
   })[item.kind];
 
 /* ======================= Loesung ======================= */
 
 export function Solution({ item }: { item: ExamItem }) {
   switch (item.kind) {
+    case 'pick':
+    case 'tf':
+      return <MctSolution item={item} />;
     case 'mc':
       return (
         <p>
@@ -533,7 +573,7 @@ export function Solution({ item }: { item: ExamItem }) {
 }
 
 const practiceHref = (item: ExamItem) =>
-  ({ tt: `#/textaufgaben/${'t' in item ? item.t.id : ''}`, mc: '#/', er: '#/modellierung', spez: '#/modellierung', rel: '#/relationen', nf: `#/normalisierung/${'ex' in item ? item.ex.id : ''}`, ddl: `#/ddl/${'ex' in item ? item.ex.id : ''}`, sql: `#/sql/${'ex' in item ? item.ex.id : ''}` })[
+  ({ tt: `#/textaufgaben/${'t' in item ? item.t.id : ''}`, mc: '#/', er: '#/modellierung', spez: '#/modellierung', rel: '#/relationen', nf: `#/normalisierung/${'ex' in item ? item.ex.id : ''}`, ddl: `#/ddl/${'ex' in item ? item.ex.id : ''}`, sql: `#/sql/${'ex' in item ? item.ex.id : ''}`, pick: item.chapter === '04' ? '#/relationen' : '#/modellierung', tf: item.chapter === '05' ? '#/normalisierung' : item.chapter === '06' ? '#/ddl' : '#/relationen' })[
     item.kind
   ];
 
@@ -552,14 +592,16 @@ function useNow(active: boolean) {
 export function ExamPage() {
   const [state, setState] = useState<ExamState | null>(() => loadExam());
   const [confirm, setConfirm] = useState(false);
+  const [step, setStep] = useState(0);
   const { SQL } = useSql();
-  const items = useMemo(() => (state ? buildExam(state) : []), [state?.seed, state?.chapters.join(), state?.minutes]); // eslint-disable-line react-hooks/exhaustive-deps
+  const items = useMemo(() => (state ? buildExam(state) : []), [state?.seed, state?.chapters.join(), state?.minutes, state?.format]); // eslint-disable-line react-hooks/exhaustive-deps
   const running = !!state && !state.submittedAt;
   const now = useNow(running);
   const timed = !!state && state.minutes > 0;
   const left = timed ? state!.startedAt + state!.minutes * 60_000 - now : Infinity;
 
   const update = (s: ExamState | null) => {
+    if (!s) (setStep(0), setConfirm(false));
     setState(s);
     saveExam(s);
   };
@@ -596,11 +638,11 @@ export function ExamPage() {
         x: max,
         k,
       },
-      items.map((it, i) => ({ id: it.id, right: results[i].points === it.points })),
+      items.flatMap((it, i) => (it.kind === 'pick' || it.kind === 'tf' ? [] : [{ id: it.id, right: results[i].points === it.points }])),
     );
     if (fresh) {
       items.forEach((it, i) =>
-        track({
+        it.kind === 'pick' || it.kind === 'tf' ? null : track({
           k: 'i',
           i: it.id,
           tp: topicOfItem(it.id) ?? it.chapter,
@@ -714,6 +756,8 @@ export function ExamPage() {
                 {CHAPTER_NAME[item.chapter]} · Thema: {topicById(topicOfItem(item.id) ?? '')?.title ?? '–'}
               </p>
               {item.kind === 'mc' && <p className="mt-1 text-sm">{item.q.question}</p>}
+              {item.kind === 'pick' && <p className="mt-1 whitespace-pre-line text-sm">{item.d.scenario}</p>}
+              {item.kind === 'tf' && <p className="mt-1 whitespace-pre-line text-sm">{item.d.intro}</p>}
               <div className="mt-2 space-y-2 text-sm">
                 <Solution item={item} />
               </div>
@@ -733,6 +777,84 @@ export function ExamPage() {
   const mm = timed ? Math.max(0, Math.floor(left / 60000)) : 0;
   const ss = timed ? Math.max(0, Math.floor((left % 60000) / 1000)) : 0;
   const answered = items.filter((i) => state.answers[i.id] !== undefined && state.answers[i.id] !== '').length;
+
+  if (state.format === 'mct') {
+    const cur = Math.min(step, items.length - 1);
+    const item = items[cur];
+    const isAnswered = (id: string) => state.answers[id] !== undefined;
+    return (
+      <>
+        <div className="sticky top-0 z-10 -mx-4 mb-4 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-bold">MCT-Probetest</span>
+            <span className={`font-mono text-lg font-bold tabular-nums ${timed && left < 3 * 60000 ? 'text-bad' : ''}`} role="timer" aria-live="off">
+              {timed ? `Es verbleiben noch ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : 'ohne Zeitlimit'}
+            </span>
+          </div>
+          <nav aria-label="Fragen" className="mt-2 flex flex-wrap gap-1">
+            {items.map((it, k) => (
+              <button
+                key={it.id}
+                onClick={() => setStep(k)}
+                aria-current={k === cur ? 'step' : undefined}
+                aria-label={`Frage ${k + 1}${isAnswered(it.id) ? ', beantwortet' : ', offen'}`}
+                className={`h-9 w-9 rounded-lg border text-sm font-semibold ${
+                  k === cur ? 'border-brand bg-brand text-brand-contrast' : isAnswered(it.id) ? 'border-ok bg-ok-bg' : 'border-line bg-surface'
+                }`}
+              >
+                {k + 1}
+              </button>
+            ))}
+          </nav>
+        </div>
+        <article className="rounded-card border border-line bg-surface p-5">
+          <h2 className="text-lg font-bold">
+            Frage {cur + 1} von {items.length}{' '}
+            <span className="text-sm font-normal text-muted">
+              ({item.points} {item.points === 1 ? 'Punkt' : 'Punkte'}) · {itemTitle(item)}
+            </span>
+          </h2>
+          <div className="mt-4">
+            <ItemInput
+              key={item.id}
+              item={item}
+              answer={state.answers[item.id]}
+              allowRun={false}
+              set={(a) => update({ ...state, answers: { ...state.answers, [item.id]: a } })}
+            />
+          </div>
+        </article>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button className={btnGhost} disabled={cur === 0} onClick={() => setStep(cur - 1)}>
+            ← Zurück
+          </button>
+          <button className={btn} disabled={cur === items.length - 1} onClick={() => setStep(cur + 1)}>
+            Weiter →
+          </button>
+          <span className="text-sm text-muted">
+            {answered} von {items.length} beantwortet
+          </span>
+          {!confirm ? (
+            <button className={`${btnGhost} ml-auto`} onClick={() => setConfirm(true)}>
+              Test beenden
+            </button>
+          ) : (
+            <span className="ml-auto flex flex-wrap items-center gap-2">
+              <span className="text-sm">
+                {answered < items.length ? `${items.length - answered} Frage(n) sind noch offen. ` : ''}Wirklich beenden?
+              </span>
+              <button className={btn} onClick={submit}>
+                Ja, beenden
+              </button>
+              <button className={btnGhost} onClick={() => setConfirm(false)}>
+                Weiter bearbeiten
+              </button>
+            </span>
+          )}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

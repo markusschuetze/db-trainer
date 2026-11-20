@@ -45,6 +45,10 @@ function perfect(item: ExamItem): Answer {
         spec: Object.fromEntries((t.specializations ?? []).map((sp, i) => [i, { disjoint: sp.disjoint, total: sp.total }])),
       };
     }
+    case 'pick':
+      return [item.d.correct];
+    case 'tf':
+      return { tf: item.d.statements.map((st) => st.truth) };
     case 'ddl':
     case 'sql':
       return item.ex.solution;
@@ -110,5 +114,25 @@ describe('Probeklausur ohne Zeitlimit', () => {
     const b = buildExam({ chapters: ALL, minutes: 60, allowRun: false, seed: 5 });
     expect(a.map((i) => i.id)).toEqual(b.map((i) => i.id));
     for (const c of ALL) expect(a.some((i) => i.chapter === c), c).toBe(true);
+  });
+
+  it('MCT-Format: sieben Fragen, Musterantworten ergeben alle Punkte, leere keine', () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const items = buildExam({ format: 'mct', chapters: ['02', '04', '05', '06'], minutes: 15, allowRun: false, seed });
+      expect(items).toHaveLength(7);
+      expect(items.reduce((s, i) => s + i.points, 0)).toBe(29);
+      for (const it of items) {
+        expect(gradeItem(it, perfect(it), SQL).points, it.id).toBe(it.points);
+        expect(gradeItem(it, undefined, SQL).points, it.id).toBe(0);
+      }
+    }
+  });
+  it('MCT-Format: Teilpunkte bei richtig/falsch-Tabellen', () => {
+    const it = buildExam({ format: 'mct', chapters: ['05'], minutes: 15, allowRun: false, seed: 9 }).find((i) => i.kind === 'tf')!;
+    if (it.kind !== 'tf') throw new Error();
+    const flipped = it.d.statements.map((s, i) => (i === 0 ? !s.truth : s.truth));
+    const got = gradeItem(it, { tf: flipped }, SQL).points;
+    expect(got).toBeGreaterThan(0);
+    expect(got).toBeLessThan(it.points);
   });
 });
