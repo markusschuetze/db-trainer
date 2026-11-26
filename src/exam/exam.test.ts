@@ -118,7 +118,7 @@ describe('Probeklausur ohne Zeitlimit', () => {
 
   it('MCT-Format: sieben Fragen, Musterantworten ergeben alle Punkte, leere keine', () => {
     for (const seed of [1, 2, 3, 4, 5]) {
-      const items = buildExam({ format: 'mct', chapters: ['02', '04', '05', '06'], minutes: 15, allowRun: false, seed });
+      const items = buildExam({ format: 'mct', chapters: ['02', '04', '05', '06'], minutes: 30, allowRun: false, seed });
       expect(items).toHaveLength(7);
       expect(items.reduce((s, i) => s + i.points, 0)).toBe(29);
       for (const it of items) {
@@ -128,7 +128,7 @@ describe('Probeklausur ohne Zeitlimit', () => {
     }
   });
   it('MCT-Format: Teilpunkte bei richtig/falsch-Tabellen', () => {
-    const it = buildExam({ format: 'mct', chapters: ['05'], minutes: 15, allowRun: false, seed: 9 }).find((i) => i.kind === 'tf')!;
+    const it = buildExam({ format: 'mct', chapters: ['05'], minutes: 30, allowRun: false, seed: 9 }).find((i) => i.kind === 'tf')!;
     if (it.kind !== 'tf') throw new Error();
     const flipped = it.d.statements.map((s, i) => (i === 0 ? !s.truth : s.truth));
     const got = gradeItem(it, { tf: flipped }, SQL).points;

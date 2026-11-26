@@ -1,4 +1,4 @@
-// MCT-Format wie im ILIAS-Test der Vorlesung: 7 Auswahlfragen, eine Frage pro Seite.
+// MCT-Format wie im ILIAS-Test der Vorlesung: 7 Auswahlfragen, eine Frage pro Seite, 30 Minuten.
 //   1. ER-Modell zu einer Anforderung waehlen        (1 P.)
 //   2. ER-Modell mit mehreren Entitaeten waehlen     (4 P.)
 //   3. Primaerschluessel aus Abhaengigkeiten ableiten (6 P., richtig/falsch je Attribut)

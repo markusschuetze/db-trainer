@@ -74,7 +74,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           </span>
         </label>
         <label className="mt-2 flex items-start gap-2">
-          <input type="radio" className="mt-1" name="fmt" checked={mct} onChange={() => (setFormat('mct'), setMinutes(15))} />
+          <input type="radio" className="mt-1" name="fmt" checked={mct} onChange={() => (setFormat('mct'), setMinutes(30))} />
           <span>
             MCT wie im ILIAS-Test
             <span className="block text-sm text-muted">
@@ -109,9 +109,9 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           value={minutes}
           onChange={(e) => setMinutes(Number(e.target.value))}
         >
-          {mct && <option value={10}>10 Minuten (knapp)</option>}
-          {mct && <option value={15}>15 Minuten (wie im Test)</option>}
-          {mct && <option value={20}>20 Minuten (mit Reserve)</option>}
+          {mct && <option value={20}>20 Minuten (knapp)</option>}
+          {mct && <option value={30}>30 Minuten (wie im Test)</option>}
+          {mct && <option value={45}>45 Minuten (mit Reserve)</option>}
           {!mct && <option value={30}>30 Minuten (kurz)</option>}
           {!mct && <option value={60}>60 Minuten</option>}
           {!mct && <option value={90}>90 Minuten (lang)</option>}
