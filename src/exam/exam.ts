@@ -100,22 +100,6 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
   const has = (c: Chapter) => cfg.chapters.includes(c);
   const items: ExamItem[] = [];
 
-  // Wissensfragen reihum ueber Kapitel und innerhalb eines Kapitels ueber die Themen
-  // der Folien verteilt: jedes gewaehlte Kapitel kommt mindestens einmal vor.
-  const mcTotal = Math.max(cfg.chapters.length, Math.round(8 * f));
-  const perChapter = cfg.chapters.map((c) => {
-    const queues = pick(topicsOf(c), 99, r).map((t) => pick(mcQuestions.filter((q) => q.topicId === t.id), 99, r));
-    const order: McQuestion[] = [];
-    while (queues.some((q) => q.length)) for (const q of queues) if (q.length) order.push(q.shift()!);
-    return order;
-  });
-  const chosen: McQuestion[] = [];
-  for (let i = 0; chosen.length < mcTotal && perChapter.some((l) => l.length); i++) {
-    const l = perChapter[i % perChapter.length];
-    if (l.length) chosen.push(l.shift()!);
-  }
-  for (const q of chosen) items.push({ kind: 'mc', id: `mc:${q.id}`, chapter: q.chapter, points: q.multi ? 2 : 1, q });
-
   if (has('02')) for (const p of pick(phrases, n(2), r)) items.push({ kind: 'er', id: `er:${p.id}`, chapter: '02', points: 2, p });
   if (has('03'))
     for (const s of pick(specializations, n(1), r)) items.push({ kind: 'spez', id: `spez:${s.id}`, chapter: '03', points: 2, s });
@@ -133,7 +117,28 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
       items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
     for (const ex of pick(dmlExercises, n(1), r)) items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
   }
-  return items;
+  // Wissensfragen reihum ueber Kapitel und innerhalb eines Kapitels ueber die Themen
+  // der Folien verteilt: jedes gewaehlte Kapitel kommt mindestens einmal vor.
+  // Wissensfragen sind in echten Klausuren selten: etwa jede zehnte Aufgabe (1 von 10)
+  const mcTotal = Math.max(1, Math.round(items.length / 9));
+  const covered = new Set(items.map((i) => i.chapter));
+  const perChapter = pick(cfg.chapters, 99, r).map((c) => {
+    const queues = pick(topicsOf(c), 99, r).map((t) => pick(mcQuestions.filter((q) => q.topicId === t.id), 99, r));
+    const order: McQuestion[] = [];
+    while (queues.some((q) => q.length)) for (const q of queues) if (q.length) order.push(q.shift()!);
+    return { chapter: c, list: order };
+  });
+  const chosen: McQuestion[] = [];
+  // Kapitel, zu denen es nur Wissensfragen gibt (Einleitung), bekommen immer eine
+  for (const pc of perChapter) if (!covered.has(pc.chapter) && pc.list.length) chosen.push(pc.list.shift()!);
+  for (let i = 0; chosen.length < mcTotal && perChapter.some((c) => c.list.length); i++) {
+    const l = perChapter[i % perChapter.length].list;
+    if (l.length) chosen.push(l.shift()!);
+  }
+  const mcItems: ExamItem[] = [];
+  for (const q of chosen) mcItems.push({ kind: 'mc', id: `mc:${q.id}`, chapter: q.chapter, points: q.multi ? 2 : 1, q });
+
+  return [...mcItems, ...items];
 }
 
 /* ---------------- Zufallsmodus: alle Aufgaben, alle Schwierigkeitsgrade ---------------- */
