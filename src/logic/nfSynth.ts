@@ -50,3 +50,12 @@ export function is3NF(attrs: string[], fds: Fd[]): boolean {
   }
   return true;
 }
+
+/** Erste Verletzung der 3NF: Abhaengigkeit X -> A mit X kein Superschluessel und A kein Schluesselattribut */
+export function violation3NF(attrs: string[], fds: Fd[]): { lhs: string[]; rhs: string[] } | null {
+  const prime = new Set(candidateKeys(attrs, fds).flat());
+  const bad = projected(attrs, fds)
+    .filter((f) => !attrs.every((a) => closure(f.lhs, fds).has(a)) && f.rhs.some((a) => !prime.has(a)))
+    .sort((a, b) => a.lhs.length - b.lhs.length)[0];
+  return bad ? { lhs: bad.lhs, rhs: bad.rhs.filter((a) => !prime.has(a)) } : null;
+}

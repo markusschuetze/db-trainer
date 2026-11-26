@@ -247,7 +247,7 @@ ALTER TABLE Tier ADD Art VARCHAR2(20);`,
         claim: 'ok',
         truth: true,
         probe: "INSERT INTO Tier VALUES (1, 'Rex', NULL, 'Hund');",
-        why: 'Ein CHECK-Constraint wird bei NULL nicht verletzt. Nur NOT NULL würde NULL verbieten.',
+        why: 'NULL bedeutet „unbekannt“, nicht „kleiner als 0“. Der Vergleich Alter_Jahre BETWEEN 0 AND 40 ergibt bei NULL weder wahr noch falsch, sondern UNKNOWN, und ein CHECK lehnt nur FALSE ab. Ein CHECK ist deshalb kein NOT NULL: NULL verbietet nur NOT NULL.',
       },
       {
         text: 'Ein Tier mit Alter_Jahre 41 kann eingefügt werden.',

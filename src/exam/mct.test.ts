@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMct, erPick, erRel, nf3, nfPk, relPick, type MctItem } from './mct';
+import { buildMct, erPick, erRel, nf3, nfPk, relPick, specPick, type MctItem } from './mct';
 
 const rng = (seed: number) => {
   let a = seed >>> 0;
@@ -22,7 +22,7 @@ describe('MCT-Fragen', () => {
   });
   it('Auswahlfragen: genau eine richtige, vier verschiedene Antworten', () => {
     for (const s of seeds)
-      for (const it of [erPick(rng(s), false), erPick(rng(s), true), relPick(rng(s))] as Extract<MctItem, { kind: 'pick' }>[]) {
+      for (const it of [erPick(rng(s), false), erPick(rng(s), true), relPick(rng(s)), specPick(rng(s))] as Extract<MctItem, { kind: 'pick' }>[]) {
         expect(it.d.options).toHaveLength(4);
         expect(it.d.correct).toBeGreaterThanOrEqual(0);
         const keys = it.d.options.map((o) => JSON.stringify(o));
@@ -46,5 +46,28 @@ describe('MCT-Fragen', () => {
   });
   it('gleicher Seed, gleiche Fragen', () => {
     expect(JSON.stringify(buildMct(rng(42)))).toBe(JSON.stringify(buildMct(rng(42))));
+  });
+
+  it('Vorlagen wiederholen sich nicht: nicht im selben Test und nicht in den nächsten Tests', () => {
+    const items = buildMct(rng(5));
+    const srcs = items.map((i) => i.src);
+    expect(new Set(srcs).size).toBe(srcs.length);
+    // zehn Tests hintereinander: die Textaufgaben (Frage 2 und 6) werden reihum benutzt
+    let seen: string[] = [];
+    const tts: string[] = [];
+    for (let k = 0; k < 6; k++) {
+      const t = buildMct(rng(100 + k), seen);
+      seen = [...seen, ...t.map((i) => i.src)];
+      tts.push(...t.filter((i) => i.src.startsWith('tt:')).map((i) => i.src));
+    }
+    // 6 Tests x 2 Textaufgaben, mindestens 11 verschiedene
+    expect(new Set(tts).size).toBeGreaterThanOrEqual(11);
+  });
+  it('Spezialisierung: vier verschiedene Kennzeichen, genau eines passt', () => {
+    for (const s of seeds) {
+      const it = specPick(rng(s)) as Extract<MctItem, { kind: 'pick' }>;
+      const marks = it.d.options.map((o) => `${o.spec!.disjoint}${o.spec!.total}`);
+      expect(new Set(marks).size).toBe(4);
+    }
   });
 });

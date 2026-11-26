@@ -1,5 +1,6 @@
 import { ErDiagram } from '../components/ErDiagram';
 import { RelationView } from '../components/RelationView';
+import { SpecDiagram } from '../components/SpecDiagram';
 import type { Fig, MctItem } from '../exam/mct';
 
 type Pick = Extract<MctItem, { kind: 'pick' }>;
@@ -13,6 +14,7 @@ export function FigView({ fig, label }: { fig: Fig; label: string }) {
         <ErDiagram key={i} e1={r.e1} e2={r.e2} verb={r.verb} c12={r.c12} c21={r.c21} label={`${label}: ${r.e1} ${r.verb} ${r.e2}`} />
       ))}
       {fig.rel && <RelationView relations={fig.rel} />}
+      {fig.spec && <SpecDiagram s={fig.spec} reveal label={label} />}
     </div>
   );
 }

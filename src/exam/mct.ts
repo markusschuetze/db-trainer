@@ -11,8 +11,9 @@
 import { ddlReadings } from '../content/mctDdl';
 import { relationText, relType, toRelations, validMappings, type Card, type Phrase, type Relation } from '../content/erPhrases';
 import { phrases, relPhrases } from '../content/erPhrases';
+import { specializations, type Specialization } from '../content/specializations';
 import { textTasks } from '../content/textTasks';
-import { candidateKeys, is3NF, type Fd } from '../logic/nfSynth';
+import { candidateKeys, is3NF, violation3NF, type Fd } from '../logic/nfSynth';
 import { deriveSchema } from '../logic/textTaskLogic';
 
 export interface ErRel {
@@ -25,6 +26,7 @@ export interface ErRel {
 export interface Fig {
   er?: ErRel[];
   rel?: Relation[];
+  spec?: Specialization;
 }
 export interface PickData {
   scenario: string;
@@ -48,9 +50,10 @@ export interface TfData {
   statements: TfStatement[];
 }
 
+/** `src` benennt die Vorlage der Frage (z. B. "tt:profs-raeume"); damit werden Wiederholungen vermieden */
 export type MctItem =
-  | { kind: 'pick'; id: string; chapter: '02' | '04'; points: number; d: PickData }
-  | { kind: 'tf'; id: string; chapter: '02' | '04' | '05' | '06'; points: number; d: TfData };
+  | { kind: 'pick'; id: string; src: string; chapter: '02' | '03' | '04'; points: number; d: PickData }
+  | { kind: 'tf'; id: string; src: string; chapter: '02' | '04' | '05' | '06'; points: number; d: TfData };
 
 /* ---------------- Zufall ---------------- */
 
@@ -64,6 +67,21 @@ const shuffle = <T>(l: T[], r: Rnd): T[] => {
   return c;
 };
 const sample = <T>(l: T[], r: Rnd): T => l[Math.floor(r() * l.length)];
+
+/**
+ * Waehlt eine Vorlage, die moeglichst lange nicht (oder noch nie) vorkam. `seen` ist nach Aktualitaet
+ * geordnet (aelteste zuerst) und bekommt die Wahl angehaengt, damit auch innerhalb eines Tests nichts doppelt kommt.
+ */
+export function pickFresh<T>(list: T[], key: (t: T) => string, seen: string[], r: Rnd): T {
+  const score = (t: T) => seen.lastIndexOf(key(t));
+  const best = Math.min(...list.map(score));
+  const choice = sample(list.filter((t) => score(t) === best), r);
+  const k = key(choice);
+  const i = seen.indexOf(k);
+  if (i >= 0) seen.splice(i, 1);
+  seen.push(k);
+  return choice;
+}
 
 /* ---------------- 1 und 2: ER-Modell waehlen ---------------- */
 
@@ -93,21 +111,21 @@ function pickOptions(correct: ErRel[], r: Rnd): ErRel[][] {
   return out;
 }
 
+const erTasks = () => textTasks.filter((x) => x.relationships.length >= 2 && x.relationships.length <= 3 && !x.specializations?.length);
+
 const cardWords: Record<Card, string> = { '01': 'höchstens einer (0,1)', '11': 'genau einer (1,1)', '0N': 'beliebig viele (0,N)', '1N': 'mindestens einer (1,N)' };
 
-export function erPick(r: Rnd, multi: boolean): MctItem {
+export function erPick(r: Rnd, multi: boolean, seen: string[] = []): MctItem {
   if (!multi) {
-    let p: Phrase = sample(phrases.filter((x) => !x.recursive), r);
-    let correct: ErRel = { e1: p.e1.name, e2: p.e2.name, verb: p.verb, c12: p.c12, c21: p.c21 };
-    for (let i = 0; i < 30 && pickOptions([correct], r).length < 3; i++) {
-      p = sample(phrases.filter((x) => !x.recursive), r);
-      correct = { e1: p.e1.name, e2: p.e2.name, verb: p.verb, c12: p.c12, c21: p.c21 };
-    }
+    const usable = phrases.filter((x) => !x.recursive && pickOptions([{ e1: x.e1.name, e2: x.e2.name, verb: x.verb, c12: x.c12, c21: x.c21 }], r).length >= 3);
+    const p: Phrase = pickFresh(usable, (x) => `ph:${x.id}`, seen, r);
+    const correct: ErRel = { e1: p.e1.name, e2: p.e2.name, verb: p.verb, c12: p.c12, c21: p.c21 };
     const opts = [[correct], ...pickOptions([correct], r)];
     const order = shuffle(opts.map((_, i) => i), r);
     return {
       kind: 'pick',
       id: `mct-er-${p.id}`,
+      src: `ph:${p.id}`,
       chapter: '02',
       points: 1,
       d: {
@@ -119,7 +137,7 @@ export function erPick(r: Rnd, multi: boolean): MctItem {
       },
     };
   }
-  const t = sample(textTasks.filter((x) => x.relationships.length >= 2 && x.relationships.length <= 3 && !x.specializations?.length), r);
+  const t = pickFresh(erTasks(), (x) => `tt:${x.id}`, seen, r);
   const correct: ErRel[] = t.relationships.map((x) => ({ e1: x.e1, e2: x.e2, verb: x.verb, c12: x.c12, c21: x.c21 }));
   const opts = [correct, ...pickOptions(correct, r)];
   // pickOptions liefert bei zwei oder drei Beziehungen immer genug verschiedene Abwandlungen
@@ -127,6 +145,7 @@ export function erPick(r: Rnd, multi: boolean): MctItem {
   return {
     kind: 'pick',
     id: `mct-ertext-${t.id}`,
+    src: `tt:${t.id}`,
     chapter: '02',
     points: 4,
     d: {
@@ -145,8 +164,8 @@ const flipNotNull = (rels: Relation[]): Relation[] =>
   rels.map((rel) => ({ ...rel, columns: rel.columns.map((c) => (c.fk && !c.pk ? { ...c, notNull: !c.notNull } : c)) }));
 const relKey = (rels: Relation[]) => rels.map(relationText).sort().join('\n');
 
-export function relPick(r: Rnd): MctItem {
-  const p: Phrase = sample(relPhrases.filter((x) => relType(x) !== '1:1'), r);
+export function relPick(r: Rnd, seen: string[] = []): MctItem {
+  const p: Phrase = pickFresh(relPhrases.filter((x) => relType(x) !== '1:1'), (x) => `ph:${x.id}`, seen, r);
   const m = validMappings(p)[0];
   const correct = toRelations(p, m);
   const broken = (rels: Relation[]) => {
@@ -160,11 +179,11 @@ export function relPick(r: Rnd): MctItem {
     flipNotNull(correct),
     broken(correct),
   ];
-  const seen = new Set([relKey(correct)]);
+  const used = new Set([relKey(correct)]);
   const wrong: Relation[][] = [];
   for (const c of shuffle(cand, r)) {
-    if (!seen.has(relKey(c))) {
-      seen.add(relKey(c));
+    if (!used.has(relKey(c))) {
+      used.add(relKey(c));
       wrong.push(c);
     }
     if (wrong.length === 3) break;
@@ -175,6 +194,7 @@ export function relPick(r: Rnd): MctItem {
   return {
     kind: 'pick',
     id: `mct-rel-${p.id}`,
+    src: `ph:${p.id}`,
     chapter: '04',
     points: 1,
     d: {
@@ -222,6 +242,7 @@ export function nfPk(r: Rnd): Extract<MctItem, { kind: 'tf' }> {
   return {
     kind: 'tf',
     id: `mct-nfpk-${nums.join('')}`,
+    src: `nf:${nums.join('')}`,
     chapter: '05',
     points: 6,
     d: {
@@ -255,21 +276,24 @@ export function nf3(r: Rnd): MctItem {
   }
   const stmts: TfStatement[] = chosen.map((c, i) => {
     const t = is3NF(c, fds);
+    const key = candidateKeys(c, fds)[0].join(', ');
+    const v = violation3NF(c, fds);
     return {
       text: `R${i + 1} ( ${c.join(', ')} )`,
       truth: t,
-      why: t
-        ? 'Alle Abhängigkeiten in dieser Relation haben links den Schlüssel, oder die rechte Seite gehört zum Schlüssel.'
-        : 'Ein Nichtschlüsselattribut hängt von einem anderen Nichtschlüsselattribut ab (transitive Abhängigkeit). Das verletzt die 3NF.',
+      why: v
+        ? `Schlüssel von R${i + 1}: ${key}. Der Schlüssel bestimmt ${v.lhs.join(', ')}, und ${v.lhs.join(', ')} bestimmt wiederum ${v.rhs.join(', ')}. Dabei ist ${v.lhs.join(', ')} kein Schlüssel und ${v.rhs.join(', ')} gehört nicht zum Schlüssel: ${v.rhs.join(', ')} hängt nur über ${v.lhs.join(', ')} vom Schlüssel ab (transitiv). Das verletzt die 3NF.`
+        : `Schlüssel von R${i + 1}: ${key}. Es gibt hier keine Abhängigkeit zwischen zwei Nichtschlüsselattributen, also keine transitive Abhängigkeit. Die Relation steht in 3NF.`,
     };
   });
   return {
     kind: 'tf',
     id: `mct-nf3-${nums.join('')}`,
+    src: `nf:${nums.join('')}`,
     chapter: '05',
     points: 6,
     d: {
-      intro: `Betrachten Sie eine Relation R ( ${all.join(', ')} )\nmit dem Primärschlüssel ${y}\nund den folgenden funktionalen Abhängigkeiten:\n${fds.map(fdText).join('      ')}`,
+      intro: `Betrachten Sie eine Relation R ( ${all.join(', ')} )\nmit dem Primärschlüssel ${y}\nund den folgenden funktionalen Abhängigkeiten:\n${fds.map(fdText).join('\n')}`,
       question: 'Welche Relationen gehören zur 3. Normalform?',
       statements: stmts,
     },
@@ -292,8 +316,8 @@ function corrupt(rel: Relation, r: Rnd): Relation | null {
   return bad.length ? sample(bad, r) : null;
 }
 
-export function erRel(r: Rnd): MctItem {
-  const t = sample(textTasks.filter((x) => x.relationships.length >= 2 && x.relationships.length <= 3 && !x.specializations?.length), r);
+export function erRel(r: Rnd, seen: string[] = []): MctItem {
+  const t = pickFresh(erTasks(), (x) => `tt:${x.id}`, seen, r);
   const schema = deriveSchema(t);
   const want = Math.min(4, schema.length);
   const picked = shuffle(schema, r).slice(0, want);
@@ -315,6 +339,7 @@ export function erRel(r: Rnd): MctItem {
   return {
     kind: 'tf',
     id: `mct-errel-${t.id}`,
+    src: `tt:${t.id}`,
     chapter: '04',
     points: 8,
     d: {
@@ -328,11 +353,12 @@ export function erRel(r: Rnd): MctItem {
 
 /* ---------------- 7: DDL lesen ---------------- */
 
-export function ddlRead(r: Rnd): MctItem {
-  const d = sample(ddlReadings, r);
+export function ddlRead(r: Rnd, seen: string[] = []): MctItem {
+  const d = pickFresh(ddlReadings, (x) => `dd:${x.id}`, seen, r);
   return {
     kind: 'tf',
     id: `mct-ddl-${d.id}`,
+    src: `dd:${d.id}`,
     chapter: '06',
     points: 3,
     d: {
@@ -344,7 +370,38 @@ export function ddlRead(r: Rnd): MctItem {
   };
 }
 
+/* ---------------- Spezialisierung: Kennzeichen waehlen ---------------- */
+
+export function specPick(r: Rnd, seen: string[] = []): MctItem {
+  const sp = pickFresh(specializations, (x) => `sp:${x.id}`, seen, r);
+  const variants = [
+    { disjoint: true, total: true },
+    { disjoint: true, total: false },
+    { disjoint: false, total: true },
+    { disjoint: false, total: false },
+  ];
+  const order = shuffle(variants, r);
+  const name = (v: { disjoint: boolean; total: boolean }) => `${v.disjoint ? 'disjunkt' : 'überlappend'} und ${v.total ? 'vollständig' : 'partiell'}`;
+  return {
+    kind: 'pick',
+    id: `mct-spez-${sp.id}`,
+    src: `sp:${sp.id}`,
+    chapter: '03',
+    points: 1,
+    d: {
+      scenario: sp.text,
+      question: 'Welches der folgenden Modelle bildet die Spezialisierung korrekt ab?',
+      options: order.map((v) => ({ spec: { ...sp, disjoint: v.disjoint, total: v.total } })),
+      correct: order.findIndex((v) => v.disjoint === sp.disjoint && v.total === sp.total),
+      why: `Richtig ist ${name(sp)}. ${sp.why}`,
+    },
+  };
+}
+
 /** Die sieben Fragen eines MCT in der Reihenfolge des ILIAS-Tests */
-export function buildMct(r: Rnd): MctItem[] {
-  return [erPick(r, false), erPick(r, true), nfPk(r), nf3(r), relPick(r), erRel(r), ddlRead(r)];
+export function buildMct(r: Rnd, avoid: string[] = []): MctItem[] {
+  const seen = [...avoid];
+  // Frage 1: Kardinalitaet oder Spezialisierung (Skript 02 und 03)
+  const first = r() < 0.5 ? specPick(r, seen) : erPick(r, false, seen);
+  return [first, erPick(r, true, seen), nfPk(r), nf3(r), relPick(r, seen), erRel(r, seen), ddlRead(r, seen)];
 }

@@ -56,6 +56,8 @@ export type Answer =
 export interface ExamConfig {
   /** 'mct': 7 Auswahlfragen wie im ILIAS-Test, eine Frage pro Seite */
   format?: 'mct';
+  /** MCT: zuletzt benutzte Vorlagen (aelteste zuerst), damit Fragen nicht staendig wiederkommen */
+  avoid?: string[];
   chapters: Chapter[];
   minutes: number;
   allowRun: boolean;
@@ -94,7 +96,7 @@ function pick<T>(list: T[], n: number, r: () => number): T[] {
 
 export function buildExam(cfg: ExamConfig): ExamItem[] {
   const r = rng(cfg.seed);
-  if (cfg.format === 'mct') return buildMct(r);
+  if (cfg.format === 'mct') return buildMct(r, cfg.avoid);
   const f = (cfg.minutes || 60) / 60; // 0 = ohne Zeitlimit, Umfang wie bei 60 Minuten
   const n = (base: number) => Math.max(1, Math.round(base * f));
   const has = (c: Chapter) => cfg.chapters.includes(c);

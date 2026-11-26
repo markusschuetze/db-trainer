@@ -32,6 +32,23 @@ import { runSqlExercise } from '../sql/sqlGrading';
 import { useSql } from '../useSql';
 import { MctSolution, PickInput, TfInput } from './MctItems';
 
+const SEEN_KEY = 'dbt:mct-seen';
+const loadSeen = (): string[] => {
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+const saveSeen = (l: string[]) => {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set(l.reverse())].reverse().slice(-60)));
+  } catch {
+    /* ignorieren */
+  }
+};
+
 const btn = 'rounded-lg bg-brand px-4 py-2 font-semibold text-brand-contrast disabled:opacity-50';
 const btnGhost = 'rounded-lg border border-line bg-surface px-4 py-2 font-semibold';
 const allChapters = () => Object.keys(CHAPTER_NAME) as Chapter[];
@@ -120,7 +137,8 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
         onClick={() =>
           onStart({
             ...(mct ? { format: 'mct' as const } : {}),
-            chapters: mct ? (['02', '04', '05', '06'] as Chapter[]) : chapters,
+            ...(mct ? { avoid: loadSeen() } : {}),
+            chapters: mct ? (['02', '03', '04', '05', '06'] as Chapter[]) : chapters,
             minutes,
             allowRun: mct ? false : allowRun,
             seed: Math.floor(Math.random() * 2 ** 31),
@@ -499,7 +517,7 @@ export const itemTitle = (item: ExamItem) =>
     ddl: `SQL-DDL: ${'ex' in item ? item.ex.title : ''}`,
     sql: `SQL: ${'ex' in item ? item.ex.title : ''}`,
     tt: 'Schema aus Text erkennen',
-    pick: item.kind === 'pick' && item.chapter === '04' ? 'Relationenmodell wählen' : 'ER-Modell wählen',
+    pick: item.kind === 'pick' && item.chapter === '04' ? 'Relationenmodell wählen' : item.kind === 'pick' && item.chapter === '03' ? 'Spezialisierung wählen' : 'ER-Modell wählen',
     tf: 'Aussagen beurteilen',
   })[item.kind];
 
@@ -594,7 +612,7 @@ export function ExamPage() {
   const [confirm, setConfirm] = useState(false);
   const [step, setStep] = useState(0);
   const { SQL } = useSql();
-  const items = useMemo(() => (state ? buildExam(state) : []), [state?.seed, state?.chapters.join(), state?.minutes, state?.format]); // eslint-disable-line react-hooks/exhaustive-deps
+  const items = useMemo(() => (state ? buildExam(state) : []), [state?.seed, state?.chapters.join(), state?.minutes, state?.format, state?.avoid?.join()]); // eslint-disable-line react-hooks/exhaustive-deps
   const running = !!state && !state.submittedAt;
   const now = useNow(running);
   const timed = !!state && state.minutes > 0;
@@ -602,6 +620,8 @@ export function ExamPage() {
 
   const update = (s: ExamState | null) => {
     if (!s) (setStep(0), setConfirm(false));
+    // neuer MCT: benutzte Vorlagen merken, damit der naechste Test andere Fragen bringt
+    if (s && !state && s.format === 'mct') saveSeen([...(s.avoid ?? []), ...buildExam(s).map((i) => ('src' in i ? i.src : ''))].filter(Boolean));
     setState(s);
     saveExam(s);
   };
