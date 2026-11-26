@@ -437,11 +437,29 @@ export function buildMct(r: Rnd, avoid: string[] = [], count = 30): MctItem[] {
   // Gesamtpunktzahl: zwei Punkte pro Frage (30 Minuten = 30 Fragen = 60 Punkte), Rest auf die Tabellenfragen verteilt
   const flex = ordered.filter((it) => it.kind === 'tf');
   let diff = 2 * count - ordered.reduce((a, it) => a + it.points, 0);
-  for (let k = 0; diff !== 0 && flex.length; k = (k + 1) % flex.length) {
-    const step = diff > 0 ? 1 : -1;
-    if (flex[k].points + step < 3) continue;
-    flex[k].points += step;
-    diff -= step;
+
+  // Zuerst bis zum bisherigen Minimum von drei Punkten ausgleichen. Bei alten,
+  // gespeicherten Kurztests (z. B. 15 Minuten) kann das Ziel genau darunter
+  // liegen; dann weiter bis minimal ein Punkt, damit der Aufbau immer endet.
+  for (const minPoints of [3, 1]) {
+    while (diff < 0) {
+      let changed = false;
+      for (const item of flex) {
+        if (diff >= 0) break;
+        if (item.points > minPoints) {
+          item.points--;
+          diff++;
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+  }
+
+  // Bei positivem Rest gibt es keine Obergrenze: verteile ihn gleichmaessig.
+  for (let k = 0; diff > 0 && flex.length; k = (k + 1) % flex.length) {
+    flex[k].points++;
+    diff--;
   }
   const ids = new Map<string, number>();
   return ordered.map((it) => {
