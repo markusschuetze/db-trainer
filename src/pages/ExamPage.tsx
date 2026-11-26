@@ -43,7 +43,7 @@ const loadSeen = (): string[] => {
 };
 const saveSeen = (l: string[]) => {
   try {
-    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set(l.reverse())].reverse().slice(-60)));
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set(l.reverse())].reverse().slice(-200)));
   } catch {
     /* ignorieren */
   }
@@ -78,8 +78,8 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           <span>
             MCT wie im ILIAS-Test
             <span className="block text-sm text-muted">
-              7 Auswahlfragen, eine Frage pro Seite, mit Zurück und Weiter: ER-Modell wählen, Primärschlüssel und 3NF beurteilen,
-              Relationenmodell, Teiltransformationen und DDL-Code lesen. 29 Punkte, kein eigener Code.
+              Eine Auswahlfrage pro Minute (30 Minuten = 30 Fragen), eine Frage pro Seite, mit Zurück und Weiter: ER-Modell wählen, Primärschlüssel und 3NF beurteilen,
+              Relationenmodell, Teiltransformationen und DDL-Code lesen. Je 2 Punkte pro Frage (30 Minuten = 60 Punkte), kein eigener Code.
             </span>
           </span>
         </label>

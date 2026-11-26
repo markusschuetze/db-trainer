@@ -116,11 +116,11 @@ describe('Probeklausur ohne Zeitlimit', () => {
     for (const c of ALL) expect(a.some((i) => i.chapter === c), c).toBe(true);
   });
 
-  it('MCT-Format: sieben Fragen, Musterantworten ergeben alle Punkte, leere keine', () => {
+  it('MCT-Format: dreissig Fragen, Musterantworten ergeben alle Punkte, leere keine', () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       const items = buildExam({ format: 'mct', chapters: ['02', '04', '05', '06'], minutes: 30, allowRun: false, seed });
-      expect(items).toHaveLength(7);
-      expect(items.reduce((s, i) => s + i.points, 0)).toBe(29);
+      expect(items).toHaveLength(30);
+      expect(items.reduce((s, i) => s + i.points, 0)).toBe(60);
       for (const it of items) {
         expect(gradeItem(it, perfect(it), SQL).points, it.id).toBe(it.points);
         expect(gradeItem(it, undefined, SQL).points, it.id).toBe(0);

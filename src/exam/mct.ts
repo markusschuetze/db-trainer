@@ -1,4 +1,5 @@
-// MCT-Format wie im ILIAS-Test der Vorlesung: 7 Auswahlfragen, eine Frage pro Seite, 30 Minuten.
+// MCT-Format wie im ILIAS-Test der Vorlesung: eine Auswahlfrage pro Seite, eine Frage pro Minute (30 Minuten = 30 Fragen).
+// Die Fragetypen:
 //   1. ER-Modell zu einer Anforderung waehlen        (1 P.)
 //   2. ER-Modell mit mehreren Entitaeten waehlen     (4 P.)
 //   3. Primaerschluessel aus Abhaengigkeiten ableiten (6 P., richtig/falsch je Attribut)
@@ -398,10 +399,54 @@ export function specPick(r: Rnd, seen: string[] = []): MctItem {
   };
 }
 
-/** Die sieben Fragen eines MCT in der Reihenfolge des ILIAS-Tests */
-export function buildMct(r: Rnd, avoid: string[] = []): MctItem[] {
+/** Anteile der Fragetypen; bei 30 Fragen ergibt das 8/4/3/2/2/6/3/2 und damit alle Kapitel in der Reihenfolge der Skripte */
+const MIX: { w: number; make: (r: Rnd, seen: string[]) => MctItem }[] = [
+  { w: 0.22, make: (r, s) => erPick(r, false, s) },
+  { w: 0.13, make: (r, s) => specPick(r, s) },
+  { w: 0.1, make: (r, s) => erPick(r, true, s) },
+  { w: 0.07, make: (r) => nfPk(r) },
+  { w: 0.07, make: (r) => nf3(r) },
+  { w: 0.2, make: (r, s) => relPick(r, s) },
+  { w: 0.1, make: (r, s) => erRel(r, s) },
+  { w: 0.07, make: (r, s) => ddlRead(r, s) },
+];
+
+/** Anzahl Fragen je Typ (Groesster-Rest-Verfahren); ab 8 Fragen kommt jeder Typ mindestens einmal vor */
+export function mctCounts(n: number): number[] {
+  const base = n >= MIX.length ? 1 : 0;
+  const raw = MIX.map((m) => m.w * n);
+  const c = raw.map((x) => Math.max(base, Math.floor(x)));
+  let rest = n - c.reduce((a, b) => a + b, 0);
+  const order = raw.map((x, i) => [x - Math.floor(x), i]).sort((a, b) => b[0] - a[0]);
+  for (let k = 0; rest > 0; k = (k + 1) % order.length, rest--) c[order[k][1]]++;
+  for (let k = 0; rest < 0; k = (k + 1) % c.length) if (c[k] > base) (c[k]--, rest++);
+  return c;
+}
+
+/** Ein MCT mit `count` Fragen (eine pro Minute), eine Frage pro Seite, nach Skripten sortiert */
+export function buildMct(r: Rnd, avoid: string[] = [], count = 30): MctItem[] {
   const seen = [...avoid];
-  // Frage 1: Kardinalitaet oder Spezialisierung (Skript 02 und 03)
-  const first = r() < 0.5 ? specPick(r, seen) : erPick(r, false, seen);
-  return [first, erPick(r, true, seen), nfPk(r), nf3(r), relPick(r, seen), erRel(r, seen), ddlRead(r, seen)];
+  const out: MctItem[] = [];
+  mctCounts(count).forEach((n, t) => {
+    for (let i = 0; i < n; i++) out.push(MIX[t].make(r, seen));
+  });
+  // Reihenfolge wie im Skript (02, 03, 04, 05, 06), innerhalb eines Kapitels gemischt
+  const byCh = (it: MctItem) => it.chapter;
+  const chapters = [...new Set(out.map(byCh))].sort();
+  const ordered = chapters.flatMap((ch) => shuffle(out.filter((it) => byCh(it) === ch), r));
+  // Gesamtpunktzahl: zwei Punkte pro Frage (30 Minuten = 30 Fragen = 60 Punkte), Rest auf die Tabellenfragen verteilt
+  const flex = ordered.filter((it) => it.kind === 'tf');
+  let diff = 2 * count - ordered.reduce((a, it) => a + it.points, 0);
+  for (let k = 0; diff !== 0 && flex.length; k = (k + 1) % flex.length) {
+    const step = diff > 0 ? 1 : -1;
+    if (flex[k].points + step < 3) continue;
+    flex[k].points += step;
+    diff -= step;
+  }
+  const ids = new Map<string, number>();
+  return ordered.map((it) => {
+    const k = (ids.get(it.id) ?? 0) + 1;
+    ids.set(it.id, k);
+    return k === 1 ? it : { ...it, id: `${it.id}-${k}` };
+  });
 }

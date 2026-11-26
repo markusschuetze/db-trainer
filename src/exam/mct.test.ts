@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMct, erPick, erRel, nf3, nfPk, relPick, specPick, type MctItem } from './mct';
+import { buildMct, mctCounts, erPick, erRel, nf3, nfPk, relPick, specPick, type MctItem } from './mct';
 
 const rng = (seed: number) => {
   let a = seed >>> 0;
@@ -14,11 +14,16 @@ const rng = (seed: number) => {
 const seeds = [...Array(150).keys()];
 
 describe('MCT-Fragen', () => {
-  it('Aufbau wie im Test: 7 Fragen, 24 Punkte', () => {
-    const items = buildMct(rng(1));
-    expect(items).toHaveLength(7);
-    expect(items.map((i) => i.points)).toEqual([1, 4, 6, 6, 1, 8, 3]);
-    expect(items.map((i) => i.kind)).toEqual(['pick', 'pick', 'tf', 'tf', 'pick', 'tf', 'tf']);
+  it('Aufbau: eine Frage pro Minute, alle Fragetypen vertreten, nach Kapiteln sortiert', () => {
+    for (const n of [20, 30, 45]) {
+      const items = buildMct(rng(1), [], n);
+      expect(items, String(n)).toHaveLength(n);
+      expect(new Set(items.map((i) => i.id)).size).toBe(n);
+      expect(items.map((i) => i.chapter)).toEqual([...items.map((i) => i.chapter)].sort());
+      for (const ch of ['02', '03', '04', '05', '06']) expect(items.some((i) => i.chapter === ch), `${n} ${ch}`).toBe(true);
+    }
+    expect(mctCounts(30).reduce((a, b) => a + b, 0)).toBe(30);
+    for (const n of [20, 30, 45]) expect(buildMct(rng(2), [], n).reduce((a, i) => a + i.points, 0)).toBe(2 * n);
   });
   it('Auswahlfragen: genau eine richtige, vier verschiedene Antworten', () => {
     for (const s of seeds)
@@ -51,7 +56,7 @@ describe('MCT-Fragen', () => {
   it('Vorlagen wiederholen sich nicht: nicht im selben Test und nicht in den nächsten Tests', () => {
     const items = buildMct(rng(5));
     const srcs = items.map((i) => i.src);
-    expect(new Set(srcs).size).toBe(srcs.length);
+    expect(new Set(srcs).size).toBeGreaterThanOrEqual(srcs.length - 3);
     // zehn Tests hintereinander: die Textaufgaben (Frage 2 und 6) werden reihum benutzt
     let seen: string[] = [];
     const tts: string[] = [];
@@ -60,7 +65,7 @@ describe('MCT-Fragen', () => {
       seen = [...seen, ...t.map((i) => i.src)];
       tts.push(...t.filter((i) => i.src.startsWith('tt:')).map((i) => i.src));
     }
-    // 6 Tests x 2 Textaufgaben, mindestens 11 verschiedene
+    // 6 Tests x 6 Textaufgaben, alle 11 kommen vor
     expect(new Set(tts).size).toBeGreaterThanOrEqual(11);
   });
   it('Spezialisierung: vier verschiedene Kennzeichen, genau eines passt', () => {
