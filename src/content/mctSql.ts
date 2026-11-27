@@ -6,52 +6,6 @@ import type { DdlReading } from './mctDdl';
 
 export const sqlReadings: DdlReading[] = [
   {
-    id: 'konto-rollback',
-    code: `CREATE TABLE Konto (
-  Konto_ID INTEGER PRIMARY KEY,
-  Inhaber VARCHAR2(30) NOT NULL,
-  Stand NUMBER(8,2) NOT NULL
-);
-
-INSERT INTO Konto VALUES (1, 'Maier', 100);
-INSERT INTO Konto VALUES (2, 'Schulz', 250);
-COMMIT;`,
-    statements: [
-      {
-        text: 'Nach UPDATE Konto SET Stand = Stand - 50 WHERE Konto_ID = 1; und ROLLBACK; beträgt der Stand von Konto 1 weiterhin 100.',
-        claim: 'value',
-        value: '100',
-        truth: true,
-        probe: 'UPDATE Konto SET Stand = Stand - 50 WHERE Konto_ID = 1;\nROLLBACK;\nSELECT Stand FROM Konto WHERE Konto_ID = 1;',
-        why: 'ROLLBACK verwirft die noch nicht bestätigte Änderung. Der Stand ist wieder 100.',
-      },
-      {
-        text: 'Nach UPDATE Konto SET Stand = Stand - 50 WHERE Konto_ID = 1; COMMIT; ROLLBACK; beträgt der Stand von Konto 1 wieder 100.',
-        claim: 'value',
-        value: '100',
-        truth: false,
-        probe: 'UPDATE Konto SET Stand = Stand - 50 WHERE Konto_ID = 1;\nCOMMIT;\nROLLBACK;\nSELECT Stand FROM Konto WHERE Konto_ID = 1;',
-        why: 'Das COMMIT hat die Änderung bestätigt. Das spätere ROLLBACK hat nichts mehr zu verwerfen, der Stand bleibt 50.',
-      },
-      {
-        text: 'UPDATE Konto SET Stand = 0; ohne WHERE ändert alle Zeilen der Tabelle (danach haben 2 Konten den Stand 0).',
-        claim: 'value',
-        value: '2',
-        truth: true,
-        probe: 'UPDATE Konto SET Stand = 0;\nSELECT COUNT(*) FROM Konto WHERE Stand = 0;',
-        why: 'Ohne WHERE gilt die Änderung für jede Zeile.',
-      },
-      {
-        text: 'DELETE FROM Konto; ohne WHERE löscht nur die erste Zeile (danach bleibt 1 Konto).',
-        claim: 'value',
-        value: '1',
-        truth: false,
-        probe: 'DELETE FROM Konto;\nSELECT COUNT(*) FROM Konto;',
-        why: 'Ohne WHERE werden alle Zeilen gelöscht. Es bleibt kein Konto übrig.',
-      },
-    ],
-  },
-  {
     id: 'artikel-insert',
     code: `CREATE TABLE Artikel (
   Art_ID INTEGER PRIMARY KEY,
@@ -102,8 +56,7 @@ COMMIT;`,
 
 INSERT INTO Mitarbeiter VALUES (1, 'Ina', 3000, 500);
 INSERT INTO Mitarbeiter VALUES (2, 'Jan', 2800, NULL);
-INSERT INTO Mitarbeiter VALUES (3, 'Kim', NULL, NULL);
-COMMIT;`,
+INSERT INTO Mitarbeiter VALUES (3, 'Kim', NULL, NULL);`,
     statements: [
       {
         text: 'SELECT COUNT(*) FROM Mitarbeiter WHERE Bonus = NULL; liefert 0.',
@@ -151,8 +104,7 @@ INSERT INTO Bestellung VALUES (1, 'Aksoy', 20);
 INSERT INTO Bestellung VALUES (2, 'Aksoy', 30);
 INSERT INTO Bestellung VALUES (3, 'Berg', 10);
 INSERT INTO Bestellung VALUES (4, 'Cebi', 60);
-INSERT INTO Bestellung VALUES (5, 'Cebi', 40);
-COMMIT;`,
+INSERT INTO Bestellung VALUES (5, 'Cebi', 40);`,
     statements: [
       {
         text: 'SELECT COUNT(DISTINCT Kunde) FROM Bestellung; liefert 3.',
@@ -207,8 +159,7 @@ INSERT INTO Abteilung VALUES (3, 'Archiv');
 INSERT INTO Mitarbeiter VALUES (1, 'Ina', 1);
 INSERT INTO Mitarbeiter VALUES (2, 'Jan', 1);
 INSERT INTO Mitarbeiter VALUES (3, 'Kim', 2);
-INSERT INTO Mitarbeiter VALUES (4, 'Lea', NULL);
-COMMIT;`,
+INSERT INTO Mitarbeiter VALUES (4, 'Lea', NULL);`,
     statements: [
       {
         text: 'SELECT COUNT(*) FROM Mitarbeiter m JOIN Abteilung a ON m.Abt_ID = a.Abt_ID; liefert 3.',
@@ -253,8 +204,7 @@ COMMIT;`,
 
 INSERT INTO Produkt VALUES (1, 'Tisch', 100, 5);
 INSERT INTO Produkt VALUES (2, 'Stuhl', 40, 0);
-INSERT INTO Produkt VALUES (3, 'Lampe', 25, 12);
-COMMIT;`,
+INSERT INTO Produkt VALUES (3, 'Lampe', 25, 12);`,
     statements: [
       {
         text: 'Nach DELETE FROM Produkt WHERE Lager = 0; hat die Tabelle noch 2 Zeilen.',
@@ -300,8 +250,7 @@ COMMIT;`,
 INSERT INTO Student VALUES (1, 'Aydin', 3, 1.7);
 INSERT INTO Student VALUES (2, 'Bauer', 5, NULL);
 INSERT INTO Student VALUES (3, 'Cole', 3, 2.3);
-INSERT INTO Student VALUES (4, 'Dietz', 7, 3.0);
-COMMIT;`,
+INSERT INTO Student VALUES (4, 'Dietz', 7, 3.0);`,
     statements: [
       {
         text: 'SELECT COUNT(*) FROM Student WHERE Note > 2.0; liefert 2.',
@@ -338,46 +287,92 @@ COMMIT;`,
     ],
   },
   {
-    id: 'kurs-transaktion',
-    code: `CREATE TABLE Kurs (
-  K_ID INTEGER PRIMARY KEY,
-  Titel VARCHAR2(20) NOT NULL,
-  Plaetze INTEGER
+    id: 'lieferant-teile',
+    code: `CREATE TABLE Lieferant (
+  Lief_ID INTEGER PRIMARY KEY,
+  Name VARCHAR2(20) NOT NULL,
+  Email VARCHAR2(30) UNIQUE
 );
 
-INSERT INTO Kurs VALUES (1, 'Datenbanken', 30);
-INSERT INTO Kurs VALUES (2, 'Mathe', 50);
-COMMIT;`,
+INSERT INTO Lieferant VALUES (1, 'Nord', 'info@nord.de');
+INSERT INTO Lieferant VALUES (2, 'Süd', NULL);`,
     statements: [
       {
-        text: "Nach INSERT INTO Kurs VALUES (3, 'Web', 20); und ROLLBACK; hat die Tabelle 2 Zeilen.",
-        claim: 'value',
-        value: '2',
-        truth: true,
-        probe: "INSERT INTO Kurs VALUES (3, 'Web', 20);\nROLLBACK;\nSELECT COUNT(*) FROM Kurs;",
-        why: 'Das ROLLBACK nimmt den noch nicht bestätigten INSERT zurück.',
+        text: "INSERT INTO Lieferant VALUES (3, 'West', 'info@nord.de'); läuft fehlerfrei.",
+        claim: 'ok',
+        truth: false,
+        probe: "INSERT INTO Lieferant VALUES (3, 'West', 'info@nord.de');",
+        why: 'Die E-Mail-Adresse ist UNIQUE und gehört schon dem Lieferanten Nord.',
       },
       {
-        text: "Nach INSERT INTO Kurs VALUES (3, 'Web', 20); COMMIT; ROLLBACK; hat die Tabelle 2 Zeilen.",
+        text: "INSERT INTO Lieferant VALUES (3, 'West', NULL); läuft fehlerfrei, obwohl Süd schon keine E-Mail hat.",
+        claim: 'ok',
+        truth: true,
+        probe: "INSERT INTO Lieferant VALUES (3, 'West', NULL);",
+        why: 'UNIQUE erlaubt mehrere NULL-Werte, denn NULL ist mit nichts gleich.',
+      },
+      {
+        text: "Nach UPDATE Lieferant SET Name = 'Mitte' WHERE Lief_ID = 7; läuft das Statement fehlerfrei und ändert 0 Zeilen.",
+        claim: 'ok',
+        truth: true,
+        probe: "UPDATE Lieferant SET Name = 'Mitte' WHERE Lief_ID = 7;",
+        why: 'Ein UPDATE ohne Treffer ist kein Fehler.',
+      },
+      {
+        text: 'SELECT COUNT(*) FROM Lieferant WHERE Email IS NOT NULL; liefert 2.',
         claim: 'value',
         value: '2',
         truth: false,
-        probe: "INSERT INTO Kurs VALUES (3, 'Web', 20);\nCOMMIT;\nROLLBACK;\nSELECT COUNT(*) FROM Kurs;",
-        why: 'Das COMMIT hat den INSERT festgeschrieben. Es bleiben 3 Zeilen.',
+        probe: 'SELECT COUNT(*) FROM Lieferant WHERE Email IS NOT NULL;',
+        why: 'Nur Nord hat eine E-Mail-Adresse, das Ergebnis ist 1.',
       },
+    ],
+  },
+  {
+    id: 'film-abfragen',
+    code: `CREATE TABLE Film (
+  Film_ID INTEGER PRIMARY KEY,
+  Titel VARCHAR2(30) NOT NULL,
+  Genre VARCHAR2(10) NOT NULL,
+  Dauer INTEGER NOT NULL
+);
+
+INSERT INTO Film VALUES (1, 'Alpha', 'Drama', 120);
+INSERT INTO Film VALUES (2, 'Beta', 'Komödie', 90);
+INSERT INTO Film VALUES (3, 'Gamma', 'Drama', 150);
+INSERT INTO Film VALUES (4, 'Delta', 'Krimi', 100);`,
+    statements: [
       {
-        text: 'DELETE FROM Kurs WHERE Plaetze > 100; läuft fehlerfrei, auch wenn keine Zeile betroffen ist.',
-        claim: 'ok',
+        text: 'SELECT AVG(Dauer) FROM Film WHERE Genre = \'Drama\'; liefert 135.',
+        claim: 'value',
+        value: '135',
         truth: true,
-        probe: 'DELETE FROM Kurs WHERE Plaetze > 100;',
-        why: 'Ein DELETE ohne Treffer ist kein Fehler. Es werden einfach 0 Zeilen gelöscht.',
+        probe: "SELECT AVG(Dauer) FROM Film WHERE Genre = 'Drama';",
+        why: '(120 + 150) / 2 = 135.',
       },
       {
-        text: "INSERT INTO Kurs (K_ID, Plaetze) VALUES (3, 20); läuft fehlerfrei.",
-        claim: 'ok',
+        text: 'SELECT COUNT(DISTINCT Genre) FROM Film; liefert 4.',
+        claim: 'value',
+        value: '4',
         truth: false,
-        probe: 'INSERT INTO Kurs (K_ID, Plaetze) VALUES (3, 20);',
-        why: 'Titel ist NOT NULL und fehlt im INSERT.',
+        probe: 'SELECT COUNT(DISTINCT Genre) FROM Film;',
+        why: 'Es gibt nur die drei Genres Drama, Komödie und Krimi. Drama kommt doppelt vor.',
+      },
+      {
+        text: 'SELECT COUNT(*) FROM Film WHERE Dauer BETWEEN 100 AND 120; liefert 2.',
+        claim: 'value',
+        value: '2',
+        truth: true,
+        probe: 'SELECT COUNT(*) FROM Film WHERE Dauer BETWEEN 100 AND 120;',
+        why: 'BETWEEN schließt beide Grenzen ein: Alpha (120) und Delta (100).',
+      },
+      {
+        text: "SELECT Titel FROM Film WHERE Genre IN ('Drama', 'Krimi') ORDER BY Dauer; liefert als erste Zeile Alpha.",
+        claim: 'value',
+        value: 'Alpha',
+        truth: false,
+        probe: "SELECT Titel FROM Film WHERE Genre IN ('Drama', 'Krimi') ORDER BY Dauer;",
+        why: 'Aufsteigend nach Dauer kommt zuerst der kürzeste Film, Delta mit 100 Minuten.',
       },
     ],
   },

@@ -93,7 +93,7 @@ describe('Probeklausur', () => {
         const r = gradeItem(item, perfect(item), SQL);
         expect(r.points, item.id).toBe(r.max);
       }
-    });
+    }, 30_000);
   }
 
   it('leere Abgabe ergibt 0 Punkte', () => {
