@@ -2,6 +2,7 @@ import { config } from '../config';
 import { useRef, useState } from 'react';
 import { CHAPTER_NAME, type Chapter } from '../content/mcQuestions';
 import {
+  deleteExam,
   exportProgress,
   importProgress,
   isFull,
@@ -17,6 +18,7 @@ import {
   type Mastery,
   type ProgressData,
 } from '../progress';
+import { loadExam, saveExam } from '../exam/exam';
 import { ConsentSetting } from '../components/ConsentBanner';
 import { topicsOf } from '../content/topics';
 import { CHAPTERS, itemsOfTopic, practiceIds, questionIds, topicHref, topics } from '../progressCatalog';
@@ -228,6 +230,7 @@ export function ProgressPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmExam, setConfirmExam] = useState('');
   const passedCount = d.exams.filter(passed).length;
   const best = d.exams.length ? Math.max(...d.exams.map(percentOf)) : null;
   const last5 = d.exams.slice(-5);
@@ -314,7 +317,10 @@ export function ProgressPage() {
                     <th className="py-1 pr-3">Umfang</th>
                     <th className="py-1 pr-3 text-right">Punkte</th>
                     <th className="py-1 pr-3 text-right">Prozent</th>
-                    <th className="py-1">Ergebnis</th>
+                    <th className="py-1 pr-3">Ergebnis</th>
+                    <th className="py-1">
+                      <span className="sr-only">Löschen</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="tabular-nums">
@@ -327,7 +333,32 @@ export function ProgressPage() {
                         {e.p.toLocaleString('de-DE')} / {e.x}
                       </td>
                       <td className="py-1 pr-3 text-right">{percentOf(e).toFixed(0)} %</td>
-                      <td className="py-1">{passed(e) ? '✓ bestanden' : '✗ nicht bestanden'}</td>
+                      <td className="py-1 pr-3">{passed(e) ? '✓ bestanden' : '✗ nicht bestanden'}</td>
+                      <td className="py-1 whitespace-nowrap">
+                        {confirmExam === e.id ? (
+                          <>
+                            <button
+                              className="mr-2 text-bad underline"
+                              onClick={() => {
+                                // läuft die Klausur noch als Ergebnisseite, würde sie sich sonst wieder eintragen
+                                const cur = loadExam();
+                                if (cur && `${cur.seed}-${cur.startedAt}` === e.id) saveExam(null);
+                                deleteExam(e.id);
+                                setConfirmExam('');
+                              }}
+                            >
+                              Wirklich löschen
+                            </button>
+                            <button className="underline" onClick={() => setConfirmExam('')}>
+                              Abbrechen
+                            </button>
+                          </>
+                        ) : (
+                          <button className="underline" onClick={() => setConfirmExam(e.id)} aria-label={`Klausur ${d.exams.length - i} löschen`}>
+                            Löschen
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

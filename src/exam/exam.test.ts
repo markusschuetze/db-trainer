@@ -108,6 +108,23 @@ describe('Probeklausur', () => {
   });
 });
 
+describe('Wiederholungen', () => {
+  it('aufeinanderfolgende Klausuren bringen möglichst andere Aufgaben', () => {
+    let seen: string[] = [];
+    const ids: string[][] = [];
+    for (let k = 0; k < 4; k++) {
+      const e = buildExam({ chapters: ALL, minutes: 60, allowRun: false, seed: 100 + k, avoid: seen });
+      ids.push(e.map((i) => i.id));
+      seen = [...seen.filter((x) => !ids[k].includes(x)), ...ids[k]];
+    }
+    // Aufgaben mit grossem Vorrat (Kardinalitaeten, Relationen, Wissensfragen) wiederholen sich nicht direkt
+    for (let k = 1; k < 4; k++) {
+      const dup = ids[k].filter((x) => ids[k - 1].includes(x) && /^(er|rel|mc|spez):/.test(x));
+      expect(dup, `Klausur ${k}`).toEqual([]);
+    }
+  });
+});
+
 describe('Probeklausur ohne Zeitlimit', () => {
   it('hat denselben Umfang wie eine 60-Minuten-Klausur und deckt alle Kapitel ab', () => {
     const a = buildExam({ chapters: ALL, minutes: 0, allowRun: false, seed: 5 });

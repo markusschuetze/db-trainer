@@ -43,7 +43,7 @@ const loadSeen = (): string[] => {
 };
 const saveSeen = (l: string[]) => {
   try {
-    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set(l.reverse())].reverse().slice(-200)));
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set(l.reverse())].reverse().slice(-400)));
   } catch {
     /* ignorieren */
   }
@@ -137,7 +137,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
         onClick={() =>
           onStart({
             ...(mct ? { format: 'mct' as const } : {}),
-            ...(mct ? { avoid: loadSeen() } : {}),
+            avoid: loadSeen(),
             chapters: mct ? (['02', '03', '04', '05', '06'] as Chapter[]) : chapters,
             minutes,
             allowRun: mct ? false : allowRun,
@@ -620,8 +620,8 @@ export function ExamPage() {
 
   const update = (s: ExamState | null) => {
     if (!s) (setStep(0), setConfirm(false));
-    // neuer MCT: benutzte Vorlagen merken, damit der naechste Test andere Fragen bringt
-    if (s && !state && s.format === 'mct') saveSeen([...(s.avoid ?? []), ...buildExam(s).map((i) => ('src' in i ? i.src : ''))].filter(Boolean));
+    // neue Klausur: benutzte Aufgaben merken, damit die naechste andere Fragen bringt
+    if (s && !state) saveSeen([...(s.avoid ?? []), ...buildExam(s).map((i) => ('src' in i ? i.src : i.id))].filter(Boolean));
     setState(s);
     saveExam(s);
   };

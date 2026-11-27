@@ -183,6 +183,11 @@ export function recordExam(attempt: ExamAttempt, itemResults: { id: string; righ
   return true;
 }
 
+/** Eine einzelne Probeklausur aus dem Verlauf entfernen (die Statistik der einzelnen Fragen bleibt) */
+export function deleteExam(id: string) {
+  update((d) => ({ ...d, exams: d.exams.filter((e) => e.id !== id) }));
+}
+
 export function resetProgress() {
   update(() => empty());
 }

@@ -92,6 +92,20 @@ function pick<T>(list: T[], n: number, r: () => number): T[] {
   return copy.slice(0, Math.max(0, Math.min(n, copy.length)));
 }
 
+/**
+ * Wie pick, bevorzugt aber Eintraege, die in frueheren Klausuren nicht oder am laengsten nicht vorkamen.
+ * `seen` ist nach Aktualitaet geordnet (aelteste zuerst); innerhalb gleicher Aktualitaet entscheidet der Zufall.
+ */
+function fresh<T>(list: T[], n: number, r: () => number, key: (t: T) => string, seen: string[]): T[] {
+  const shuffled = pick(list, list.length, r);
+  const rank = (t: T) => seen.lastIndexOf(key(t));
+  return shuffled
+    .map((t, i) => ({ t, i, k: rank(t) }))
+    .sort((a, b) => a.k - b.k || a.i - b.i)
+    .map((x) => x.t)
+    .slice(0, Math.max(0, Math.min(n, list.length)));
+}
+
 /* ---------------- Zusammenstellung ---------------- */
 
 export function buildExam(cfg: ExamConfig): ExamItem[] {
@@ -101,23 +115,24 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
   const n = (base: number) => Math.max(1, Math.round(base * f));
   const has = (c: Chapter) => cfg.chapters.includes(c);
   const items: ExamItem[] = [];
+  const seen = cfg.avoid ?? [];
 
-  if (has('02')) for (const p of pick(phrases, n(2), r)) items.push({ kind: 'er', id: `er:${p.id}`, chapter: '02', points: 2, p });
+  if (has('02')) for (const p of fresh(phrases, n(2), r, (p) => `er:${p.id}`, seen)) items.push({ kind: 'er', id: `er:${p.id}`, chapter: '02', points: 2, p });
   if (has('03'))
-    for (const s of pick(specializations, n(1), r)) items.push({ kind: 'spez', id: `spez:${s.id}`, chapter: '03', points: 2, s });
-  if (has('04')) for (const p of pick(relPhrases, n(2), r)) items.push({ kind: 'rel', id: `rel:${p.id}`, chapter: '04', points: 2, p });
+    for (const s of fresh(specializations, n(1), r, (x) => `spez:${x.id}`, seen)) items.push({ kind: 'spez', id: `spez:${s.id}`, chapter: '03', points: 2, s });
+  if (has('04')) for (const p of fresh(relPhrases, n(2), r, (p) => `rel:${p.id}`, seen)) items.push({ kind: 'rel', id: `rel:${p.id}`, chapter: '04', points: 2, p });
   if (has('05'))
-    for (const ex of pick(nfExercises, n(1), r))
+    for (const ex of fresh(nfExercises, n(1), r, (x) => `nf:${x.id}`, seen))
       items.push({ kind: 'nf', id: `nf:${ex.id}`, chapter: '05', points: 3 + ex.fds.length, ex });
   const ttPool = textTasks.filter((t) => has(topicById(t.topicId)?.chapter ?? ''));
-  for (const t of pick(ttPool, n(1), r))
+  for (const t of fresh(ttPool, n(1), r, (t) => `tt:${t.id}`, seen))
     items.push({ kind: 'tt', id: `tt:${t.id}`, chapter: topicById(t.topicId)!.chapter, points: 2 + t.relationships.length + 1 + (t.specializations?.length ? 1 : 0), t });
   if (has('06'))
-    for (const ex of pick(ddlExercises, n(1), r)) items.push({ kind: 'ddl', id: `ddl:${ex.id}`, chapter: '06', points: 6, ex });
+    for (const ex of fresh(ddlExercises, n(1), r, (x) => `ddl:${x.id}`, seen)) items.push({ kind: 'ddl', id: `ddl:${ex.id}`, chapter: '06', points: 6, ex });
   if (has('SQL')) {
-    for (const ex of pick(dqlExercises.filter((e) => e.level > 1), n(2), r))
+    for (const ex of fresh(dqlExercises.filter((e) => e.level > 1), n(2), r, (x) => `sql:${x.id}`, seen))
       items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
-    for (const ex of pick(dmlExercises, n(1), r)) items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
+    for (const ex of fresh(dmlExercises, n(1), r, (x) => `sql:${x.id}`, seen)) items.push({ kind: 'sql', id: `sql:${ex.id}`, chapter: 'SQL', points: 4, ex });
   }
   // Wissensfragen reihum ueber Kapitel und innerhalb eines Kapitels ueber die Themen
   // der Folien verteilt: jedes gewaehlte Kapitel kommt mindestens einmal vor.
@@ -125,7 +140,7 @@ export function buildExam(cfg: ExamConfig): ExamItem[] {
   const mcTotal = Math.max(1, Math.round(items.length / 9));
   const covered = new Set(items.map((i) => i.chapter));
   const perChapter = pick(cfg.chapters, 99, r).map((c) => {
-    const queues = pick(topicsOf(c), 99, r).map((t) => pick(mcQuestions.filter((q) => q.topicId === t.id), 99, r));
+    const queues = pick(topicsOf(c), 99, r).map((t) => fresh(mcQuestions.filter((q) => q.topicId === t.id), 99, r, (q) => `mc:${q.id}`, seen));
     const order: McQuestion[] = [];
     while (queues.some((q) => q.length)) for (const q of queues) if (q.length) order.push(q.shift()!);
     return { chapter: c, list: order };
