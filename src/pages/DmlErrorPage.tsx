@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { freshOrder, touchSeen } from '../logic/seen';
 import { track } from '../analytics';
 import { dmlErrorTasks, ERROR_CAUSE, type DmlErrorTask, type ErrorCode } from '../content/dmlErrors';
 import { MARKTPLATZ_RELATIONS } from '../content/scenarios/marktplatz';
@@ -173,9 +174,13 @@ export function DmlErrorPage() {
   const order = useMemo(() => {
     const undone = dmlErrorTasks.filter((t) => !isDone(`dmlerr:${t.id}`));
     const done = dmlErrorTasks.filter((t) => isDone(`dmlerr:${t.id}`));
-    return [...shuffle(undone), ...shuffle(done)];
+    const byId = (t: { id: string }) => `dmlerr:${t.id}`;
+    return [...freshOrder(undone, byId), ...freshOrder(done, byId)];
   }, [round]); // eslint-disable-line react-hooks/exhaustive-deps
   const task = order[pos];
+  useEffect(() => {
+    if (task) touchSeen(`dmlerr:${task.id}`);
+  }, [task]);
   const next = () => {
     if (pos + 1 < order.length) setPos(pos + 1);
     else {

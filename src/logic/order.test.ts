@@ -38,3 +38,12 @@ describe('Normalformen alles gemischt', () => {
     }
   });
 });
+
+describe('Frische Reihenfolge', () => {
+  it('zeigt bisher nicht gesehene Aufgaben zuerst', () => {
+    const seen = new Set(phrases.slice(0, 5).map((p) => p.id));
+    const o = mixedOrder(phrases, relType, undefined, Math.random, (p) => (seen.has(p.id) ? 1 : -1));
+    const firstSeen = o.findIndex((i) => seen.has(phrases[i].id));
+    expect(firstSeen).toBeGreaterThanOrEqual(phrases.length - 5 - 2);
+  });
+});

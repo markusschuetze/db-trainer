@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { track } from '../analytics';
+import { freshPick, touchSeen } from '../logic/seen';
 import { CHAPTER_NAME, mcQuestions, type Chapter, type McQuestion } from '../content/mcQuestions';
 import { mastery, recordItem, useProgress, type Mastery, type ProgressData } from '../progress';
 import { CHAPTERS } from '../progressCatalog';
@@ -19,7 +20,7 @@ function nextQuestion(pool: McQuestion[], d: ProgressData, skip?: string): McQue
       const prevTopic = pool.find((q) => q.id === skip)?.topicId;
       const other = cands.filter((q) => q.topicId !== prevTopic);
       const from = other.length ? other : cands;
-      return from[Math.floor(Math.random() * from.length)];
+      return freshPick(from, (x) => `mc:${x.id}`);
     }
   }
   return pool.find((q) => q.id !== skip) ?? pool[0] ?? null;
@@ -42,6 +43,7 @@ export function LearnPage({ topicId }: { topicId?: string }) {
   const sure = pool.filter((x) => mastery(d.items[`mc:${x.id}`]) === 'sicher').length;
 
   const next = () => {
+    if (q) touchSeen(`mc:${q.id}`);
     setCurrent(nextQuestion(pool, d, q?.id));
     setAnswer([]);
     setChecked(false);

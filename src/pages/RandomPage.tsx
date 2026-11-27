@@ -1,3 +1,4 @@
+import { loadSeen, touchSeen } from '../logic/seen';
 import { useMemo, useRef, useState } from 'react';
 import { track } from '../analytics';
 import { CHAPTER_NAME } from '../content/mcQuestions';
@@ -16,22 +17,22 @@ export function RandomPage() {
   const pool = useMemo(buildPool, []);
   const [levels, setLevels] = useState<Level[]>([1, 2, 3]);
   const [programming, setProgramming] = useState(true);
-  const history = useRef<string[]>([]);
+  const history = useRef<string[]>(loadSeen());
   const started = useRef(Date.now());
-  const [item, setItem] = useState<ExamItem | null>(() => pickRandom(pool, { levels: [1, 2, 3], programming: true }, []));
+  const [item, setItem] = useState<ExamItem | null>(() => pickRandom(pool, { levels: [1, 2, 3], programming: true }, loadSeen()));
   const [answer, setAnswer] = useState<Answer | undefined>();
   const [result, setResult] = useState<ItemResult | null>(null);
   const [stats, setStats] = useState({ n: 0, right: 0, points: 0, max: 0, streak: 0, best: 0 });
 
   const draw = (lv = levels, prog = programming) => {
     const next = pickRandom(pool, { levels: lv, programming: prog }, history.current);
-    if (next) history.current.push(next.id);
+    if (next) (history.current.push(next.id), touchSeen(next.id));
     setItem(next);
     setAnswer(undefined);
     setResult(null);
     started.current = Date.now();
   };
-  if (item && !history.current.length) history.current.push(item.id);
+  if (item && history.current[history.current.length - 1] !== item.id) (history.current.push(item.id), touchSeen(item.id));
 
   const toggleLevel = (l: Level) => {
     const lv = levels.includes(l) ? levels.filter((x) => x !== l) : [...levels, l];

@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { nfExercises } from '../content/exercises';
 import type { NfExercise } from '../content/types';
 import { mixedOrder } from '../logic/order';
+import { freshOrder, loadSeen, touchSeen } from '../logic/seen';
 import { isDone } from '../progress';
 import { NfExercisePage } from './NfExercisePage';
 
@@ -18,15 +19,6 @@ const AREAS: { id: NfArea; title: string; text: string }[] = [
   { id: 'A', title: 'Normalformen: alles gemischt', text: 'Alle Aufgaben bunt durcheinander, auch mit Relationen, bei denen du selbst feststellst, bis zu welcher Normalform es geht.' },
 ];
 
-const shuffle = <T,>(a: T[]): T[] => {
-  const c = [...a];
-  for (let i = c.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [c[i], c[j]] = [c[j], c[i]];
-  }
-  return c;
-};
-
 /** Aufgaben nacheinander wie in den anderen Trainern: gemischt, noch nicht erledigte zuerst. */
 export function NfTrainerPage({ initialArea = '1' }: { initialArea?: NfArea }) {
   const area = initialArea;
@@ -34,10 +26,18 @@ export function NfTrainerPage({ initialArea = '1' }: { initialArea?: NfArea }) {
   const [pos, setPos] = useState(0);
   const order = useMemo(() => {
     const list = nfExercises.filter((e) => inArea(e, area));
-    if (area === 'A') return mixedOrder(list, (e) => areaOf(e)).map((i) => list[i]); // nie zwei Aufgaben desselben Bereichs hintereinander
-    return [...shuffle(list.filter((e) => !isDone(`nf:${e.id}`))), ...shuffle(list.filter((e) => isDone(`nf:${e.id}`)))];
+    if (area === 'A') {
+      // nie zwei Aufgaben desselben Bereichs hintereinander
+      const seen = loadSeen();
+      return mixedOrder(list, (e) => areaOf(e), undefined, Math.random, (e) => seen.lastIndexOf(`nf:${e.id}`)).map((i) => list[i]);
+    }
+    const byId = (e: { id: string }) => `nf:${e.id}`;
+    return [...freshOrder(list.filter((e) => !isDone(byId(e))), byId), ...freshOrder(list.filter((e) => isDone(byId(e))), byId)];
   }, [area, round]); // eslint-disable-line react-hooks/exhaustive-deps
   const ex = order[pos];
+  useEffect(() => {
+    if (ex) touchSeen(`nf:${ex.id}`);
+  }, [ex]);
   const done = order.filter((e) => isDone(`nf:${e.id}`)).length;
   const current = AREAS.find((a) => a.id === area)!;
 

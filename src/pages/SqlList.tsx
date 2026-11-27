@@ -1,3 +1,4 @@
+import { freshPick, touchSeen } from '../logic/seen';
 import { useMemo, useState } from 'react';
 import { LEVEL_NAME, scenarios } from '../content/scenarios';
 import { sqlExercises } from '../content/sqlExercises';
@@ -73,7 +74,11 @@ export function SqlList() {
   const open = list.filter((e) => !d.done.includes(`sql:${e.id}`));
   const random = () => {
     const pool = open.length ? open : list;
-    if (pool.length) location.hash = `#/sql/${pool[Math.floor(Math.random() * pool.length)].id}`;
+    if (pool.length) {
+      const e = freshPick(pool, (x) => `sql:${x.id}`);
+      touchSeen(`sql:${e.id}`);
+      location.hash = `#/sql/${e.id}`;
+    }
   };
   const groups = scenarios
     .map((s) => ({ s, items: list.filter((e) => (e.scenario ?? 'hochschule') === s.id) }))

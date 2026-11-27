@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { track } from '../analytics';
 import { dmlErrorTasks } from '../content/dmlErrors';
 import { predictTasks, type PredictTask } from '../content/dmlPredict';
 import { mcQuestions, type McQuestion } from '../content/mcQuestions';
 import { gradeItem, type Answer, type ExamItem } from '../exam/exam';
 import { mixedOrder } from '../logic/order';
+import { loadSeen, touchSeen } from '../logic/seen';
 import { isDone, markDone, recordItem } from '../progress';
 import { DmlErrorCard, MarktplatzAside } from './DmlErrorPage';
 import { ItemInput, Solution } from './ExamPage';
@@ -145,10 +146,14 @@ export function DmlMixPage() {
   const order = useMemo(() => {
     const undone = all.filter((i) => !isDone(i.id));
     const rest = all.filter((i) => !undone.includes(i));
-    const mix = (l: Item[]) => mixedOrder(l, (i) => i.kind).map((k) => l[k]);
+    const seen = loadSeen();
+    const mix = (l: Item[]) => mixedOrder(l, (i) => i.kind, undefined, Math.random, (i) => seen.lastIndexOf(i.id)).map((k) => l[k]);
     return [...mix(undone), ...mix(rest)];
   }, [all, round]); // eslint-disable-line react-hooks/exhaustive-deps
   const item = order[pos];
+  useEffect(() => {
+    if (item) touchSeen(item.id);
+  }, [item]);
   const next = () => {
     if (pos + 1 < order.length) setPos(pos + 1);
     else {

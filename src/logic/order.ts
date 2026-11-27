@@ -2,12 +2,14 @@
  * Gemischte Reihenfolge: zufaellig, aber moeglichst nie zwei Aufgaben desselben Typs hintereinander
  * (z. B. nicht dreimal 1:N in Folge). `avoid` ist der Typ der zuletzt gezeigten Aufgabe.
  */
-export function mixedOrder<T>(items: T[], key: (t: T) => string, avoid?: string, rnd: () => number = Math.random): number[] {
+export function mixedOrder<T>(items: T[], key: (t: T) => string, avoid?: string, rnd: () => number = Math.random, rank?: (t: T) => number): number[] {
   const pool = items.map((_, i) => i);
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rnd() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
+  // nie oder am laengsten nicht gezeigte Aufgaben nach vorn (stabil, Zufall bleibt innerhalb gleicher Rangstufe)
+  if (rank) pool.sort((a, b) => rank(items[a]) - rank(items[b]));
   const out: number[] = [];
   let last = avoid;
   while (pool.length) {
