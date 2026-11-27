@@ -116,3 +116,89 @@ export function MctSolution({ item }: { item: Pick | Tf }) {
     </ul>
   );
 }
+
+const Mark = ({ ok }: { ok: boolean }) => (
+  <span className={`text-lg font-bold ${ok ? 'text-ok' : 'text-bad'}`}>
+    <span aria-hidden>{ok ? '✓' : '✗'}</span>
+    <span className="sr-only">{ok ? 'richtig beantwortet' : 'falsch beantwortet'}</span>
+  </span>
+);
+
+/** Auswertung: die eigenen Kreuze wie im Test, daneben Haken oder Kreuz, ob es stimmte, darunter die Erklärung */
+export function MctReview({ item, answer }: { item: Pick | Tf; answer: unknown }) {
+  if (item.kind === 'pick') {
+    const sel = (answer as number[] | undefined)?.[0];
+    return (
+      <div className="space-y-2">
+        {item.d.options.map((o, i) => {
+          const mine = sel === i;
+          const right = i === item.d.correct;
+          return (
+            <div key={i} className={`flex items-start gap-3 rounded-lg border p-3 ${right ? 'border-ok bg-ok-bg' : mine ? 'border-bad bg-bad-bg' : 'border-line'}`}>
+              <input type="radio" className="mt-1" disabled readOnly checked={mine} aria-label={`Antwort ${i + 1}${mine ? ', deine Auswahl' : ''}`} />
+              <span className="min-w-0 flex-1 overflow-x-auto">
+                <FigView fig={o} label={`Antwort ${i + 1}`} />
+              </span>
+              <span className="w-24 shrink-0 text-right text-sm">
+                {mine && <Mark ok={right} />}
+                {right && <span className="block font-semibold text-ok">Richtig</span>}
+              </span>
+            </div>
+          );
+        })}
+        {sel === undefined && <p className="text-bad">Keine Antwort gegeben.</p>}
+        <p className="text-muted">{item.d.why}</p>
+      </div>
+    );
+  }
+  const v = ((answer as { tf?: (boolean | null)[] } | undefined)?.tf ?? []) as (boolean | null)[];
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-bg text-left">
+            <th scope="col" className="p-2 font-semibold">
+              Aussage
+            </th>
+            <th scope="col" className="w-16 p-2 text-center font-semibold">
+              richtig
+            </th>
+            <th scope="col" className="w-16 p-2 text-center font-semibold">
+              falsch
+            </th>
+            <th scope="col" className="w-16 p-2 text-center font-semibold">
+              Ergebnis
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {item.d.statements.map((st, i) => {
+            const mine = v[i] ?? null;
+            const ok = mine === st.truth;
+            return (
+              <tr key={i} className="border-t border-line align-top">
+                <th scope="row" className="p-2 text-left font-normal">
+                  {st.text && <span>{st.text}</span>}
+                  {st.fig && <FigView fig={st.fig} label={`Aussage ${i + 1}`} />}
+                  <span className="mt-1 block text-muted">
+                    <strong className={st.truth ? 'text-ok' : 'text-bad'}>{st.truth ? 'Richtig' : 'Falsch'}.</strong> {st.why}
+                  </span>
+                </th>
+                <td className="p-2 text-center">
+                  <input type="radio" disabled readOnly checked={mine === true} aria-label={`Aussage ${i + 1}: deine Antwort richtig`} className="h-5 w-5" />
+                </td>
+                <td className="p-2 text-center">
+                  <input type="radio" disabled readOnly checked={mine === false} aria-label={`Aussage ${i + 1}: deine Antwort falsch`} className="h-5 w-5" />
+                </td>
+                <td className="p-2 text-center">
+                  <Mark ok={ok} />
+                  {mine === null && <span className="block text-xs text-muted">offen</span>}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

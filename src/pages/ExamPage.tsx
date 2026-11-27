@@ -30,7 +30,7 @@ import { runExercise } from '../sql/ddlGrading';
 import type { StatementResult } from '../sql/oracle';
 import { runSqlExercise } from '../sql/sqlGrading';
 import { useSql } from '../useSql';
-import { MctSolution, PickInput, TfInput } from './MctItems';
+import { MctReview, PickInput, TfInput } from './MctItems';
 
 const SEEN_KEY = 'dbt:mct-seen';
 const loadSeen = (): string[] => {
@@ -531,11 +531,11 @@ export const itemTitle = (item: ExamItem) =>
 
 /* ======================= Loesung ======================= */
 
-export function Solution({ item }: { item: ExamItem }) {
+export function Solution({ item, answer }: { item: ExamItem; answer?: Answer }) {
   switch (item.kind) {
     case 'pick':
     case 'tf':
-      return <MctSolution item={item} />;
+      return <MctReview item={item} answer={answer} />;
     case 'mc':
       return (
         <p>
@@ -787,7 +787,7 @@ export function ExamPage() {
               {item.kind === 'pick' && <p className="mt-1 whitespace-pre-line text-sm">{item.d.scenario}</p>}
               {item.kind === 'tf' && <p className="mt-1 whitespace-pre-line text-sm">{item.d.intro}</p>}
               <div className="mt-2 space-y-2 text-sm">
-                <Solution item={item} />
+                <Solution item={item} answer={state.answers[item.id]} />
               </div>
               <a href={practiceHref(item)} className="mt-1 inline-block py-2 text-sm underline">
                 Dazu üben →
