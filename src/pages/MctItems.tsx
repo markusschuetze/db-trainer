@@ -117,7 +117,7 @@ export function MctSolution({ item }: { item: Pick | Tf }) {
   );
 }
 
-const Mark = ({ ok }: { ok: boolean }) => (
+export const Mark = ({ ok }: { ok: boolean }) => (
   <span className={`text-lg font-bold ${ok ? 'text-ok' : 'text-bad'}`}>
     <span aria-hidden>{ok ? '✓' : '✗'}</span>
     <span className="sr-only">{ok ? 'richtig beantwortet' : 'falsch beantwortet'}</span>
