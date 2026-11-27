@@ -50,6 +50,11 @@ export const topics: Topic[] = [
   { id: '06-alter-drop', chapter: '06', title: 'ALTER und DROP', slides: 'ADD CONSTRAINT, DROP TABLE … CASCADE CONSTRAINTS' },
   { id: '06-identity', chapter: '06', title: 'Identity Column und Sequenzen', slides: 'GENERATED … AS IDENTITY' },
 
+  // 08 ACID-Transaktionen
+  { id: '08-acid', chapter: '08', title: 'ACID, Atomicity, Consistency und SQL-Transaktionen', slides: 'Transaktionsbegriff, A-C-I-D, Atomarität und Konsistenz, BEGIN, COMMIT, ROLLBACK, SET TRANSACTION' },
+  { id: '08-isolation', chapter: '08', title: 'Isolation: Probleme, Sperren und Isolationsebenen', slides: 'Lost Update, Dirty Read, Phantom-Problem, Sperrebenen, Read Committed, Serializable' },
+  { id: '08-durability', chapter: '08', title: 'Durability, Logging und Recovery', slides: 'Log, Write-Ahead-Logging, Buffer-/Recovery-Manager, Transaktionsrecovery, Crash Recovery mit REDO und UNDO' },
+
   // SQL-DML/DQL
   { id: 'sql-select', chapter: 'SQL', title: 'SELECT, WHERE, ORDER BY', slides: 'Projektion, Selektion, Sortierung, LIKE, NULL' },
   { id: 'sql-funktionen', chapter: 'SQL', title: 'Zeilen- und Datumsfunktionen', slides: 'NVL, UPPER, TO_DATE, TO_CHAR' },

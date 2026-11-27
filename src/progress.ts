@@ -9,7 +9,7 @@
 //   - Export/Import als Datei fuer den Wechsel zwischen Geraeten ausserhalb von ILU
 
 import { useSyncExternalStore } from 'react';
-import { BUILTIN_CHAPTERS, type Chapter } from './content/mcQuestions';
+import { FULL_EXAM_CHAPTERS, type Chapter } from './content/mcQuestions';
 import { readSuspendData, scormActive, suspendLimit, writeSuspendData } from './scorm';
 
 /** [gesehen, richtig, Serie richtig in Folge, zuletzt (Unix-Sekunden)] */
@@ -222,7 +222,7 @@ export const PASS_PERCENT = 50;
 export const percentOf = (e: ExamAttempt) => (e.x ? (100 * e.p) / e.x : 0);
 export const passed = (e: ExamAttempt) => percentOf(e) >= PASS_PERCENT;
 /** Zaehlt fuer die Pruefungsreife: alle Kapitel, mindestens 60 Minuten */
-export const isFull = (e: ExamAttempt) => BUILTIN_CHAPTERS.every((c) => e.c.includes(c)) && e.m >= 60;
+export const isFull = (e: ExamAttempt) => FULL_EXAM_CHAPTERS.every((c) => e.c.includes(c)) && e.m >= 60;
 
 /** Bestandene vollstaendige Probeklausuren in Folge (die juengsten zuerst) */
 export function passStreak(exams: ExamAttempt[]): number {

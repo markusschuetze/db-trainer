@@ -56,6 +56,12 @@ const modules: Module[] = [
     soon: true,
   },
   {
+    title: L('Transaktionen und ACID'),
+    script: L('Skript 08'),
+    text: L('ACID-Eigenschaften zuordnen, Abläufe mit Lost Update, Dirty Read und Phantom erkennen und die Crash Recovery mit REDO und UNDO durchspielen.'),
+    href: '#/transaktionen',
+  },
+  {
     title: L('Textaufgaben'),
     script: L('Klausurvorbereitung'),
     text: L('Aus Anforderungstexten Entitäten, Beziehungen, Kardinalitäten und Schlüssel erkennen und das Relationenschema ableiten.'),

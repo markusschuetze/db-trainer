@@ -25,6 +25,7 @@ import { DmlErrorPage } from './pages/DmlErrorPage';
 import { DmlMixPage } from './pages/DmlMixPage';
 import { DmlOverview } from './pages/DmlOverview';
 import { ProvokePage } from './pages/ProvokePage';
+import { TransactionPage } from './pages/TransactionPage';
 
 // Hash-Routing: funktioniert statisch ueberall, auch in iFrame und ILIAS-Lernmodul.
 function useRoute() {
@@ -60,6 +61,8 @@ function route(page?: string, id?: string, id2?: string): ReactNode {
       if (id === 'gemischt') return <DmlMixPage />;
       if (id === 'constraints') return <ProvokePage id={id2} key={id2 ?? 'start'} />;
       return <DmlOverview />;
+    case 'transaktionen':
+      return <TransactionPage />;
     case 'zufall':
       return <RandomPage />;
     case 'textaufgaben':
@@ -88,6 +91,7 @@ const PAGE_TITLE: Record<string, string> = {
   ddl: 'SQL-DDL',
   sql: 'SQL-DML: Daten ändern',
   dml: 'SQL-DML',
+  transaktionen: 'Transaktionen und ACID',
   modellierung: 'Modellierung',
   relationen: 'Relationenmodell',
   pruefung: 'Prüfungsmodus',

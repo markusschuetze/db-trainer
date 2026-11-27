@@ -1,9 +1,13 @@
 // Wissensfragen pro Kapitel. Eigenstaendig formuliert nach den Inhalten der Skripte.
 // correct: Indizes der richtigen Optionen. multi: Mehrfachauswahl (wird so angekuendigt).
 
-/** Standard-Kapitel '01'..'06', 'SQL'; Lehrende koennen im Aufgabenpaket eigene ergaenzen */
+import { transactionQuestions } from './mcTransactions';
+
+/** Standard-Kapitel '01'..'06', 'SQL', '08'; Lehrende koennen im Aufgabenpaket eigene ergaenzen */
 export type Chapter = string;
-export const BUILTIN_CHAPTERS = ['01', '02', '03', '04', '05', '06', 'SQL'];
+export const BUILTIN_CHAPTERS = ['01', '02', '03', '04', '05', '06', 'SQL', '08'];
+/** Diese Kapitel muss eine vollstaendige Probeklausur abdecken (zaehlt fuer die Pruefungsreife); Kapitel 08 ist freiwillig dazugekommen */
+export const FULL_EXAM_CHAPTERS = ['01', '02', '03', '04', '05', '06', 'SQL'];
 
 export const CHAPTER_NAME: Record<string, string> = {
   '01': 'Einleitung',
@@ -13,6 +17,7 @@ export const CHAPTER_NAME: Record<string, string> = {
   '05': 'Normalisierung',
   '06': 'SQL-DDL',
   SQL: 'SQL-DML/DQL',
+  '08': 'ACID-Transaktionen',
 };
 
 export interface McQuestion {
@@ -713,4 +718,4 @@ const fileQuestions = Object.values(
   import.meta.glob<McQuestion | McQuestion[]>('./aufgaben/fragen/*.json', { eager: true, import: 'default' }),
 ).flat();
 
-export const mcQuestions: McQuestion[] = [...baseQuestions, ...fileQuestions];
+export const mcQuestions: McQuestion[] = [...baseQuestions, ...transactionQuestions, ...fileQuestions];

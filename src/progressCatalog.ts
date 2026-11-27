@@ -9,10 +9,11 @@ import { mcQuestions, type Chapter } from './content/mcQuestions';
 import { specializations } from './content/specializations';
 import { sqlExercises } from './content/sqlExercises';
 import { textTasks } from './content/textTasks';
+import { acidTasks, scheduleTasks } from './content/transactions';
 import { topicById, topics } from './content/topics';
 
 /** Alle Kapitel in Reihenfolge (Standard + im Aufgabenpaket ergaenzte); wird in place erweitert */
-export const CHAPTERS: Chapter[] = ['01', '02', '03', '04', '05', '06', 'SQL'];
+export const CHAPTERS: Chapter[] = ['01', '02', '03', '04', '05', '06', 'SQL', '08'];
 
 /** Thema einer Beziehungs-Phrase: im ER-Trainer Krähenfuß, im Relationen-Trainer je nach Typ */
 export const erTopic = () => '02-kraehenfuss';
@@ -34,6 +35,9 @@ const buildCatalog = () => [
   ...textTasks.map((t) => ({ id: `tt:${t.id}`, topicId: t.topicId, kind: 'uebung' as const })),
   ...dmlErrorTasks.map((t) => ({ id: `dmlerr:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
   ...predictTasks.map((t) => ({ id: `dmlpred:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
+  ...acidTasks.map((t) => ({ id: `tx:acid-${t.id}`, topicId: '08-acid', kind: 'uebung' as const })),
+  ...scheduleTasks.map((t) => ({ id: `tx:sched-${t.id}`, topicId: '08-isolation', kind: 'uebung' as const })),
+  { id: 'tx:recovery', topicId: '08-durability', kind: 'uebung' as const },
   ...provokeTasks.map((t) => ({ id: `prov:${t.id}`, topicId: 'sql-dml', kind: 'uebung' as const })),
 ];
 
@@ -55,6 +59,7 @@ export const practiceHref: Record<string, string> = {
   '05': '#/normalisierung',
   '06': '#/ddl',
   SQL: '#/sql',
+  '08': '#/transaktionen',
 };
 
 /** Wo uebt man ein Thema? Bei reinen Wissensthemen: Fragen lernen zu diesem Thema */

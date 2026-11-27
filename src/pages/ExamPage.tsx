@@ -7,7 +7,7 @@ import { ARTIFICIAL, deriveSchema, entityCandidates, keyOptions, relationshipCan
 import { SqlEditor } from '../components/SqlEditor';
 import { StatementOutput } from '../components/SqlOutput';
 import { CARD_LABEL, CARDS, fkNotNull, toRelations, validMappings, type Card, type Mapping } from '../content/erPhrases';
-import { BUILTIN_CHAPTERS, CHAPTER_NAME, type Chapter } from '../content/mcQuestions';
+import { CHAPTER_NAME, FULL_EXAM_CHAPTERS, type Chapter } from '../content/mcQuestions';
 import type { DepKind } from '../content/types';
 import {
   buildExam,
@@ -733,7 +733,7 @@ export function ExamPage() {
           className={`mt-4 block rounded-card border-2 p-4 no-underline ${percent >= 50 ? 'border-ok bg-ok-bg' : 'border-line bg-surface'}`}
         >
           <strong>{percent >= 50 ? '✓ Bestanden.' : '✗ Diesmal nicht bestanden.'}</strong>{' '}
-          {BUILTIN_CHAPTERS.every((c) => state.chapters.includes(c)) && state.minutes >= 60
+          {FULL_EXAM_CHAPTERS.every((c) => state.chapters.includes(c)) && state.minutes >= 60
             ? 'Diese vollständige Probeklausur zählt für deine Prüfungsreife.'
             : 'Teilklausuren zählen nicht für die Prüfungsreife, aber für deine Fragenstatistik.'}{' '}
           <span className="underline">Fortschritt ansehen →</span>
