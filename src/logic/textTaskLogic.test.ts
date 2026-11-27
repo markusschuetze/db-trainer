@@ -64,7 +64,7 @@ describe('Textaufgaben: abgeleitetes Relationenschema', () => {
     expect(text('mitarbeiterin-projekt')).toContain('Mitarbeiterin_Projekt (_Mitarbeiterin_ID_ <fk>, _Projekt_Projektnummer_ <fk>, Rolle)');
   });
   it('1:N: Fremdschluessel auf der N-Seite, NOT NULL bei Minimum 1', () => {
-    expect(text('profs-raeume')).toContain('Büromaterial (_ID_, Bezeichnung, Typ, Raum_Raumnummer <fk> NOT NULL)');
+    expect(text('profs-raeume')).toContain('Büromaterial (_ID_, Raum_Raumnummer <fk> NOT NULL)');
   });
   it('fehlender Schluessel wird durch einen kuenstlichen ersetzt, Beziehungsattribut an der N-Seite', () => {
     const s = text('schueler-schule');

@@ -22,9 +22,12 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+/** Nummern-Kuerzel wie RaumNr = Raumnummer erklaeren sich selbst und werden nicht aufgelistet */
+export const isSelfEvident = (key: string, value: string) => /(nr|_id|id)$/i.test(key) && /nummer$/i.test(value.trim());
+
 /** Tabelle mit einer Erklaerung der Spaltenkuerzel rechts daneben (auf schmalen Bildschirmen darunter). */
 function TableWithGlossary({ ex, table, caption, highlight }: { ex: NfExercise; table: Table; caption: string; highlight?: string[] }) {
-  const entries = Object.entries(ex.glossary ?? {}).filter(([k]) => table.columns.includes(k));
+  const entries = Object.entries(ex.glossary ?? {}).filter(([k, v]) => table.columns.includes(k) && !isSelfEvident(k, v));
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
       <div className="min-w-0 flex-1">
