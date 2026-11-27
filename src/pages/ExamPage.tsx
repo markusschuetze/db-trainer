@@ -76,11 +76,19 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
         <label className="mt-2 flex items-start gap-2">
           <input type="radio" className="mt-1" name="fmt" checked={mct} onChange={() => (setFormat('mct'), setMinutes(30))} />
           <span>
-            MCT wie im ILIAS-Test
+            MCT 1 (wie im ILIAS-Test)
             <span className="block text-sm text-muted">
               Eine Auswahlfrage pro Minute (30 Minuten = 30 Fragen), eine Frage pro Seite, mit Zurück und Weiter: ER-Modell wählen, Primärschlüssel und 3NF beurteilen,
-              Relationenmodell, Teiltransformationen und DDL-Code lesen. Je 2 Punkte pro Frage (30 Minuten = 60 Punkte), kein eigener Code.
+              Relationenmodell, Teiltransformationen sowie DDL- und SQL-Code lesen (etwa 30 % SQL). Je 2 Punkte pro Frage (30 Minuten = 60 Punkte), kein eigener Code.
             </span>
+          </span>
+        </label>
+        <label className="mt-2 flex items-start gap-2 opacity-60">
+          <input type="radio" className="mt-1" name="fmt" disabled />
+          <span>
+            MCT 2
+            <span className="ml-2 rounded-full border border-line px-2 py-0.5 text-xs font-semibold text-muted">Coming soon</span>
+            <span className="block text-sm text-muted">Der zweite Test aus der Vorlesung folgt, sobald das Material da ist.</span>
           </span>
         </label>
       </fieldset>
@@ -138,7 +146,7 @@ function Setup({ onStart }: { onStart: (s: ExamState) => void }) {
           onStart({
             ...(mct ? { format: 'mct' as const } : {}),
             avoid: loadSeen(),
-            chapters: mct ? (['02', '03', '04', '05', '06'] as Chapter[]) : chapters,
+            chapters: mct ? (['02', '03', '04', '05', '06', 'SQL'] as Chapter[]) : chapters,
             minutes,
             allowRun: mct ? false : allowRun,
             seed: Math.floor(Math.random() * 2 ** 31),
@@ -806,7 +814,7 @@ export function ExamPage() {
       <>
         <div className="sticky top-0 z-10 -mx-4 mb-4 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="font-bold">MCT-Probetest</span>
+            <span className="font-bold">MCT 1</span>
             <span className={`font-mono text-lg font-bold tabular-nums ${timed && left < 3 * 60000 ? 'text-bad' : ''}`} role="timer" aria-live="off">
               {timed ? `Es verbleiben noch ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : 'ohne Zeitlimit'}
             </span>

@@ -20,9 +20,18 @@ describe('MCT-Fragen', () => {
       expect(items, String(n)).toHaveLength(n);
       expect(new Set(items.map((i) => i.id)).size).toBe(n);
       expect(items.map((i) => i.chapter)).toEqual([...items.map((i) => i.chapter)].sort());
-      for (const ch of ['02', '03', '04', '05', '06']) expect(items.some((i) => i.chapter === ch), `${n} ${ch}`).toBe(true);
+      for (const ch of ['02', '03', '04', '05', '06', 'SQL']) expect(items.some((i) => i.chapter === ch), `${n} ${ch}`).toBe(true);
     }
     expect(mctCounts(30).reduce((a, b) => a + b, 0)).toBe(30);
+    // etwa 30 % SQL, bei 30 Fragen genau 5 Kardinalitaetsfragen (Kraehenfuss)
+    for (const seed of [1, 2, 3]) {
+      const items = buildMct(rng(seed), [], 30);
+      const sql = items.filter((i) => i.chapter === 'SQL' || i.chapter === '06').length;
+      const card = items.filter((i) => i.id.startsWith('mct-er-') || i.id.startsWith('mct-ertext-')).length;
+      expect(sql / 30, 'SQL-Anteil').toBeGreaterThanOrEqual(0.27);
+      expect(sql / 30, 'SQL-Anteil').toBeLessThanOrEqual(0.33);
+      expect(card, 'Kardinalitaeten').toBe(5);
+    }
     for (const n of [20, 30, 45]) expect(buildMct(rng(2), [], n).reduce((a, i) => a + i.points, 0)).toBe(2 * n);
   });
   it('Auswahlfragen: genau eine richtige, vier verschiedene Antworten', () => {

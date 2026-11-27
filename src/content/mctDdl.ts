@@ -5,7 +5,9 @@
 
 export interface DdlStatement {
   text: string;
-  claim: 'ok' | 'error';
+  /** 'value': die Aussage behauptet, dass die letzte Abfrage des Pruefskripts genau `value` (erste Zelle) liefert */
+  claim: 'ok' | 'error' | 'value';
+  value?: string;
   truth: boolean;
   /** Skript, das nach dem Code laeuft; der LETZTE Befehl entscheidet */
   probe: string;

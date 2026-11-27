@@ -7,9 +7,12 @@
 //   5. Relationenmodell zu einem ERD waehlen          (1 P.)
 //   6. Teiltransformationen ERD -> Relationen         (8 P., richtig/falsch)
 //   7. DDL-Code lesen und beurteilen                  (3 P., richtig/falsch)
+//   8. SQL-DML/DQL-Skript lesen und beurteilen        (3 P., richtig/falsch)
+// Etwa 30 % der Fragen sind SQL (7 und 8), Kardinalitaeten (1 und 2) bleiben bei 5 von 30.
 // Alles wird aus den vorhandenen Inhalten erzeugt; die Wahrheit ist berechnet, nicht von Hand geraten.
 
 import { ddlReadings } from '../content/mctDdl';
+import { sqlReadings } from '../content/mctSql';
 import { relationText, relType, toRelations, validMappings, type Card, type Phrase, type Relation } from '../content/erPhrases';
 import { phrases, relPhrases } from '../content/erPhrases';
 import { specializations, type Specialization } from '../content/specializations';
@@ -54,7 +57,7 @@ export interface TfData {
 /** `src` benennt die Vorlage der Frage (z. B. "tt:profs-raeume"); damit werden Wiederholungen vermieden */
 export type MctItem =
   | { kind: 'pick'; id: string; src: string; chapter: '02' | '03' | '04'; points: number; d: PickData }
-  | { kind: 'tf'; id: string; src: string; chapter: '02' | '04' | '05' | '06'; points: number; d: TfData };
+  | { kind: 'tf'; id: string; src: string; chapter: '02' | '04' | '05' | '06' | 'SQL'; points: number; d: TfData };
 
 /* ---------------- Zufall ---------------- */
 
@@ -371,6 +374,25 @@ export function ddlRead(r: Rnd, seen: string[] = []): MctItem {
   };
 }
 
+/* ---------------- SQL-DML/DQL: Skript lesen ---------------- */
+
+export function sqlRead(r: Rnd, seen: string[] = []): MctItem {
+  const d = pickFresh(sqlReadings, (x) => `sq:${x.id}`, seen, r);
+  return {
+    kind: 'tf',
+    id: `mct-sql-${d.id}`,
+    src: `sq:${d.id}`,
+    chapter: 'SQL',
+    points: 3,
+    d: {
+      intro: 'Es werden folgende Tabellen erstellt und mit Daten gefüllt:',
+      code: d.code,
+      question: 'Bewerten Sie folgende Aussagen hinsichtlich ihrer Richtigkeit:',
+      statements: shuffle(d.statements, r).map((s) => ({ text: s.text, truth: s.truth, why: s.why })),
+    },
+  };
+}
+
 /* ---------------- Spezialisierung: Kennzeichen waehlen ---------------- */
 
 export function specPick(r: Rnd, seen: string[] = []): MctItem {
@@ -399,27 +421,36 @@ export function specPick(r: Rnd, seen: string[] = []): MctItem {
   };
 }
 
-/** Anteile der Fragetypen; bei 30 Fragen ergibt das 8/4/3/2/2/6/3/2 und damit alle Kapitel in der Reihenfolge der Skripte */
-const MIX: { w: number; make: (r: Rnd, seen: string[]) => MctItem }[] = [
-  { w: 0.22, make: (r, s) => erPick(r, false, s) },
-  { w: 0.13, make: (r, s) => specPick(r, s) },
-  { w: 0.1, make: (r, s) => erPick(r, true, s) },
-  { w: 0.07, make: (r) => nfPk(r) },
-  { w: 0.07, make: (r) => nf3(r) },
-  { w: 0.2, make: (r, s) => relPick(r, s) },
-  { w: 0.1, make: (r, s) => erRel(r, s) },
-  { w: 0.07, make: (r, s) => ddlRead(r, s) },
+/**
+ * Anteile der Fragetypen. Etwa 30 % sind SQL (DDL lesen, DML/DQL lesen), Kardinalitaeten (Kraehenfuss) bleiben bei 5 Fragen.
+ * Bei 30 Fragen sind das 9 SQL-Fragen (30 %) und 5 Kardinalitaetsfragen, dazu alle Kapitel in der Reihenfolge der Skripte.
+ */
+const MIX: { n30: number; make: (r: Rnd, seen: string[]) => MctItem }[] = [
+  { n30: 2, make: (r, s) => erPick(r, false, s) },
+  { n30: 3, make: (r, s) => erPick(r, true, s) },
+  { n30: 3, make: (r, s) => specPick(r, s) },
+  { n30: 3, make: (r) => nfPk(r) },
+  { n30: 2, make: (r) => nf3(r) },
+  { n30: 5, make: (r, s) => relPick(r, s) },
+  { n30: 3, make: (r, s) => erRel(r, s) },
+  { n30: 2, make: (r, s) => ddlRead(r, s) },
+  { n30: 7, make: (r, s) => sqlRead(r, s) },
 ];
 
-/** Anzahl Fragen je Typ (Groesster-Rest-Verfahren); ab 8 Fragen kommt jeder Typ mindestens einmal vor */
+/** Anzahl Fragen je Typ: bei 30 Fragen genau n30, sonst anteilig (Groesster-Rest-Verfahren), ab 9 Fragen jeder Typ mindestens einmal */
 export function mctCounts(n: number): number[] {
-  const base = n >= MIX.length ? 1 : 0;
-  const raw = MIX.map((m) => m.w * n);
-  const c = raw.map((x) => Math.max(base, Math.floor(x)));
+  const raw = MIX.map((m) => (m.n30 * n) / 30);
+  const c = raw.map((x) => Math.floor(x + 1e-9));
   let rest = n - c.reduce((a, b) => a + b, 0);
-  const order = raw.map((x, i) => [x - Math.floor(x), i]).sort((a, b) => b[0] - a[0]);
+  const order = raw.map((x, i) => [x - Math.floor(x + 1e-9), i]).sort((a, b) => b[0] - a[0]);
   for (let k = 0; rest > 0; k = (k + 1) % order.length, rest--) c[order[k][1]]++;
-  for (let k = 0; rest < 0; k = (k + 1) % c.length) if (c[k] > base) (c[k]--, rest++);
+  if (n >= MIX.length)
+    for (let i = 0; i < c.length; i++)
+      if (c[i] === 0) {
+        const big = c.indexOf(Math.max(...c));
+        c[big]--;
+        c[i] = 1;
+      }
   return c;
 }
 
@@ -430,16 +461,16 @@ export function buildMct(r: Rnd, avoid: string[] = [], count = 30): MctItem[] {
   mctCounts(count).forEach((n, t) => {
     for (let i = 0; i < n; i++) out.push(MIX[t].make(r, seen));
   });
-  // Reihenfolge wie im Skript (02, 03, 04, 05, 06), innerhalb eines Kapitels gemischt
+  // Reihenfolge wie im Skript (02, 03, 04, 05, 06, SQL), innerhalb eines Kapitels gemischt
   const byCh = (it: MctItem) => it.chapter;
   const chapters = [...new Set(out.map(byCh))].sort();
   const ordered = chapters.flatMap((ch) => shuffle(out.filter((it) => byCh(it) === ch), r));
   // Gesamtpunktzahl: zwei Punkte pro Frage (30 Minuten = 30 Fragen = 60 Punkte), Rest auf die Tabellenfragen verteilt
   const flex = ordered.filter((it) => it.kind === 'tf');
   let diff = 2 * count - ordered.reduce((a, it) => a + it.points, 0);
-  for (let k = 0; diff !== 0 && flex.length; k = (k + 1) % flex.length) {
+  for (let k = 0, guard = 0; diff !== 0 && flex.length && guard < 2000; k = (k + 1) % flex.length, guard++) {
     const step = diff > 0 ? 1 : -1;
-    if (flex[k].points + step < 3) continue;
+    if (flex[k].points + step < 2) continue;
     flex[k].points += step;
     diff -= step;
   }
